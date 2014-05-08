@@ -254,14 +254,36 @@ void Parser::parse(const char *file) {
 			sphere(pos, r);
 		}
 		else if (cmd == "cone" || cmd == "n") {
-			double h;
-			iss >> h;
-			cone(h, ' ');
+			double l = 0, u = 0;
+			iss >> l >> u;
+			if (l > u) {
+				std::swap(l, u);
+			}
+			cone(l, u, ' ');
 		}
-		else if (cmd == "nc" || cmd == "conecap") {
-			double h;
-			iss >> h;
-			cone(h, 'c');
+		else if (cmd == "np" || cmd == "conep" || cmd == "cone+") {
+			double l = 0, u = 0;
+			iss >> l >> u;
+			if (l > u) {
+				std::swap(l, u);
+			}
+			cone(l, u, 'p');
+		}
+		else if (cmd == "nn" || cmd == "conen" || cmd == "cone-") {
+			double l = 0, u = 0;
+			iss >> l >> u;
+			if (l > u) {
+				std::swap(l, u);
+			}
+			cone(l, u, 'n');
+		}
+		else if (cmd == "nb" || cmd == "coneb" || cmd == "cone+-") {
+			double l = 0, u = 0;
+			iss >> l >> u;
+			if (l > u) {
+				std::swap(l, u);
+			}
+			cone(l, u, 'b');
 		}
 		else if (cmd == "torus" || cmd == "u") {
 			double R, r;

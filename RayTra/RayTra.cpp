@@ -54,6 +54,30 @@ void RayTra::circle(Vector3d p, Vector3d n, double r) {
 }
 void RayTra::cylinder(double r, double h, char cap) {
 	Cylinder* c = new Cylinder(r, h, last);
+	if (cap == 'p' || cap == 'b') {
+		Circle* top = new Circle(Vector3d(0, 0, h / 2.0), Vector3d(0, 0, 1), r, last);
+		_surfaces->addSurface(top);
+	}
+	if (cap == 'n' || cap == 'b') {
+		Circle* bottom = new Circle(Vector3d(0, 0, -h / 2.0), Vector3d(0, 0, -1), r, last);
+		_surfaces->addSurface(bottom);
+	}
+	_surfaces->addSurface(c);
+}
+void RayTra::cone(double l, double u, char cap) {
+	Cone* c = new Cone(l, u, last);
+	if (cap == 'p' || cap == 'b') {
+		if (u != 0) {
+			Circle* top = new Circle(Vector3d(0, 0, u), Vector3d(0, 0, 1), u, last);
+			_surfaces->addSurface(top);
+		}
+	}
+	if (cap == 'n' || cap == 'b') {
+		if (l != 0) {
+			Circle* bottom = new Circle(Vector3d(0, 0, l), Vector3d(0, 0, -1), l, last);
+			_surfaces->addSurface(bottom);
+		}
+	}
 	_surfaces->addSurface(c);
 }
 void RayTra::camera(Vector3d pos, Vector3d dir, Vector3d up, double d, double iw, double ih, int pw, int ph, double size){

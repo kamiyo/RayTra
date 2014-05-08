@@ -28,7 +28,7 @@ inline Vector4d operator* (const Transform& t, const Vector4d& v) {
 }
 
 inline Vector3d apply(const Matrix4d& m, const Vector3d& v, const int& i) {
-	Vector4d vv(Vector4d::Zero()); vv << v.x, v.y, v.z, (double) i;
+	Vector4d vv(v(0), v(1), v(2), (double)i);
 	return (m * vv).block<3, 1>(0, 0);
 }
 #endif

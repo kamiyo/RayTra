@@ -16,16 +16,18 @@
 #include "Plane.h"
 #include "Cylinder.h"
 #include "Circle.h"
+#include "Cone.h"
+#include "Torus.h"
 #include "Shading.h"
 #include "Instance.h"
 #include "Face.h"
 #include "BVH.h"
 #include "Hilbert.h"
 #include "UtilDefines.h"
-#include <ImfRgbaFile.h>
-#include <ImfStringAttribute.h>
-#include <ImfMatrixAttribute.h>
-#include <ImfArray.h>
+#include <OpenEXR/ImfRgbaFile.h>
+#include <OpenEXR/ImfStringAttribute.h>
+#include <OpenEXR/ImfMatrixAttribute.h>
+#include <OpenEXR/ImfArray.h>
 #include <map>
 #include <fstream>
 
@@ -38,7 +40,7 @@ class RayTra : public Parser {
 	virtual void plane(Vector3d n, Vector3d p);
 	virtual void circle(Vector3d p, Vector3d n, double r);
 	virtual void cylinder(double r, double h, char cap);
-	virtual void cone(double h, char cap);
+	virtual void cone(double l, double u, char cap);
 	virtual void torus(double R, double r);
 	virtual void camera(Vector3d pos, Vector3d dir, Vector3d up, double d, double iw, double ih, int pw, int ph, double size);
 	virtual void pointLight(Vector3d pos, Vector3d rgb, Vector3d atten, double r);

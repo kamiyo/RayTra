@@ -23,6 +23,7 @@
     <ClInclude Include="BVH.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Circle.h" />
+    <ClInclude Include="Cone.h" />
     <ClInclude Include="Cylinder.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="Group.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="Shading.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Surface.h" />
+    <ClInclude Include="Torus.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="UtilDefines.h" />
@@ -51,6 +53,7 @@
     <ClCompile Include="BVH.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="Cone.cpp" />
     <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="Face.cpp" />
     <ClCompile Include="Group.cpp" />
@@ -68,9 +71,11 @@
     <ClCompile Include="rand.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RayTra.cpp" />
+    <ClCompile Include="rpoly.cpp" />
     <ClCompile Include="Shading.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="Torus.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="UtilDefines.cpp" />
@@ -131,13 +136,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>OPENEXR_DLL;_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <OpenMPSupport>false</OpenMPSupport>
+      <OpenMPSupport>true</OpenMPSupport>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>IlmImf.lib Imath.lib Iex.lib Half.lib zdll.lib %(AdditionalOptions)</AdditionalOptions>
       <Profile>true</Profile>
+      <AdditionalDependencies>Half.lib;IlmImf.lib;Imath.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -187,7 +193,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>IlmImf.lib Imath.lib Iex.lib Half.lib zdll.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>IlmImf.lib Imath.lib Iex.lib Half.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>kernel32.lib;user32.lib;zlib.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

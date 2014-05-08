@@ -1,5 +1,5 @@
-#ifndef _CYLINDER_H_
-#define _CYLINDER_H_
+#ifndef CYLINDER_H_
+#define CYLINDER_H_
 
 #include "Surface.h"
 class Cylinder :

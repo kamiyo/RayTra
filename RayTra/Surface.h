@@ -29,7 +29,7 @@ public:
 	bool _trans;
 	Box _b;
 	int _type;
-	enum { PLANE, SPHERE, CYLINDER, TRIANGLE, FACE, CIRCLE, BOVOH, INSTANCE };
+	enum { PLANE, SPHERE, CYLINDER, CONE, TORUS, TRIANGLE, FACE, CIRCLE, BOVOH, INSTANCE };
 };
 
 #endif /* SURFACE_H_ */

@@ -10,6 +10,7 @@ Circle::Circle(Vector3d pos, Vector3d norm, double rad, Material* m)
 	boundingBox();
 	_l = NULL;
 	_type = CIRCLE;
+	_trans = false;
 }
 
 Circle::Circle(Vector3d pos, Vector3d norm, double rad, Light* l)

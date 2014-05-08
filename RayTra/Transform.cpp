@@ -42,8 +42,8 @@ void Transform::scale(double s) {
 }
 
 void Transform::scale(Vector3d xyz) {
-	Matrix4d temp; temp.diagonal << xyz.x, xyz.y, xyz.z, 1.0;
-	Matrix4d tempInv; tempInv.diagonal << 1 / xyz.x, 1 / xyz.y, 1 / xyz.z, 1.0;
+	Matrix4d temp; temp.diagonal() << xyz(0), xyz(1), xyz(2), 1.0;
+	Matrix4d tempInv; tempInv.diagonal() << 1 / xyz(0), 1 / xyz(1), 1 / xyz(2), 1.0;
 	_current *= temp;
 	_currentInv = tempInv * _currentInv;
 }
