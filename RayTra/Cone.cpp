@@ -41,7 +41,7 @@ bool Cone::hit(Ray& ray, double t0, double t1, hitRecord& rec)
 			double nz; nz = (n(2) > 0) ? -1.0 : 1.0;
 			n(2) = 0; n.normalize();
 			n(2) = nz;
-			rec.n = -1.0 * n.normalized();
+			rec.n = n.normalized();
 		}
 		else if (ray.type == Ray::SHAD) {
 			rec.s = this;
@@ -67,8 +67,7 @@ bool Cone::hit(Ray& ray, double t0, double t1, hitRecord& rec)
 
 void Cone::boundingBox() {
 	double maxRad = std::max(abs(_u), abs(_l));
-	_b.MAX = Vector3d(maxRad, maxRad, _u);
-	_b.MIN = Vector3d(-maxRad, -maxRad, _l);
+	_b.set(Vector3d(-maxRad, -maxRad, _l), Vector3d(maxRad, maxRad, _u));
 }
 
 Cone::~Cone()

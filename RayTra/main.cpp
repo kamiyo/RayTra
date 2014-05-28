@@ -15,8 +15,8 @@
 */
 
 #include <fstream>
+#include <iostream>
 #include <cstring>
-#include <ctime>
 #include <memory>
 #include "RayTra.h"
 
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 	else {
-		std::cerr << "not correct number of arguments" << std::endl;
+		cerr << "not correct number of arguments" << endl;
 		return 1;
 	}
 	tracer.parse(argv[1]);
@@ -110,7 +110,11 @@ int main(int argc, char** argv) {
 	}
 	o.resizeErase (height, width);
 	cout << endl << width << " " << height << endl;
+	clock_t start = clock();
 	tracer.render(o);
+	clock_t ends = clock();
+	double runtime = (double) (ends - start) / CLOCKS_PER_SEC;
+	cout << runtime << " seconds" << endl;
 	writeRgba(name.c_str(), &o[0][0], width, height);
 	return 0;
 	//glutInitWindowPosition(0,0);

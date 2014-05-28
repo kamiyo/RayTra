@@ -50,21 +50,16 @@ bool Circle::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		}
 		if (ray.type != Ray::OCCL) {
 			if (ray.type != Ray::SHAD) {
-				if (d.dot(_n) > 0) {
-					rec.n = -1.0 * _n.normalized();
-				} else {
-					rec.n = _n.normalized();
-				}
-				rec.m = _m;
+				rec.n = _n.normalized();
 			} else {
 				rec.s = this;
 			}
+			rec.m = _m;
 		}
 		return true;
 	}
 }
 
 void Circle::boundingBox() {
-	_b.MAX = _p.array() + _r;
-	_b.MIN = _p.array() - _r;
+	_b.set(_p.array() - _r, _p.array() + _r);
 }

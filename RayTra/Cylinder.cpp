@@ -39,7 +39,7 @@ bool Cylinder::hit(Ray& r, double t0, double t1, hitRecord& rec) {
 		if (r.type == Ray::VIEW) {
 			Vector3d n = eye + rec.t * dir;
 			n[2] = 0;
-			rec.n = -1.0 * n.normalized();
+			rec.n = n.normalized();
 		}
 		else if (r.type == Ray::SHAD) {
 			rec.s = this;
@@ -64,6 +64,5 @@ bool Cylinder::hit(Ray& r, double t0, double t1, hitRecord& rec) {
 }
 
 void Cylinder::boundingBox() {
-	_b.MAX = Vector3d(_r, _r, _h/2.);
-	_b.MIN = Vector3d(-_r, -_r, -_h/2.);
+	_b.set(Vector3d(-_r, -_r, -_h / 2.), Vector3d(_r, _r, _h / 2.));
 }

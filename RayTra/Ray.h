@@ -25,6 +25,7 @@ public:
 		static const int VIEW = 0, SHAD = 1, DIFF = 2, OCCL = 3;
 		std::vector<double> ref;
 		std::vector<Vector3d> alpha;
+		static int count;
 };
 
 std::ostream &operator<<(std::ostream &os, Ray &r);

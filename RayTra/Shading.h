@@ -35,6 +35,7 @@ public:
 	int _indirect;
 	int _recurs;
 	int _refraction;
+	bool _russian;
 	bool _shadows;
 	bool toBreak;
 };

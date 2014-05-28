@@ -80,6 +80,11 @@ void RayTra::cone(double l, double u, char cap) {
 	}
 	_surfaces->addSurface(c);
 }
+void RayTra::torus(double R, double r) {
+	Torus* t = new Torus(R, r, last);
+	_surfaces->addSurface(t);
+}
+
 void RayTra::camera(Vector3d pos, Vector3d dir, Vector3d up, double d, double iw, double ih, int pw, int ph, double size){
 	if (size == nINF) {
 		field = false;
@@ -132,6 +137,11 @@ void RayTra::setOption(int option, int setting) {
 			samples = setting;
 		}
 		break;
+	case RUSSIAN:
+		if (setting == 1) {
+			_shading->_russian = true;
+		}
+		break;
 	case REFRACT:
 		_shading->_refraction = setting;
 		break;
@@ -168,7 +178,7 @@ void RayTra::parse(const char* name){
 	if (actualLights)
 		populateLights();
 	if (structure == BoVoH) {
-		BVH* objects = new BVH(_surfaces, 0);
+		BVH* objects = new BVH(_surfaces);
 		_all->addSurface(objects);
 	} else if (structure == BiSpPa) {
 
@@ -372,8 +382,11 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 		//ples = sam.getPoints();
 	}
 	int counter = 0;
+	clock_t master_start = clock();
 #pragma omp parallel for schedule(dynamic)
 	for (int j = 0; j < height; j++) {
+		clock_t start = clock();
+		int startray = Ray::count;
 		for (int i = 0; i < width; i++) {
 			if (i == 162 && j == 215) {
 				_shading->toBreak = true;
@@ -491,14 +504,23 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 #pragma omp atomic
 			counter += 1;
 		}
+		clock_t end = clock();
+		double runtime = (double) (end - start) / CLOCKS_PER_SEC;
 		double total = (double) (height * width);
 		double perc = (double) counter / total;
+		int raysince = Ray::count - startray;
 		perc *= 100;
-		std::cout << "\rprogress: " << floor(perc) << "% : " << counter << "/" << total;
+#pragma omp critical
+		{
+			std::cout << "\rprogress: " << floor(perc) << "% : " << counter << " " << Ray::count << " rays - " << ((double)raysince / runtime) << " r/s";
+			std::cout.flush();
+		}
+	}
+	clock_t master_stop = clock();
+	double master_run = (double) (master_stop - master_start) / CLOCKS_PER_SEC;
+	{
+		std::cout << "\r\rprogress: 100%, " << Ray::count << " rays at " << ((double) Ray::count / master_run) << " r/s" << endl;
 		std::cout.flush();
 	}
-	std::cout << "\rprogress: 100%" << endl;
-	std::cout.flush();
-
 	return;
 }

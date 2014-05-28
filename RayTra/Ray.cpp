@@ -17,6 +17,8 @@ vec-double	ref		vector of index of refractions (for nested transparent objects)
 vec-vec		alpha	vector of rgb attenuation constants
 */
 
+
+
 /*
 IN
 vec			e		start
@@ -25,8 +27,12 @@ vec-double	r		ref (see above)
 vec-vec		a		alpha (see above)
 int			t		type of ray
 */
+
+int Ray::count = 0;
+
 Ray::Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a, int t):
 eye(e), dir(d), ref(r), alpha(a), type(t) {
+	Ray::count++;
 	sign.resize(3);
 	inv = dir.cwiseInverse();
 	reSign();

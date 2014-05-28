@@ -47,9 +47,7 @@ void Surface::trans(Matrix4d& inv) {
 }
 
 Box Surface::combine(const Box& b1, const Box& b2) {
-	Box b;
-	b.MAX = b1.MAX.cwiseMax(b2.MAX);
-	b.MIN = b1.MIN.cwiseMin(b2.MIN);
+	Box b(b1.MIN.cwiseMin(b2.MIN), b1.MAX.cwiseMax(b2.MAX));
 	return b;
 }
 

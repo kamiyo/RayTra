@@ -31,7 +31,7 @@ void Parser::parse(const char *file) {
 	/* mat variables, initialized */
 	Vector3d ka,kd,ks,ki,alpha;
 	ka.setOnes(); kd.setZero(); ks.setZero(); ki.setZero(); alpha.setZero();
-	double r=0,n=1.0;
+	double r=0,n=0;
 
 	/*light variables, uninitialized */
 	Vector3d lpos, ldir, lrgb, latten;
@@ -141,6 +141,11 @@ void Parser::parse(const char *file) {
 				int setting;
 				iss >> setting;
 				setOption(CIRCULAR, setting);
+			}
+			else if (cmd == "russian" || cmd == "rr") {
+				int setting;
+				iss >> setting;
+				setOption(RUSSIAN, setting);
 			}
 			else if (cmd == "o" || cmd == "options") {
 				isOpt = false;
@@ -329,6 +334,8 @@ void Parser::parse(const char *file) {
 		}
 		else if (cmd=="m" || cmd == "material") {
 			isMat = true;
+			ka.setOnes(); kd.setZero(); ki.setZero(); ks.setZero();
+			alpha.setZero(); n = 0; r = 0.;
 			iss >> matString;
 		}
 		else if (cmd == "l" || cmd == "light") {

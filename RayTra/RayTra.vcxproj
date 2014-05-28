@@ -39,6 +39,7 @@
     <ClInclude Include="rand.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RayTra.h" />
+    <ClInclude Include="rpoly.h" />
     <ClInclude Include="Shading.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Surface.h" />
@@ -80,6 +81,9 @@
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="UtilDefines.cpp" />
     <ClCompile Include="Vertex.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\x64\Release\scene.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3970B404-5622-4318-84F4-4418F3273300}</ProjectGuid>
@@ -188,6 +192,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>OPENEXR_DLL;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

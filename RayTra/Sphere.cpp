@@ -50,17 +50,6 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 			if (rec.t < t0 || rec.t > t1) {
 				return false;
 			}
-			/*if (ray.type != Ray::OCCL) {
-				if (ray.type != Ray::SHAD) {
-					Vector3d n = e + rec.t * d;
-					n = (n - _p).normalized();
-					rec.n = n;
-				} else {
-					rec.s = this;
-				}
-				rec.l = _l;
-				rec.m = _m;
-			}*/
 			if (ray.type == Ray::VIEW) {
 				Vector3d n = e + rec.t * d;
 				n = (n - _p).normalized();
@@ -72,12 +61,16 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 			return true;
 		}
 		else {
-			rec.s = this;
-			Vector3d n = e + rec.t * d;
-			n = (n - _p).normalized();
-			rec.n = n;
+			if (ray.type == Ray::VIEW) {
+				Vector3d n = e + rec.t * d;
+				n = (n - _p).normalized();
+				rec.n = n;
+				rec.l = _l;
+			}
+			else if (ray.type == Ray::SHAD) {
+				rec.s = this;
+			}
 			rec.m = _m;
-			rec.l = _l;
 			return true;
 		}
 	}
@@ -85,6 +78,5 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 }
 
 void Sphere::boundingBox() {
-	_b.MAX = _p.array() + _r;
-	_b.MIN = _p.array() - _r;
+	_b.set(_p.array() - _r, _p.array() + _r);
 }

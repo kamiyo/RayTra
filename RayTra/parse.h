@@ -30,7 +30,7 @@ protected:
 	Transform T;
 public:
 	virtual void parse(const char *file);
-	enum { SHADOWS, SAMPLES, REFRACT, STRUCT, RECURSE, DOF, INDIRECT, LIGHTS, ORDER, CIRCULAR };
+	enum { SHADOWS, SAMPLES, REFRACT, STRUCT, RECURSE, DOF, INDIRECT, LIGHTS, ORDER, CIRCULAR, RUSSIAN };
 };
 
 #endif

@@ -32,16 +32,17 @@ bool Plane::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		if (rec.t < t0 || rec.t > t1) {
 			return false;
 		} else {
-			if (ray.type != Ray::OCCL) {
-				if (ray.type != Ray::SHAD) {
-					if (d.dot(_n) > 0) {
-						rec.n = -1.0 * _n.normalized();
-					} else {
-						rec.n = _n.normalized();
-					}
-					rec.m = _m;
+			if (ray.type == Ray::VIEW) {
+				if (d.dot(_n) > 0) {
+					rec.n = -1.0 * _n.normalized();
 				}
-				rec.s = NULL;
+				else {
+					rec.n = _n.normalized();
+				}
+				rec.m = _m;
+			}
+			else {
+				rec.s = this;
 			}
 			return true;
 		}
@@ -49,6 +50,6 @@ bool Plane::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 }
 
 void Plane::boundingBox() {
-	_b.MAX = Vector3d(INF, INF, INF);
-	_b.MIN = Vector3d(nINF, nINF, nINF);
+	_b.setMax(Vector3d(INF, INF, INF));
+	_b.setMin(Vector3d(nINF, nINF, nINF));
 }

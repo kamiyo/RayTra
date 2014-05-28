@@ -13,6 +13,7 @@
 #include <Eigen/StdVector>
 #include <Eigen/Geometry>
 #include <cmath>
+#include <ctime>
 #include <cstdlib>
 #include <vector>
 #include <stack>
