@@ -38,10 +38,12 @@ void RayTra::populateLights() {
 
 void RayTra::sphere(Vector3d pos, double r) {
 	Sphere* s = new Sphere(pos, r, last);
+	applyTransform(s);
 	_surfaces->addSurface(s);
 }
 void RayTra::triangle(Vector3d p1, Vector3d p2, Vector3d p3){
 	Triangle* t = new Triangle(p1, p2, p3, last);
+	applyTransform(t);
 	_surfaces->addSurface(t);
 }
 void RayTra::plane(Vector3d n, Vector3d p){
@@ -50,31 +52,38 @@ void RayTra::plane(Vector3d n, Vector3d p){
 }
 void RayTra::circle(Vector3d p, Vector3d n, double r) {
 	Circle* c = new Circle(p, n, r, last);
+	applyTransform(c);
 	_surfaces->addSurface(c);
 }
 void RayTra::cylinder(double r, double h, char cap) {
 	Cylinder* c = new Cylinder(r, h, last);
+	applyTransform(c);
 	if (cap == 'p' || cap == 'b') {
 		Circle* top = new Circle(Vector3d(0, 0, h / 2.0), Vector3d(0, 0, 1), r, last);
+		applyTransform(top);
 		_surfaces->addSurface(top);
 	}
 	if (cap == 'n' || cap == 'b') {
 		Circle* bottom = new Circle(Vector3d(0, 0, -h / 2.0), Vector3d(0, 0, -1), r, last);
+		applyTransform(bottom);
 		_surfaces->addSurface(bottom);
 	}
 	_surfaces->addSurface(c);
 }
 void RayTra::cone(double l, double u, char cap) {
 	Cone* c = new Cone(l, u, last);
+	applyTransform(c);
 	if (cap == 'p' || cap == 'b') {
 		if (u != 0) {
 			Circle* top = new Circle(Vector3d(0, 0, u), Vector3d(0, 0, 1), u, last);
+			applyTransform(top);
 			_surfaces->addSurface(top);
 		}
 	}
 	if (cap == 'n' || cap == 'b') {
 		if (l != 0) {
 			Circle* bottom = new Circle(Vector3d(0, 0, l), Vector3d(0, 0, -1), l, last);
+			applyTransform(bottom);
 			_surfaces->addSurface(bottom);
 		}
 	}
@@ -82,6 +91,7 @@ void RayTra::cone(double l, double u, char cap) {
 }
 void RayTra::torus(double R, double r) {
 	Torus* t = new Torus(R, r, last);
+	applyTransform(t);
 	_surfaces->addSurface(t);
 }
 
@@ -119,6 +129,11 @@ void RayTra::material(string s, Vector3d amb, Vector3d diff, Vector3d spec, doub
 		mtlMap.insert(pair<string, Material*>(s, last));
 	} else {
 		last = (iter)->second;
+	}
+}
+void RayTra::applyTransform(Surface* s) {
+	if ((T._current != Matrix4d::Identity())) {
+		s->trans(T._current, T._currentInv);
 	}
 }
 void RayTra::setOption(int option, int setting) {

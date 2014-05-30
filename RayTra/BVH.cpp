@@ -39,18 +39,18 @@ BVH::BVH(Group* g) {
 		Vector3d diff = b.MAX - b.MIN;
 		int axis;
 		double range = diff.maxCoeff(&axis);
-		std::cout << "----" << axis << "------" << std::endl;
-		std::cout << b << " " << b._m << std::endl;
+		//std::cout << "----" << axis << "------" << std::endl;
+		//std::cout << b << " " << b._m << std::endl;
 		bool allSame = true;
 		for (int i = 0; i < (int) N; i++) {
-			std::cout << s[i]->_b << " " << s[i]->_b._m << std::endl;
+			//std::cout << s[i]->_b << " " << s[i]->_b._m << std::endl;
 			m += s[i]->_b._m[axis];
 			if (allSame && (s[i]->_b != b && s[i]->_b._m[axis] != b._m[axis])) {
 				allSame = false;
 			}
 		}
 		m /= (double) N;
-		std::cout << m << " " << allSame << std::endl;
+		//std::cout << m << " " << allSame << std::endl;
 		Group* left = new Group();
 		Group* right = new Group();
 		for (int i = 0; i < (int) N; i++) {
@@ -75,11 +75,36 @@ TODO: write tree display algo
 POSSIBLE?: turn into Heap instead of tree
 */
 
+bool BVH::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+	if (!hitbox(ray, t0, t1)) return false;
+	if (_trans) {
+		Vector3d oEye = ray.eye;
+		Vector3d oDir = ray.dir;
+		Vector3d oInv = ray.inv;
+		std::vector<int> oSign = ray.sign;
+		ray.eye = apply(_mInv, oEye, 1);
+		ray.dir = apply(_mInv, oDir, 0);
+		ray.reSign();
+		bool temp = hit(ray, t0, t1, rec);
+		ray.eye = oEye;
+		ray.dir = oDir;
+		ray.inv = oInv;
+		ray.sign = oSign;
+		if (temp) {
+			rec.n = apply(_mTrans, rec.n, 0);
+		}
+		return temp;
+	}
+	else {
+		return hit(ray, t0, t1, rec);
+	}
+}
+
 bool BVH::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	if (hitbox(ray, t0, t1)) {
 		hitRecord lrec, rrec;
-		bool leftHit = (_l != NULL) && (_l->hit(ray, t0, t1, lrec));
-		bool rightHit = (_r != NULL) && (_r->hit(ray, t0, t1, rrec));
+		bool leftHit = (_l != NULL) && (_l->_hit(ray, t0, t1, lrec));
+		bool rightHit = (_r != NULL) && (_r->_hit(ray, t0, t1, rrec));
 		if (leftHit && rightHit) {
 			if (lrec.t < rrec.t) {
 				rec = lrec;

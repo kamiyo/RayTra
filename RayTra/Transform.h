@@ -19,8 +19,10 @@ public:
 	void rotate(Vector3d axis, double rot);
 	Matrix4d _current;
 	Matrix4d _currentInv;
+	Matrix4d _normal;
 	std::stack<Matrix4d> _m;
 	std::stack<Matrix4d> _mInv;
+	std::stack<Matrix4d> _mN;
 };
 
 inline Vector4d operator* (const Transform& t, const Vector4d& v) {
@@ -28,7 +30,8 @@ inline Vector4d operator* (const Transform& t, const Vector4d& v) {
 }
 
 inline Vector3d apply(const Matrix4d& m, const Vector3d& v, const int& i) {
-	Vector4d vv(v(0), v(1), v(2), (double)i);
+	double h = i;
+	Vector4d vv(v(0), v(1), v(2), h);
 	return (m * vv).block<3, 1>(0, 0);
 }
 #endif

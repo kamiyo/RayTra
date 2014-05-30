@@ -245,7 +245,7 @@ void Parser::parse(const char *file) {
 			double x, y, z;
 			iss >> x;
 			y = z = x;
-			iss >> y >> x;
+			iss >> y >> z;
 			T.scale(Vector3d(x, y, z));
 		}
 		else if (cmd == "move" || cmd == "trans" || cmd == "translate") {

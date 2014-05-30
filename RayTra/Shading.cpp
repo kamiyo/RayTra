@@ -54,7 +54,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d
 	Vector3d d = (-1.0 * v.dir).normalized();									// d = viewing ray direction (out of surface)
 	Material* m;
 
-	if (s->hit(v, t0, t1, rec)) {
+	if (s->_hit(v, t0, t1, rec)) {
 		Vector3d n = rec.n;						// n = normal vector of intersection
 		
 		double nd = n.dot(d);
@@ -103,7 +103,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d
 			*/
 			double fall = _l[j]->getFalloff(p);
 			
-			if ((fall != 0 && !s->hit(sRay, 0.0001, 1, srec)) || srec.m == NULL || _shadows == false) {
+			if ((fall != 0 && !s->_hit(sRay, 0.0001, 1, srec)) || srec.m == NULL || _shadows == false) {
 				Vector3d I = _l[j]->_rgb;
 				l = l.normalized();
 				Vector3d h = (l.normalized() + d).normalized();

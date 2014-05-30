@@ -15,6 +15,7 @@ class BVH : public Surface{
 public:
 	BVH(Group* g);
 	bool hit(Ray& ray, double t0, double t1, hitRecord& rec);
+	bool _hit(Ray& ray, double t0, double t1, hitRecord& rec);
 	void boundingBox();
 	bool hitbox(Ray& ray, double t0, double t1);
 	Surface* _l;

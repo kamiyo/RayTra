@@ -14,8 +14,9 @@ public:
 	Box();
 	Box(Vector3d min, Vector3d max);
 	virtual ~Box();
-	void setMax(Vector3d max);
-	void setMin(Vector3d min);
+	Box transform(Matrix4d& m);
+	Box combine(Box& rhs);
+	Box combine(Box& b1, Box& b2);
 	void set(Vector3d min, Vector3d max);
 	bool operator==(const Box& rhs);
 	bool operator!=(const Box& rhs);

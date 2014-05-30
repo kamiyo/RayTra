@@ -50,6 +50,4 @@ bool Plane::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 }
 
 void Plane::boundingBox() {
-	_b.setMax(Vector3d(INF, INF, INF));
-	_b.setMin(Vector3d(nINF, nINF, nINF));
 }

@@ -76,26 +76,7 @@ int main(int argc, char** argv) {
 		name = name.substr(0, name.find_last_of('.')) + ".exr";
 	}
 	else if (argc == 1) {
-		clock_t start = clock();
-		Vector3d temp = Vector3d::Zero();
-		for (int i = 0; i < 1; i++) {
-			Vector3d t(0, 1, 0);
-			temp += cosVec(t);
-		}
-		clock_t ends = clock();
-		double runtime = (double) (ends - start) / CLOCKS_PER_SEC;
-		cout << temp.normalized() << " " << runtime << endl;
 
-		start = clock();
-		temp.setZero();
-		for (int i = 0; i < 1; i++) {
-			Vector3d t(0, 1, 0);
-			temp += _cosVec(t);
-		}
-		ends = clock();
-		runtime = (double) (ends - start) / CLOCKS_PER_SEC;
-		cout << temp.normalized() << " " << runtime << endl;
-		return 0;
 	}
 	else {
 		cerr << "not correct number of arguments" << endl;

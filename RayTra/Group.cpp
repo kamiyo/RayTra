@@ -15,7 +15,7 @@ Group::Group() {
 
 void Group::addSurface(Surface* s) {
 	_s.push_back(s);
-	_b = combine(_b, s->_b);
+	_b = _b.combine(s->_b);
 }
 
 bool Group::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
@@ -23,7 +23,7 @@ bool Group::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	for (int i = 0; i < (int)_s.size(); i++) {
 		hitRecord temp;
 //		std::cout << ray.eye << std::endl;
-		if (_s[i]->hit(ray, t0, t1, temp)) {
+		if (_s[i]->_hit(ray, t0, t1, temp)) {
 			hit = true;
 			rec = temp;
 			t1 = rec.t;

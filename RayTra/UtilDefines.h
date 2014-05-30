@@ -43,6 +43,8 @@ typedef Eigen::Matrix4d Matrix4d;
 typedef Eigen::Vector3d Vector3d;
 typedef Eigen::Vector4d Vector4d;
 typedef Eigen::AngleAxisd AngleAxisd;
+typedef Eigen::Array4d Array4d;
+typedef Eigen::Array33d Array33d;
 
 typedef struct hitRecord {
 	double t;

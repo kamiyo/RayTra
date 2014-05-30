@@ -42,6 +42,7 @@ class RayTra : public Parser {
 	virtual void cylinder(double r, double h, char cap);
 	virtual void cone(double l, double u, char cap);
 	virtual void torus(double R, double r);
+	virtual void applyTransform(Surface* s);
 	virtual void camera(Vector3d pos, Vector3d dir, Vector3d up, double d, double iw, double ih, int pw, int ph, double size);
 	virtual void pointLight(Vector3d pos, Vector3d rgb, Vector3d atten, double r);
 	virtual void directionalLight(Vector3d dir, Vector3d rgb, Vector3d atten);

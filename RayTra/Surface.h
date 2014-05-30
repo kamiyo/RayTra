@@ -17,14 +17,13 @@ class Surface {
 public:
 	enum { NeedsToAlign = (sizeof(Vector4d) % 16) == 0 };
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign);
-	bool _hit(Ray& ray, double t0, double t1, hitRecord& rec);
-	void trans(Matrix4d& inv);
+	virtual bool _hit(Ray& ray, double t0, double t1, hitRecord& rec);
+	void trans(Matrix4d& m, Matrix4d& inv);
 	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec) = 0;
 	virtual void boundingBox() = 0;
 	virtual int type();
-	virtual Box combine(const Box& b1, const Box& b2);
 	Matrix4d _mInv;
-	Matrix4d _mInvTrans;
+	Matrix4d _mTrans;
 	Material* _m;
 	bool _trans;
 	Box _b;

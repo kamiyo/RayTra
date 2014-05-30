@@ -18,20 +18,11 @@
 
 bool Surface::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	if (_trans) {
-		Vector3d oEye = ray.eye;
-		Vector3d oDir = ray.dir;
-		Vector3d oInv = ray.inv;
-		std::vector<int> oSign = ray.sign;
-		ray.eye = apply(_mInv, oEye, 1);
-		ray.dir = apply(_mInv, oDir, 0);
-		ray.reSign();
-		bool temp = hit(ray, t0, t1, rec);
-		ray.eye = oEye;
-		ray.dir = oDir;
-		ray.inv = oInv;
-		ray.sign = oSign;
+		Ray tRay(apply(_mInv, ray.eye, 1), apply(_mInv, ray.dir, 0), ray.ref, ray.alpha, Ray::VIEW);
+		bool temp = hit(tRay, t0, t1, rec);
 		if (temp) {
-			rec.n = apply(_mInvTrans, rec.n, 0);
+			rec.n = apply(_mTrans, rec.n, 0);
+			rec.n.normalize();
 		}
 		return temp;
 	}
@@ -40,15 +31,11 @@ bool Surface::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	}
 }
 
-void Surface::trans(Matrix4d& inv) {
+void Surface::trans(Matrix4d& m, Matrix4d& inv) {
 	_trans = true;
 	_mInv = inv;
-	_mInvTrans = inv.transpose();
-}
-
-Box Surface::combine(const Box& b1, const Box& b2) {
-	Box b(b1.MIN.cwiseMin(b2.MIN), b1.MAX.cwiseMax(b2.MAX));
-	return b;
+	_mTrans = m.inverse().transpose();
+	_b = _b.transform(m);
 }
 
 int Surface::type() {
