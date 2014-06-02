@@ -36,7 +36,7 @@ BVH::BVH(Group* g) {
 	else {
 		double m = 0;
 		Box b = g->_b;
-		Vector3d diff = b.MAX - b.MIN;
+		Vector3d diff = b.max() - b.min();
 		int axis;
 		double range = diff.maxCoeff(&axis);
 		//std::cout << "----" << axis << "------" << std::endl;

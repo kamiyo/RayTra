@@ -23,6 +23,7 @@
 #include "Face.h"
 #include "BVH.h"
 #include "Hilbert.h"
+#include "Sampler.h"
 #include "UtilDefines.h"
 #include <OpenEXR/ImfRgbaFile.h>
 #include <OpenEXR/ImfStringAttribute.h>

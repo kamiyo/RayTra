@@ -6,10 +6,10 @@ class Hilbert {
 public:
 	Hilbert(int x, int y);
 	~Hilbert();
-	Vector2i* getPoints();
+	Sampler2i& getPoints();
 	int size();
 private:
-	Vector2i* _points;
+	Sampler2i _points;
 	int _size;
 	int _x, _y;
 	static const int N = 0, E = 1, S = 2, W = 3;

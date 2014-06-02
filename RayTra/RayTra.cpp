@@ -13,11 +13,12 @@ RayTra::RayTra() {
 	_shading = new Shading();
 	hasnorm = false;
 	startMaterial = true;
-	structure = 0;
-	field = true;
+	structure = LIST;
+	field = OFF_0;
 	esf = 0;
 	samples = 1;
-	area = false;
+	area = OFF;
+	order = LINEAR;
 	circular = false;
 	circleLight = false;
 	actualLights = false;
@@ -140,7 +141,7 @@ void RayTra::setOption(int option, int setting) {
 	switch (option) {
 	case SHADOWS:
 		area = setting;
-		if (area == 1) {
+		if (area >= 1) {
 			_shading->_shadows = true;
 		}
 		break;
@@ -381,12 +382,12 @@ void RayTra::splitStringToInt(const string& s, char d, vector<int>& e) {
 		sub = "";
 	}
 }
-
+//TODO make a sampler class and move the sample grid stuff off
 // render function
 void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
-	_shading->toBreak = false;
-	init_genrand(time(NULL));					// seed rand
-	Vector2i* bert = NULL;
+	init_genrand(time(NULL));
+	seedRand();					// seed rand
+	Sampler2i bert;
 	std::cout << samples << " " << order << std::endl;
 	//Vector2i* ples;
 	if (order == HILBERT) {
@@ -396,126 +397,62 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 		//Hilbert sam(samples, samples);
 		//ples = sam.getPoints();
 	}
+
+	Sampler master(width, height, Sampler::INTEGRAL, Sampler::SQUARE, ((order == HILBERT) ? (Sampler::HILBERT) : 0), Sampler::CENTER, false);
+	Sampler ms_sampler(samples, samples, Sampler::FRACTIONAL, Sampler::SQUARE, Sampler::LINEAR, ((samples > 1) ? (Sampler::STRATIFIED) : (Sampler::CENTER)), true);
+	Sampler lens_sampler, light_sampler;
+	
+	std::cout << area << std::endl;
+	if (field == OFF) lens_sampler = Sampler(samples, samples);
+	else lens_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((circular) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1)?(Sampler::STRATIFIED):(Sampler::CENTER)), true);
+	if (area <= 1) light_sampler = Sampler(samples, samples);
+	else light_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((area == SOFTCIRCLE) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1) ? (Sampler::STRATIFIED) : (Sampler::CENTER)), true);
+	Sampler2d master_pixels = master.genPoints();
+
 	int counter = 0;
 	clock_t master_start = clock();
 #pragma omp parallel for schedule(dynamic)
 	for (int j = 0; j < height; j++) {
+		
 		clock_t start = clock();
 		int startray = Ray::count;
+
 		for (int i = 0; i < width; i++) {
-			if (i == 162 && j == 215) {
-				_shading->toBreak = true;
-			}
-			Vector2i linear; int cur;
-			if (order == HILBERT) {
-				cur = j*width + i;
-				linear << i, j;
-				//i = bert[cur][0];
-				//j = bert[cur][1];
-			}
 
 			Vector3d c = Vector3d::Zero();		// initialize color result vector (RGB)
-			std::vector<Vector2d, Eigen::aligned_allocator<Vector2d> > l;			// 1-D array of 2-D matrix for area lights sampling
-			std::vector<Vector2d, Eigen::aligned_allocator<Vector2d> > s;			// 1-D array of 2-D matrix for DoF
+			
+			Sampler2d l_sample = light_sampler.genPoints();
+			Sampler2d s_sample = lens_sampler.genPoints();
+			Sampler2d ms_sample = ms_sampler.genPoints();
+			Sampler::shuffle(s_sample);
+			Sampler::shuffle(l_sample);
 
-			if (area > 0) {
-				for (int p = 0; p < samples; p++) {
-					for (int q = 0; q < samples; q++) {
-						Vector2d temp(((double) p + RAN) / (double) samples, ((double) q + RAN) / (double) samples);
-						if (circleLight == true) {
-							/*	double angle = temp[0] * M_PI * 2;
-							double rad = RAD * sqrt(temp[1]);
-							temp << rad * cos(angle), rad * sin(angle);*/
-							to_unit_disk(temp[0], temp[1], temp);
-						}
-						else {
-							temp = temp.array() - 0.5;
-						}
-						l.push_back(temp);
-					}
-				}
-				for (int zz = samples*samples - 1; zz > 0; zz--) {
-					int random = RAN * zz;
-					Vector2d temp = l[zz];
-					l[zz] = l[random];
-					l[random] = temp;
-				}
-			}
-			else {
-				for (int p = 0; p < samples * samples; p++) {
-					l.push_back(Vector2d(0, 0));
-				}
-			}
-			if (field > 0) {
-				for (int p = 0; p < samples; p++) {
-					for (int q = 0; q < samples; q++) {
-						Vector2d temp(((double) p + RAN) / (double) samples, ((double) q + RAN) / (double) samples);
-						if (circular == true) {
-							/*double angle = temp[0] * M_PI * 2;
-							double rad = RAD * sqrt(temp[1]);
-							temp << rad * cos(angle), rad * sin(angle);
-							*/
-							to_unit_disk(temp[0], temp[1], temp);
-						}
-						else {
-							temp = temp.array() - 0.5;
-						}
-						s.push_back(temp);
-					}
-				}
-				for (int zz = samples*samples - 1; zz > 0; zz--) {
-					int random = RAN * zz;
-					Vector2d temp = s[zz];
-					s[zz] = s[random];
-					s[random] = temp;
-				}
-			}
-			else {
-				for (int p = 0; p < samples * samples; p++) {
-					s.push_back(Vector2d(0, 0));
-				}
-			}
-
+			int current_pixel = j * width + i;
+			int x = master_pixels[current_pixel][0];
+			int y = master_pixels[current_pixel][1];
 			// multisampling raytracing
-			for (int p = 0; p < samples; p++) {
-				for (int q = 0; q < samples; q++) {
-					//int cursamp; Vector2i linsamp;
-					//if (hil) {
-					//	cursamp = p*samples + q;
-					//	linsamp << p, q;
-					//	p = bert[cursamp][0];
-					//	q = bert[cursamp][1];
-					//}
+			for (int q = 0; q < samples; q++) {
+				for (int p = 0; p < samples; p++) {
 
+					int current_sample = q * samples + p;
+					int current_pixel = j * width + i;
 					Ray r;
-					if (samples == 1) {
-						_cam->generateRay(Vector2d(0.0, 0.0), (double) i + 0.5, (double) j + 0.5, r);			// generate ray: version for nonMS
-					}
-					else {
-						_cam->generateRay(s[p * samples + q], (double) i + ((double) p + RAN) / (double) samples, (double) j + ((double) q + RAN) / (double) samples, r);		// generate ray: version for MS
-					}
-					c += _shading->computeShading(r, 0, INF, _all, l[p * samples + q]);				// SHADE
-					//if (hil) {
-					//	p = linsamp[0];
-					//	q = linsamp[1];
-					//}
+					_cam->generateRay(s_sample[current_sample], x + ms_sample[current_sample][0], y + ms_sample[current_sample][1], r);
+					c += _shading->computeShading(r, 0, INF, _all, l_sample[current_sample]);				// SHADE
 				}
 			}
 			c = c / (samples * samples);		// normalize result
-			o[height - (j + 1)][i].r = c[0];
-			o[height - (j + 1)][i].g = c[1];
-			o[height - (j + 1)][i].b = c[2];
-			o[height - (j + 1)][i].a = 1.0;
+			int invHeight = height - (y + 1);
+			o[invHeight][x].r = c[0];
+			o[invHeight][x].g = c[1];
+			o[invHeight][x].b = c[2];
+			o[invHeight][x].a = 1.0;
 
 			//pixels[j*width + i] = toInt(c[0]) | (toInt(c[1]) << 8) | (toInt(c[2]) << 16);
 			//glClear(GL_COLOR | GL_DEPTH);
 			//glRasterPos2i(0, 0);
 			//glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 			//glutSwapBuffers();
-			if (order == HILBERT) {
-				//i = linear[0];
-				//j = linear[1];
-			}
 #pragma omp atomic
 			counter += 1;
 		}

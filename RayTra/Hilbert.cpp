@@ -11,13 +11,13 @@ Hilbert::Hilbert(int x, int y) : _x(x), _y(y) {
 	//int check = 1;
 	//while ((1<<check)<m) check++;
 	//if (nOrder != check) exit(0);
-	_points = new Vector2i[x * y];
+	_points.resize(x * y);
 	_size = 0;
 	nX = nY = 0;
 	hilbert(nOrder, N, E, S, W);
 }
 
-Vector2i* Hilbert::getPoints() {
+Sampler2i& Hilbert::getPoints() {
 	return _points;
 }
 

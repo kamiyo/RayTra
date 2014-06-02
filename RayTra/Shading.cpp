@@ -36,12 +36,12 @@ void Shading::addAmbient(Vector3d a) {
 }
 
 // form of function where recursion and refraction are not specified. 
-Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d& area) {
+Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d area) {
 	return computeShading(v, t0, t1, s, area, _recurs, _refraction);
 }
 
 //SHADER
-Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d& area, int recurs, int refrac) {
+Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d area, int recurs, int refrac) {
 	if (recurs == -1 || refrac == -1) {
 		return Vector3d::Zero();						//return 0 if recursion limit reached
 	}
@@ -88,8 +88,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d
 				if (w.dot(up) == 1) up << 1.0, 0.0, 0.0;
 				Vector3d u = (up.cross(w)).normalized();
 				Vector3d v = (w.cross(u)).normalized();
-				Vector2d _area = area.array();				//		if there is no "area" to the light, then area variable (0, 0) 
-				_area *= ((LightP*)_l[j])->_r;
+				Vector2d _area = area.array() * ((LightP*)_l[j])->_r;
 				l = l + u * _area[0] + v * _area[1];
 			}
 
@@ -188,7 +187,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d
 			v1 = Ray(p, t, v1.ref, v1.alpha, Ray::VIEW);
 			//std::cout << "reflect" << std::endl;
 			if (_russian) {
-				double roll = genrand_real2();
+				double roll = RAN;
 				if (roll < R) {
 					result += krefract.cwiseProduct(R * computeShading(v0, 0.001, INF, s, area, recurs, refrac));
 				}

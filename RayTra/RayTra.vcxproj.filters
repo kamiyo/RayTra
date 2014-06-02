@@ -102,6 +102,9 @@
     <ClInclude Include="rpoly.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Sampler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Box.cpp">
@@ -197,9 +200,15 @@
     <ClCompile Include="rpoly.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sampler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\x64\Release\scene.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="hanoi.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

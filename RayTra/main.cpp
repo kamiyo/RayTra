@@ -30,12 +30,12 @@ bool rendered = false;
 */
 
 
-// stuff for exr output
-unsigned int* pixels;
-int width, height;
-RayTra tracer;
+// global vars
+		  unsigned int*	pixels;
+					int	width, height;
+				 RayTra	tracer;
 Imf::Array2D<Imf::Rgba> o;
-string name;
+				 string	name;
 
 //define to convert floating point intensity to 0-255 with adjustment
 //#define toInt(x) ((int)(pow(clamp(x, 0.f, 1.f), 1.f / 2.2f) * 255.f + .5f))
@@ -74,11 +74,7 @@ int main(int argc, char** argv) {
 	} else if (argc == 2) {
 		name = argv[1];
 		name = name.substr(0, name.find_last_of('.')) + ".exr";
-	}
-	else if (argc == 1) {
-
-	}
-	else {
+	} else {
 		cerr << "not correct number of arguments" << endl;
 		return 1;
 	}

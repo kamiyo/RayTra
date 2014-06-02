@@ -16,8 +16,12 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <array>
+#include <functional>
+#include <algorithm>
 #include <stack>
 #include <iostream>
+#include <random>
 #include <memory>
 #include <limits>
 
@@ -31,9 +35,8 @@ class Surface;
 #define INF std::numeric_limits<double>::infinity()
 #define nINF -1 * std::numeric_limits<double>::infinity()
 #define EULER 2.718281828459045235360287471352
-#define MAX b[1]
-#define MIN b[0]
-#define RAN (double)genrand_real2()
+//#define RAN (double)genrand_real2()
+#define RAN genRand_real()
 #define RAD sqrt((double)1.0 / M_PI)
 
 typedef Eigen::Vector2d Vector2d;
@@ -43,8 +46,11 @@ typedef Eigen::Matrix4d Matrix4d;
 typedef Eigen::Vector3d Vector3d;
 typedef Eigen::Vector4d Vector4d;
 typedef Eigen::AngleAxisd AngleAxisd;
+typedef Eigen::Array2d Array2d;
 typedef Eigen::Array4d Array4d;
 typedef Eigen::Array33d Array33d;
+typedef std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Vector2d> > Sampler2d;
+typedef std::vector<Eigen::Vector2i, Eigen::aligned_allocator<Vector2i> > Sampler2i;
 
 typedef struct hitRecord {
 	double t;
@@ -55,12 +61,17 @@ typedef struct hitRecord {
 } hitRecord;
 Vector3d randSphere();
 
+void seedRand();
+double genRand_real();
+int genRand_int(int x, int y);
+
 Vector3d cosVec(Vector3d a);
 Vector3d _cosVec(Vector3d a);
 
 std::istream &operator>>(std::istream &is, Vector3d &f);
 std::ostream &operator<<(std::ostream &os, Vector3d &f);
 
+std::ostream &operator<<(std::ostream &os, Sampler2d &s);
 
 // Takes sample in 2-D square to circle
 void to_unit_disk(double seedx, double seedy, Vector2d& v);

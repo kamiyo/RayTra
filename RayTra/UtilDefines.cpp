@@ -1,5 +1,9 @@
 #include "UtilDefines.h"
 
+std::mt19937_64 mt;
+std::uniform_real_distribution<double> uni_real;
+std::uniform_int_distribution<int> uni_int;
+
 Vector3d randSphere() {
 	double a, b, c;
 	do {
@@ -76,7 +80,26 @@ void to_unit_disk(double seedx, double seedy, Vector2d& v)
 				phi = 0;
 		}
 	}
-	v << RAD * r * cos(phi), RAD * r * sin(phi);
+	v << r * cos(phi), r * sin(phi);
+}
+
+void seedRand() {
+	std::array<unsigned int, 2*std::mt19937_64::state_size> seed_data;
+	std::random_device r;
+	std::generate_n(seed_data.data(), seed_data.size(), std::ref(r));
+	std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+
+	mt = std::mt19937_64(seq);
+	uni_real = std::uniform_real_distribution<double>(0., 1.);
+}
+
+double genRand_real() {
+	return uni_real(mt);
+}
+
+int genRand_int(int x, int y) {
+	std::uniform_int_distribution<int> ranint(x, y);
+	return ranint(mt);
 }
 
 std::istream &operator>>(std::istream &is, Vector3d &f) {
@@ -108,4 +131,15 @@ Vector3d vmax(std::vector<Vector3d> &v) {
 		temp = vmax(temp, v[i]);
 	}
 	return temp;
+}
+
+std::ostream &operator<<(std::ostream &os, Sampler2d &s) {
+	for (int i = 0; i < s.size(); i++) {
+		os << s[i][0] << " " << s[i][1] << std::endl;
+		os << "--- " << s[i].norm() << " ---";
+		if (i != s.size() - 1) {
+			os << "\n";
+		}
+	}
+	return os;
 }

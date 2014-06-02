@@ -24,8 +24,8 @@ public:
 	virtual ~Shading();
 	void addLight(Light* l);
 	void addAmbient(Vector3d a);
-	Vector3d computeShading(Ray v, double t0, double t1, Group* s, Vector2d& area, int recurs, int refrac);
-	Vector3d computeShading(Ray v, double t0, double t1, Group* s, Vector2d& area);
+	Vector3d computeShading(Ray v, double t0, double t1, Group* s, Vector2d area, int recurs, int refrac);
+	Vector3d computeShading(Ray v, double t0, double t1, Group* s, Vector2d area);
 	double fresnel(double index1, double index2, double c1, double c2);
 	double schlicks(double index, double c);
 	bool refract(Vector3d d, Vector3d n, double index, double indext, Vector3d& t);

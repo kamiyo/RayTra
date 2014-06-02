@@ -19,6 +19,7 @@
 bool Surface::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	if (_trans) {
 		Ray tRay(apply(_mInv, ray.eye, 1), apply(_mInv, ray.dir, 0), ray.ref, ray.alpha, Ray::VIEW);
+		Ray::count -= 1;
 		bool temp = hit(tRay, t0, t1, rec);
 		if (temp) {
 			rec.n = apply(_mTrans, rec.n, 0);
