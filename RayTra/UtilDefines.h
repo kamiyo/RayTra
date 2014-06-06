@@ -38,6 +38,9 @@ class Surface;
 //#define RAN (double)genrand_real2()
 #define RAN genRand_real()
 #define RAD sqrt((double)1.0 / M_PI)
+#define COSVEC _cosVec
+#define DISK toDisk
+#define _PLUCKER_
 
 typedef Eigen::Vector2d Vector2d;
 typedef Eigen::Vector2i Vector2i;
@@ -74,5 +77,6 @@ std::ostream &operator<<(std::ostream &os, Vector3d &f);
 std::ostream &operator<<(std::ostream &os, Sampler2d &s);
 
 // Takes sample in 2-D square to circle
+void toDisk(double x, double y, Vector2d& v);
 void to_unit_disk(double seedx, double seedy, Vector2d& v);
 #endif /* UTILDEFINES_H_ */

@@ -34,13 +34,12 @@ bool Circle::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	//std::cout << "here" << std::endl;
 	Vector3d e = ray.eye;
 	Vector3d d = ray.dir;
-	//std::cout << "e = " << e << std::endl;
-	//std::cout << "d = " << d << std::endl;
-	double num = (_n.dot(_p - e));
 	double den = _n.dot(d);
 	if (den == 0) {
 		return false;
-	} else {
+	}
+	else {
+		double num = (_n.dot(_p - e));
 		rec.t = num / den;
 		if (rec.t < t0 || rec.t > t1) {
 			return false;
@@ -48,14 +47,14 @@ bool Circle::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		if (((e + d * rec.t) - _p).norm() > _r) {
 			return false;
 		}
-		if (ray.type != Ray::OCCL) {
-			if (ray.type != Ray::SHAD) {
-				rec.n = _n.normalized();
-			} else {
-				rec.s = this;
-			}
-			rec.m = _m;
+		if (ray.type == Ray::VIEW) {
+			rec.n = _n.normalized();
 		}
+		else {
+			rec.s = this;
+		}
+		rec.m = _m;
+
 		return true;
 	}
 }

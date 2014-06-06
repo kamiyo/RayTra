@@ -43,7 +43,11 @@ Vector3d _cosVec(Vector3d a) {
 	return Vector3d((cos(ep1) * ep2) * u + (sin(ep1) * ep2) * v - sqrt(ep21) * w);
 }
 
-
+void toDisk(double x, double y, Vector2d& v) {
+	double theta = 2 * M_PI * x;
+	double r = sqrt(y);
+	v = Vector2d(r * cos(theta), r * sin(theta));
+}
 // Takes sample in 2-D square to circle
 void to_unit_disk(double seedx, double seedy, Vector2d& v)
 {

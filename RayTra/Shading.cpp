@@ -36,12 +36,12 @@ void Shading::addAmbient(Vector3d a) {
 }
 
 // form of function where recursion and refraction are not specified. 
-Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d area) {
+Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area) {
 	return computeShading(v, t0, t1, s, area, _recurs, _refraction);
 }
 
 //SHADER
-Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d area, int recurs, int refrac) {
+Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area, int recurs, int refrac) {
 	if (recurs == -1 || refrac == -1) {
 		return Vector3d::Zero();						//return 0 if recursion limit reached
 	}
@@ -72,7 +72,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, Vector2d
 
 		Vector3d global; global.setZero();
 		for (int gi = 0; gi < _indirect; gi++) {
-			Vector3d newDir = cosVec(n);
+			Vector3d newDir = COSVEC(n);
 			Ray diffR(p, v.dir.norm() * newDir, v.ref, v.alpha, Ray::VIEW);
 			global += computeShading(diffR, 0.0001, INF, s, area, recurs - 1, refrac);
 		}

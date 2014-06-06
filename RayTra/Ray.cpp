@@ -28,7 +28,7 @@ vec-vec		a		alpha (see above)
 int			t		type of ray
 */
 
-int Ray::count = 0;
+unsigned long Ray::count = 0;
 
 Ray::Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a, int t):
 eye(e), dir(d), ref(r), alpha(a), type(t) {
@@ -36,6 +36,7 @@ eye(e), dir(d), ref(r), alpha(a), type(t) {
 	sign.resize(3);
 	inv = dir.cwiseInverse();
 	reSign();
+	v = d.cross(e);
 }
 
 Ray::Ray() {

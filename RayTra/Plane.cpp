@@ -23,22 +23,19 @@ Plane::~Plane() {
 bool Plane::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	Vector3d e = ray.eye;
 	Vector3d d = ray.dir;
-	double num = _n.dot(_p - e);
 	double den = _n.dot(d);
 	if (den == 0) {
 		return false;
-	} else {
+	}
+	else {
+		double num = _n.dot(_p - e);
 		rec.t = num / den;
 		if (rec.t < t0 || rec.t > t1) {
 			return false;
-		} else {
+		}
+		else {
 			if (ray.type == Ray::VIEW) {
-				if (d.dot(_n) > 0) {
-					rec.n = -1.0 * _n.normalized();
-				}
-				else {
-					rec.n = _n.normalized();
-				}
+				rec.n = _n.normalized();
 				rec.m = _m;
 			}
 			else {

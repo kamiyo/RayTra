@@ -69,6 +69,7 @@ int main(int argc, char** argv) {
 	//clock_t start = clock();
 	//glutInit(&argc, argv);
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	std::cout << argc << endl;
 	if (argc == 3) {
 		name = argv[2];
 	} else if (argc == 2) {

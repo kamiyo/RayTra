@@ -2,7 +2,7 @@
 #define PARSE_H_
 
 #include <cstdlib>
-#include <cstring>
+#include <string>
 #include <iostream>
 #include "UtilDefines.h"
 #include "Transform.h"
@@ -24,9 +24,11 @@ protected:
 	virtual void spotLight(Vector3d pos, Vector3d dir, double theta, double phi, double p, Vector3d rgb, Vector3d atten, double r) {}
 	virtual void ambientLight(Vector3d rgb) {}
 	virtual void material(Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten) {}
+	virtual void material(string s) {}
 	virtual void material(string s, Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten) {}
-	virtual void setOption(int option, int setting) {}
+	virtual void setOption(int option, int setting, int setting2 = 0) {}
 	virtual void getObj(const char *file, int smooth) {}
+
 	Transform T;
 public:
 	virtual void parse(const char *file);

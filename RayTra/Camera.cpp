@@ -54,7 +54,7 @@ vec		p	start point (jittered or not)
 		j	jth pixel from bottom
 ray		r	reference
 */
-void Camera::generateRay(Vector2d p, double i, double j, Ray& r) {
+void Camera::generateRay(const Vector2d& p, double i, double j, Ray& r) {
 	double u = (_width) * (i / _nx - 0.5);
 	double v = (_height) * (j / _ny - 0.5);
 	Vector2d _p = p * _size;

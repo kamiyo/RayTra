@@ -20,12 +20,14 @@ public:
 		Vector3d eye;
 		Vector3d dir;
 		Vector3d inv;
+		Vector3d v;	// plucker coord (u is just dir)
 		std::vector<int> sign;
 		int type;
 		static const int VIEW = 0, SHAD = 1, DIFF = 2, OCCL = 3;
 		std::vector<double> ref;
 		std::vector<Vector3d> alpha;
-		static int count;
+		static unsigned long count;
+
 };
 
 std::ostream &operator<<(std::ostream &os, Ray &r);

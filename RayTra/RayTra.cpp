@@ -119,6 +119,15 @@ void RayTra::spotLight(Vector3d pos, Vector3d dir, double theta, double phi, dou
 void RayTra::ambientLight(Vector3d rgb){
 	_shading->addAmbient(rgb);
 }
+void RayTra::material(string s) {
+	map<string, Material*>::iterator iter = mtlMap.find(s);
+	if (iter == mtlMap.end()) {
+		cerr << "material string does not exist; ignoring" << endl;
+	}
+	else {
+		last = (iter)->second;
+	}
+}
 void RayTra::material(Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten){
 	last = new Material(amb, diff, spec, r, refl, n, atten);
 	_m.push_back(*last);
@@ -129,7 +138,9 @@ void RayTra::material(string s, Vector3d amb, Vector3d diff, Vector3d spec, doub
 		last = new Material(amb, diff, spec, r, refl, n, atten);
 		mtlMap.insert(pair<string, Material*>(s, last));
 	} else {
-		last = (iter)->second;
+		last = new Material(amb, diff, spec, r, refl, n, atten);
+		(iter)->second = last;
+		cerr << "material string exists, overwriting old entry" << endl;
 	}
 }
 void RayTra::applyTransform(Surface* s) {
@@ -137,7 +148,7 @@ void RayTra::applyTransform(Surface* s) {
 		s->trans(T._current, T._currentInv);
 	}
 }
-void RayTra::setOption(int option, int setting) {
+void RayTra::setOption(int option, int setting, int setting2) {
 	switch (option) {
 	case SHADOWS:
 		area = setting;
@@ -151,6 +162,7 @@ void RayTra::setOption(int option, int setting) {
 	case SAMPLES:
 		if (setting != 0) {
 			samples = setting;
+			sample_type = setting2;
 		}
 		break;
 	case RUSSIAN:
@@ -399,14 +411,14 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 	}
 
 	Sampler master(width, height, Sampler::INTEGRAL, Sampler::SQUARE, ((order == HILBERT) ? (Sampler::HILBERT) : 0), Sampler::CENTER, false);
-	Sampler ms_sampler(samples, samples, Sampler::FRACTIONAL, Sampler::SQUARE, Sampler::LINEAR, ((samples > 1) ? (Sampler::STRATIFIED) : (Sampler::CENTER)), true);
+	Sampler ms_sampler(samples, samples, Sampler::FRACTIONAL, Sampler::SQUARE, Sampler::LINEAR, ((samples > 1) ? (sample_type) : (Sampler::CENTER)), true);
 	Sampler lens_sampler, light_sampler;
 	
 	std::cout << area << std::endl;
 	if (field == OFF) lens_sampler = Sampler(samples, samples);
-	else lens_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((circular) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1)?(Sampler::STRATIFIED):(Sampler::CENTER)), true);
+	else lens_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((circular) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1)?(sample_type):(Sampler::CENTER)), true);
 	if (area <= 1) light_sampler = Sampler(samples, samples);
-	else light_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((area == SOFTCIRCLE) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1) ? (Sampler::STRATIFIED) : (Sampler::CENTER)), true);
+	else light_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((area == SOFTCIRCLE) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1) ? (sample_type) : (Sampler::CENTER)), true);
 	Sampler2d master_pixels = master.genPoints();
 
 	int counter = 0;
@@ -424,8 +436,8 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 			Sampler2d l_sample = light_sampler.genPoints();
 			Sampler2d s_sample = lens_sampler.genPoints();
 			Sampler2d ms_sample = ms_sampler.genPoints();
-			Sampler::shuffle(s_sample);
-			Sampler::shuffle(l_sample);
+			Sampler::shuffle(s_sample, true);
+			Sampler::shuffle(l_sample, true);
 
 			int current_pixel = j * width + i;
 			int x = master_pixels[current_pixel][0];

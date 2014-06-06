@@ -43,9 +43,7 @@ void Transform::scale(double s) {
 
 void Transform::scale(Vector3d xyz) {
 	Matrix4d temp(Matrix4d::Identity()); temp.diagonal() << xyz(0), xyz(1), xyz(2), 1.0;
-	std::cout << temp << std::endl;
 	Matrix4d tempInv(Matrix4d::Identity()); tempInv.diagonal() << 1 / xyz(0), 1 / xyz(1), 1 / xyz(2), 1.0;
-	std::cout << tempInv << std::endl;
 	_current = temp * _current;
 	_currentInv *= tempInv;
 }
@@ -60,7 +58,6 @@ void Transform::translate(Vector3d xyz) {
 
 void Transform::rotate(Vector3d axis, double rot) {
 	rot = rot * M_PI / 180;
-	std::cout << rot << std::endl;
 	axis.normalize();
 	Matrix4d t(Matrix4d::Identity()), tInv(Matrix4d::Identity());
 	t.block<3, 3>(0, 0) = AngleAxisd(rot, axis).toRotationMatrix();

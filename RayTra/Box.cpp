@@ -62,15 +62,11 @@ Box Box::transform(Matrix4d& m) {
 		, MAX[0], MAX[1], MIN[2], 1.0
 		, MAX[0], MAX[1], MAX[2], 1.0;
 	Eigen::Matrix<double, 4, 8> points = temp.transpose();
-	std::cout << points << std::endl;
 	Eigen::Matrix<double, 4, 8> result = m * points;
-	std::cout << result << std::endl;
 	Array4d min = result.rowwise().minCoeff();
 	Array4d max = result.rowwise().maxCoeff();
-	std::cout << min << " " << max << std::endl;
 	_b.set(Vector3d(min(0), min(1), min(2)), Vector3d(max(0), max(1), max(2)));
 
-	std::cout << _b << std::endl;
 	return _b;
 }
 

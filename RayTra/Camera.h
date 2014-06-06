@@ -14,7 +14,7 @@
 class Camera {
 public:
 	Camera(Vector3d pos, Vector3d at, Vector3d up, double d, double iw, double ih, int pw, int ph, double fstop);
-	void generateRay(Vector2d p, double i, double j, Ray& r);
+	void generateRay(const Vector2d& p, double i, double j, Ray& r);
 	virtual ~Camera();
 	Vector3d _e;
 	Vector3d _u;
