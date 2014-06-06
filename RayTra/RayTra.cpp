@@ -483,7 +483,7 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 	clock_t master_stop = clock();
 	double master_run = (double) (master_stop - master_start) / CLOCKS_PER_SEC;
 	{
-		std::cout << "\r\rprogress: 100%, " << Ray::count << " rays at " << ((double) Ray::count / master_run) << " r/s" << endl;
+		std::cout << "\r\rprogress: 100%, " << Ray::count << " rays at " << ((double) Ray::count / master_run) << " r/s\t\t\t" << endl;
 		std::cout.flush();
 	}
 	return;

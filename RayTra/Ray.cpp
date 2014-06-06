@@ -36,7 +36,6 @@ eye(e), dir(d), ref(r), alpha(a), type(t) {
 	sign.resize(3);
 	inv = dir.cwiseInverse();
 	reSign();
-	v = d.cross(e);
 }
 
 Ray::Ray() {

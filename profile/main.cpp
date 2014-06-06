@@ -7,10 +7,14 @@
 #include <cmath>
 #include <Eigen/Core>
 #include <cmath>
+#include <boost/math/distributions/students_t.hpp>
 
 #define M_PI 3.14159265358979323846
 
+using namespace boost::math;
 using namespace std;
+
+
 
 bool _startup(const char* lpAppName, int argc, char* argv) {
 	STARTUPINFO si;
@@ -75,6 +79,7 @@ int main(int argc, char** argv) {
 		strcpy_s(cmd2, s2.length() + 1, s2.c_str());
 
 		for (int i = 0; i < n; i++) {
+			std::cout << argv[3] << ": run " << i << endl << endl;
 			clock_t start = clock();
 			_startup(argv[3], argc - 4, cmd1);
 			clock_t stop = clock();
@@ -82,6 +87,7 @@ int main(int argc, char** argv) {
 		}
 
 		for (int i = 0; i < n; i++) {
+			std::cout << argv[4] << ": run " << i << endl << endl;
 			clock_t start = clock();
 			_startup(argv[4], argc - 4, cmd2);
 			clock_t stop = clock();
@@ -100,21 +106,23 @@ int main(int argc, char** argv) {
 		double var_2 = times_2.sum() / (n - 1);
 		std::cout << argv[4] << " mean: " << mean_2 / CLOCKS_PER_SEC << " stdev: " << sqrt(var_2) / CLOCKS_PER_SEC << endl;
 
-		double s1n1 = var_1 / (double) n;
-		double s2n2 = var_2 / (double) n;
-		double sx1x2 = sqrt(s1n1 + s2n2);
+		double sx1x2 = sqrt((var_1 + var_2) / n);
 		double t = (mean_1 - mean_2) / sx1x2;
-		double df = (s1n1 + s2n2) * (s1n1 + s2n2) / ((s1n1 * s1n1) / (n - 1) + (s2n2 * s2n2) / (n - 1));
+		double df = (var_1 + var_2) * (var_1 + var_2) * (n - 1) / (var_1 * var_1 + var_2 * var_2);
 
 		std::cout << "t: " << t << " df: " << df << std::endl;
 
-		double a = tgamma((df + 1) / 2);
-		double b = sqrt(df * M_PI) * tgamma(df / 2);
-		double c = (1 + t * t / df);
-		double d = -1. * (df + 1) / 2;
-		double ft = (a / b) * pow(c, d);
+		students_t dist(df);
+		double q = cdf(complement(dist, abs(t)));
+		double qless = cdf(dist, t);
+		double qmore = cdf(complement(dist, t));
+		double alpha = 0.05;
 
-		std::cout << "f(t) = " << ft << std::endl;
+		std::cout << "probability difference due to chance: " << q << endl;
+		std::cout << argv[3] << " != " << argv[4] << ((q > (alpha / 2)) ? (" REJECTED (NO)") : (" NOT REJECTED (YES)")) << endl;
+		std::cout << argv[3] << " < " << argv[4] << ((qless > alpha) ? (" REJECTED (NO)") : (" NOT REJECTED (YES)")) << endl;
+		std::cout << argv[3] << " > " << argv[4] << ((qmore > alpha) ? (" REJECTED (NO)") : (" NOT REJECTED (YES)")) << endl;
+
 	}
 	else {
 		std::cout << "running " << argv[2] << " " << argv[1] << " times." << endl;

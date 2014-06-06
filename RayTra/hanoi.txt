@@ -4,15 +4,15 @@ a 1 -1 -2
 u 0 1 0
 d 114
 i 40 30
-p 40 30
+p 200 150
 f 22
 c
 
 o
-ms 2 4
+ms 3 4
 s 3
-gi 2
-rc 2
+gi 3
+rc 3
 rf 0
 c 1
 dof 1
