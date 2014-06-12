@@ -23,7 +23,7 @@ BVH::BVH(Group* g) {
 	size_t N = s.size();
 	if (N == 0) {
 		return;
-		_b = Box();
+		_b = BBox();
 	}
 	if (N == 1) {
 		_l = s[0];
@@ -35,7 +35,7 @@ BVH::BVH(Group* g) {
 	}
 	else {
 		double m = 0;
-		Box b = g->_b;
+		BBox b = g->_b;
 		Vector3d diff = b.max() - b.min();
 		int axis;
 		double range = diff.maxCoeff(&axis);
@@ -78,20 +78,12 @@ POSSIBLE?: turn into Heap instead of tree
 bool BVH::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	if (!hitbox(ray, t0, t1)) return false;
 	if (_trans) {
-		Vector3d oEye = ray.eye;
-		Vector3d oDir = ray.dir;
-		Vector3d oInv = ray.inv;
-		std::vector<int> oSign = ray.sign;
-		ray.eye = apply(_mInv, oEye, 1);
-		ray.dir = apply(_mInv, oDir, 0);
-		ray.reSign();
-		bool temp = hit(ray, t0, t1, rec);
-		ray.eye = oEye;
-		ray.dir = oDir;
-		ray.inv = oInv;
-		ray.sign = oSign;
+		Ray tRay(apply(_mInv, ray.eye, 1), apply(_mInv, ray.dir, 0), ray.ref, ray.alpha, Ray::VIEW);
+		Ray::count -= 1;
+		bool temp = hit(tRay, t0, t1, rec);
 		if (temp) {
 			rec.n = apply(_mTrans, rec.n, 0);
+			rec.n.normalize();
 		}
 		return temp;
 	}
@@ -140,16 +132,19 @@ gains of 25% in paper
 */
 bool BVH::hitbox(Ray& ray, double t0, double t1) {
 	double tmin, tmax, tymin, tymax, tzmin, tzmax;
-	
-	tmin = (_b.b[ray.sign[0]][0] - ray.eye[0]) * ray.inv[0];
-	tmax = (_b.b[1-ray.sign[0]][0] - ray.eye[0]) * ray.inv[0];
-	tymin = (_b.b[ray.sign[1]][1] - ray.eye[1]) * ray.inv[1];
-	tymax = (_b.b[1-ray.sign[1]][1] - ray.eye[1]) * ray.inv[1];
+	Vector3d e = ray.eye;
+	Vector3d i = ray.inv;
+	Vector3i s = ray.sign;
+
+	tmin = (_b.b[s[0]][0] - e[0]) * i[0];
+	tmax = (_b.b[1-s[0]][0] - e[0]) * i[0];
+	tymin = (_b.b[s[1]][1] - e[1]) * i[1];
+	tymax = (_b.b[1-s[1]][1] - e[1]) * i[1];
 	if ((tmin > tymax) || (tymin > tmax)) return false;
 	if (tymin > tmin) tmin = tymin;
 	if (tymax < tmax) tmax = tymax;
-	tzmin = (_b.b[ray.sign[2]][2] - ray.eye[2]) * ray.inv[2];
-	tzmax = (_b.b[1-ray.sign[2]][2] - ray.eye[2]) * ray.inv[2];
+	tzmin = (_b.b[s[2]][2] - e[2]) * i[2];
+	tzmax = (_b.b[1-s[2]][2] - e[2]) * i[2];
 	if ((tmin > tzmax) || (tzmin > tmax)) return false;
 	if (tzmin > tmin) tmin = tzmin;
 	if (tzmax < tmax) tmax = tzmax;

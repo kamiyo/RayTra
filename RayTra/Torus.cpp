@@ -93,16 +93,19 @@ bool Torus::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 
 bool Torus::hitbox(Ray& ray, double t0, double t1) {
 	double tmin, tmax, tymin, tymax, tzmin, tzmax;
+	Vector3i s = ray.sign;
+	Vector3d i = ray.inv;
+	Vector3d e = ray.eye;
 
-	tmin = (_b.b[ray.sign[0]][0] - ray.eye[0]) * ray.inv[0];
-	tmax = (_b.b[1 - ray.sign[0]][0] - ray.eye[0]) * ray.inv[0];
-	tymin = (_b.b[ray.sign[1]][1] - ray.eye[1]) * ray.inv[1];
-	tymax = (_b.b[1 - ray.sign[1]][1] - ray.eye[1]) * ray.inv[1];
+	tmin = (_b.b[s[0]][0] - e[0]) * i[0];
+	tmax = (_b.b[1 - s[0]][0] - e[0]) * i[0];
+	tymin = (_b.b[s[1]][1] - e[1]) * i[1];
+	tymax = (_b.b[1 - s[1]][1] - e[1]) * i[1];
 	if ((tmin > tymax) || (tymin > tmax)) return false;
 	if (tymin > tmin) tmin = tymin;
 	if (tymax < tmax) tmax = tymax;
-	tzmin = (_b.b[ray.sign[2]][2] - ray.eye[2]) * ray.inv[2];
-	tzmax = (_b.b[1 - ray.sign[2]][2] - ray.eye[2]) * ray.inv[2];
+	tzmin = (_b.b[s[2]][2] - e[2]) * i[2];
+	tzmax = (_b.b[1 - s[2]][2] - e[2]) * i[2];
 	if ((tmin > tzmax) || (tzmin > tmax)) return false;
 	if (tzmin > tmin) tmin = tzmin;
 	if (tzmax < tmax) tmax = tzmax;

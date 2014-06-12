@@ -20,7 +20,7 @@ public:
 		Vector3d eye;
 		Vector3d dir;
 		Vector3d inv;
-		std::vector<int> sign;
+		Vector3i sign;
 		int type;
 		static const int VIEW = 0, SHAD = 1, DIFF = 2, OCCL = 3;
 		std::vector<double> ref;

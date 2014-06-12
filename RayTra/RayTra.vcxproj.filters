@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Box.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BVH.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -105,11 +102,11 @@
     <ClInclude Include="Sampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BVH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -203,12 +200,18 @@
     <ClCompile Include="Sampler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\x64\Release\scene.txt">
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="hanoi.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="spheres.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

@@ -33,7 +33,6 @@ unsigned long Ray::count = 0;
 Ray::Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a, int t):
 eye(e), dir(d), ref(r), alpha(a), type(t) {
 	Ray::count++;
-	sign.resize(3);
 	inv = dir.cwiseInverse();
 	reSign();
 }
@@ -42,9 +41,7 @@ Ray::Ray() {
 }
 
 void Ray::reSign() {
-	for (int i = 0; i < 3; i++) {
-		sign[i] = (inv[i] < 0);
-	}
+	sign = (inv.array() < 0);
 }
 
 Ray::~Ray() {

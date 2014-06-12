@@ -138,7 +138,7 @@ Sampler2d Sampler::genPoints() {
 			else if (_shape == CIRCLE) {
 				for (int q = 0; q < _y; q++) {
 					for (int p = 0; p < _x; p++) {
-						Vector2d temp(((double) p + 0.5), ((double) q + 0.5));
+						Vector2d temp((double) p, (double) q);
 						temp.array() /= xy.array();
 						DISK(temp[0], temp[1], temp);
 						out[q * _x + p] = temp / 2.;
@@ -171,7 +171,7 @@ Sampler2d Sampler::genPoints() {
 			else if (_shape == CIRCLE) {
 				for (int q = 0; q < _y; q++) {
 					for (int p = 0; p < _x; p++) {
-						Vector2d temp(((double) p + 0.5), ((double) q + 0.5));
+						Vector2d temp((double) p, (double) q);
 						temp.array() /= xy.array();
 						DISK(temp[0], temp[1], temp);
 						out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp / 2.;

@@ -11,7 +11,7 @@
 #include "Transform.h"
 #include "Material.h"
 #include "Ray.h"
-#include "Box.h"
+#include "BBox.h"
 
 class Surface {
 public:
@@ -26,9 +26,9 @@ public:
 	Matrix4d _mTrans;
 	Material* _m;
 	bool _trans;
-	Box _b;
+	BBox _b;
 	int _type;
-	enum { PLANE, SPHERE, CYLINDER, CONE, TORUS, TRIANGLE, FACE, CIRCLE, BOVOH, INSTANCE };
+	enum { PLANE, SPHERE, CYLINDER, CONE, TORUS, TRIANGLE, FACE, CIRCLE, BOX, BOVOH, INSTANCE };
 };
 
 #endif /* SURFACE_H_ */

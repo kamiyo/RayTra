@@ -36,13 +36,14 @@ void Parser::parse(const char *file) {
 	bool isSphere = false;
 	bool isTriFan = false;
 	bool isPlane = false;
+	bool isCuboid = false;
 	int oddeven = 0;
 	string matString = "";
 	Vector3d nInfVec(nINF, nINF, nINF);
 	/* cam variables, initialized */
-	Vector3d ce, ca, cu;
-	ce.setZero(); ca.setZero(); cu.setZero();
-	double cf, iw, ih, cN = nINF; int pw, ph;
+	Vector3d ce, ca, cu, cd, fp, fd;
+	ce = ca = cu = cd = fp = fd = Vector3d(nINF, nINF, nINF);
+	double cf = nINF, fl = nINF, iw, ih, cN = nINF; int pw, ph;
 
 	/* mat variables, initialized */
 	Vector3d ka, kd, ks, ki, alpha;
@@ -54,7 +55,11 @@ void Parser::parse(const char *file) {
 	double ltheta, lphi, lp, lrad;
 
 	/*vertex variables*/
-	Vector3d va, vb, vc, vd;
+	Vector3d va, vb, vc, vd, ve, vf, vg, vh;
+
+	/*position, radius, height*/
+	Vector3d pos, norm; double rad, Rad, height, left, right;
+	char opt;
 
 	for (int line = 1; _in.good(); line++) {
 		_in.getline(buffer, 1024);
@@ -80,17 +85,29 @@ void Parser::parse(const char *file) {
 			continue;
 		}
 		else if (isCam) {
-			if (cmd == "e" || cmd == "eye" || cmd == "pos") {
+			if (cmd == "ep" || cmd == "eye" || cmd == "pos") {
 				_iss >> ce;
 			}
-			else if (cmd == "a" || cmd == "at" || cmd == "dir") {
+			else if (cmd == "ip" || cmd == "at") {
 				_iss >> ca;
+			}
+			else if (cmd == "id" || cmd == "dir") {
+				_iss >> cd;
+			}
+			else if (cmd == "fp" || cmd == "focal") {
+				_iss >> fp;
+			}
+			else if (cmd == "fd") {
+				_iss >> fd;
 			}
 			else if (cmd == "u" || cmd == "up") {
 				_iss >> cu;
 			}
-			else if (cmd == "focal" || cmd == "d" || cmd == "distance") {
+			else if (cmd == "d" || cmd == "distance") {
 				_iss >> cf;
+			}
+			else if (cmd == "fl" || cmd == "focal length") {
+				_iss >> fl;
 			}
 			else if (cmd == "i" || cmd == "image") {
 				_iss >> iw >> ih;
@@ -103,7 +120,7 @@ void Parser::parse(const char *file) {
 			}
 			else if (cmd == "c" || cmd == "camera" || cmd == "}") {
 				isCam = false;
-				camera(ce, ca, cu, cf, iw, ih, pw, ph, cN);
+				camera(ce, ca, cd, cu, fp, fd, cf, fl, iw, ih, pw, ph, cN);
 			}
 		}
 		else if (isOpt) {
@@ -348,22 +365,128 @@ void Parser::parse(const char *file) {
 			}
 		}
 		else if (isSphere) {
-
+			if (cmd == "p" || cmd == "pos") {
+				_iss >> pos;
+			}
+			else if (cmd == "r" || cmd == "rad") {
+				_iss >> rad;
+			}
+			else if (cmd == "s" || cmd == "sphere" || cmd == "}") {
+				sphere(pos, rad);
+				isSphere == false;
+			}
 		}
 		else if (isCyl) {
-
+			if (cmd == "r" || cmd == "rad") {
+				_iss >> rad;
+			}
+			else if (cmd == "h" || cmd == "height") {
+				_iss >> height;
+			}
+			else if (cmd == "y" || cmd == "cyl" || cmd == "}") {
+				cylinder(rad, height, opt);
+				isCyl = false;
+			}
 		}
 		else if (isCirc) {
-
+			if (cmd == "p" || cmd == "pos") {
+				_iss >> pos;
+			}
+			else if (cmd == "n" || cmd == "norm") {
+				_iss >> norm;
+			}
+			else if (cmd == "r" || cmd == "rad") {
+				_iss >> rad;
+			}
+			else if (cmd == "i" || cmd == "circle" || cmd == "}") {
+				circle(pos, norm, rad);
+				isCirc = false;
+			}
 		}
 		else if (isTor) {
-
+			if (cmd == "R") {
+				_iss >> Rad;
+			}
+			else if (cmd == "r") {
+				_iss >> rad;
+			}
+			else if (cmd == "u" || cmd == "torus" || cmd == "}") {
+				torus(Rad, rad);
+				isTor = false;
+			}
 		}
 		else if (isPlane) {
-
+			if (cmd == "p" || cmd == "pos") {
+				_iss >> pos;
+			}
+			else if (cmd == "n" || cmd == "norm") {
+				_iss >> norm;
+			}
+			else if (cmd == "p" || cmd == "plane" || cmd == "}") {
+				plane(norm, pos);
+				isPlane = false;
+			}
 		}
 		else if (isCone) {
-
+			if (cmd == "left" || cmd == "l") {
+				_iss >> left;
+			}
+			else if (cmd == "right" || cmd == "r") {
+				_iss >> right;
+			}
+			else if (cmd == "n" || cmd == "cone" || cmd == "}") {
+				cone(left, right, opt);
+				isCone = false;
+			}
+		}
+		else if (isCuboid) {
+			if (cmd == "v" || cmd == "vertex") {
+				if (va == nInfVec) {
+					_iss >> va;
+				}
+				else if (vb == nInfVec) {
+					_iss >> vb;
+				}
+				else if (vc == nInfVec) {
+					_iss >> vc;
+				}
+				else if (vd == nInfVec) {
+					_iss >> vd;
+				}
+				else if (ve == nInfVec) {
+					_iss >> ve;
+				}
+				else if (vf == nInfVec) {
+					_iss >> vf;
+				}
+				else if (vg == nInfVec) {
+					_iss >> vg;
+				}
+				else if (vh == nInfVec) {
+					_iss >> vh;
+				}
+			}
+			else if (cmd == "cuboid" || cmd == "b" || cmd == "box" || cmd == "}") {
+				// top
+				triangle(va, vb, vc);
+				triangle(va, vc, vd);
+				// bottom
+				triangle(vf, ve, vh);
+				triangle(vf, vh, vg);
+				// front
+				triangle(vd, vc, vg);
+				triangle(vd, vg, vh);
+				// back
+				triangle(vb, va, ve);
+				triangle(vb, ve, vf);
+				// right
+				triangle(va, vd, vh);
+				triangle(va, vh, ve);
+				// left
+				triangle(vc, vb, vf);
+				triangle(vc, vf, vg);
+				isCuboid = false;
+			}
 		}
 		else if (cmd == "push") {
 			T.push();
@@ -392,70 +515,138 @@ void Parser::parse(const char *file) {
 			T.translate(v);
 		}
 		else if (cmd == "s" || cmd == "sphere") {
-			Vector3d pos; double r;
-			_iss >> pos >> r;
-			sphere(pos, r);
+			Vector3d p = nInfVec; double r;
+			_iss >> p >> r;
+			if (p == nInfVec) {
+				isSphere = true;
+				p == nInfVec; r = nINF;
+			}
+			else {
+				sphere(p, r);
+			}
 		}
 		else if (cmd == "cone" || cmd == "n") {
-			double l = 0, u = 0;
+			double l = nINF, u = 0;
 			_iss >> l >> u;
-			if (l > u) {
-				std::swap(l, u);
+			if (l == nINF) {
+				isCone = true;
+				left = right = nINF;
+				opt = ' ';
 			}
-			cone(l, u, ' ');
+			else {
+				if (l > u) {
+					std::swap(l, u);
+				}
+				cone(l, u, ' ');
+			}
 		}
-		else if (cmd == "np" || cmd == "conep" || cmd == "cone+") {
-			double l = 0, u = 0;
+		else if (cmd == "np" || cmd == "conep" || cmd == "cone+" || cmd == "n+") {
+			double l = nINF, u = 0;
 			_iss >> l >> u;
-			if (l > u) {
-				std::swap(l, u);
+			if (l == nINF) {
+				isCone = true;
+				left = right = nINF;
+				opt = 'p';
 			}
-			cone(l, u, 'p');
+			else {
+				if (l > u) {
+					std::swap(l, u);
+				}
+				cone(l, u, 'p');
+			}
 		}
-		else if (cmd == "nn" || cmd == "conen" || cmd == "cone-") {
-			double l = 0, u = 0;
+		else if (cmd == "nn" || cmd == "conen" || cmd == "cone-" || cmd == "n-") {
+			double l = nINF, u = 0;
 			_iss >> l >> u;
-			if (l > u) {
-				std::swap(l, u);
+			if (l == nINF) {
+				isCone = true;
+				left = right = nINF;
+				opt = 'n';
 			}
-			cone(l, u, 'n');
+			else {
+				if (l > u) {
+					std::swap(l, u);
+				}
+				cone(l, u, 'n');
+			}
 		}
-		else if (cmd == "nb" || cmd == "coneb" || cmd == "cone+-") {
-			double l = 0, u = 0;
+		else if (cmd == "nb" || cmd == "coneb" || cmd == "cone+-" || cmd == "n+-") {
+			double l = nINF, u = 0;
 			_iss >> l >> u;
-			if (l > u) {
-				std::swap(l, u);
+			if (l == nINF) {
+				isCone = true;
+				left = right = nINF;
+				opt = 'b';
 			}
-			cone(l, u, 'b');
+			else {
+				if (l > u) {
+					std::swap(l, u);
+				}
+				cone(l, u, 'b');
+			}
 		}
 		else if (cmd == "torus" || cmd == "u") {
-			double R, r;
+			double R, r; R = nINF;
 			_iss >> R >> r;
-			torus(R, r);
+			if (R == nINF) {
+				isTor = true;
+				Rad = rad = nINF;
+			}
+			else {
+				torus(R, r);
+			}
 		}
 		else if (cmd == "y" || cmd == "cylinder" || cmd == "cyl") {
 			double r, h;
-			r = 1.0; h = INF;
+			r = nINF; h = INF;
 			_iss >> r >> h;
-			cylinder(r, h, ' ');
+			if (r == nINF) {
+				isCyl = true;
+				rad = height = nINF;
+				opt = ' ';
+			}
+			else {
+				cylinder(r, h, ' ');
+			}
 		}
-		else if (cmd == "yp" || cmd == "cylinder+") {
+		else if (cmd == "yp" || cmd == "cylinder+" || cmd == "y+") {
 			double r, h;
-			r = 1.0; h = INF;
+			r = nINF; h = INF;
 			_iss >> r >> h;
-			cylinder(r, h, 'p');
+			if (r == nINF) {
+				isCyl = true;
+				rad = height = nINF;
+				opt = 'p';
+			}
+			else {
+				cylinder(r, h, 'p');
+			}
 		}
-		else if (cmd == "yn" || cmd == "cylinder-") {
+		else if (cmd == "yn" || cmd == "cylinder-" || cmd == "y-") {
 			double r, h;
-			r = 1.0; h = INF;
+			r = nINF; h = INF;
 			_iss >> r >> h;
-			cylinder(r, h, 'n');
+			if (r == nINF) {
+				isCyl = true;
+				rad = height = nINF;
+				opt = 'n';
+			}
+			else {
+				cylinder(r, h, 'n');
+			}
 		}
-		else if (cmd == "yb" || cmd == "cylinder+-") {
+		else if (cmd == "yb" || cmd == "cylinder+-" || cmd == "y+-") {
 			double r, h;
-			r = 1.0; h = INF;
+			r = nINF; h = INF;
 			_iss >> r >> h;
-			cylinder(r, h, 'b');
+			if (r == nINF) {
+				isCyl = true;
+				rad = height = nINF;
+				opt = 'b';
+			}
+			else {
+				cylinder(r, h, 'b');
+			}
 		}
 		else if (cmd == "t" || cmd == "tri" || cmd == "triangle") {
 			Vector3d a, b, c; a = nInfVec;
@@ -477,7 +668,7 @@ void Parser::parse(const char *file) {
 			}
 			else {
 				triangle(a, b, c);
-				triangle(c, b, d);
+				triangle(a, c, d);
 			}
 		}
 		else if (cmd == "tstrip" || cmd == "tristrip" || cmd == "ts") {
@@ -490,9 +681,15 @@ void Parser::parse(const char *file) {
 			va = vb = vc = nInfVec;
 		}
 		else if (cmd == "p" || cmd == "plane") {
-			Vector3d n; Vector3d p;
+			Vector3d n = nInfVec, p;
 			_iss >> n >> p;
-			plane(n, p);
+			if (n == nInfVec) {
+				isPlane == true;
+				pos = norm = nInfVec;
+			}
+			else {
+				plane(n, p);
+			}
 		}
 		else if (cmd == "c" || cmd == "camera") {
 			isCam = true;
@@ -512,10 +709,57 @@ void Parser::parse(const char *file) {
 			lpos.setZero(); ldir.setZero(); lrgb.setOnes(); latten.setZero(); latten[0] = 1;
 			ltheta = 0; lphi = 0; lp = 0; lrad = 0;
 		}
+		else if (cmd == "b" || cmd == "box" || cmd == "cuboid") {
+			Vector3d a, b, c, d, e, f, g, h; a = b = c = d = e = f = g = h = nInfVec;
+			if (a == nInfVec) {
+				isCuboid = true;
+				va = vb = vc = vd = vf = vg = vh = nInfVec;
+			}
+			else {
+				if (c == nInfVec) {
+					Vector3d min = a, max = b;
+					d = b;
+					f = a;
+					a << max[0], max[1], min[2];
+					b << min[0], max[1], min[2];
+					c << min[0], max[1], max[2];
+
+					e << max[0], min[1], min[2];
+					g << min[0], min[1], max[2];
+					h << max[0], min[1], max[2];
+
+				}
+				// min and max
+				// top
+				triangle(a, b, c);
+				triangle(a, c, d);
+				// bottom
+				triangle(f, e, h);
+				triangle(f, h, g);
+				// front
+				triangle(d, c, g);
+				triangle(d, g, h);
+				// back
+				triangle(b, a, e);
+				triangle(b, e, f);
+				// right
+				triangle(a, d, h);
+				triangle(a, h, e);
+				// left
+				triangle(c, b, f);
+				triangle(c, f, g);
+			}
+		}
 		else if (cmd == "i" || cmd == "cir" || cmd == "circle") {
-			Vector3d pos, norm; double r;
-			_iss >> pos >> norm >> r;
-			circle(pos, norm, r);
+			Vector3d p, n; double r = nINF;
+			_iss >> p >> n >> r;
+			if (r == nINF) {
+				isCirc = true;
+				pos = norm = nInfVec; rad = nINF;
+			}
+			else {
+				circle(p, n, r);
+			}
 		}
 		else if (cmd == "o" || cmd == "options") {
 			isOpt = true;

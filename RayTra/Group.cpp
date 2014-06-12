@@ -8,7 +8,7 @@
 #include "Group.h"
 
 Group::Group() {
-	Box b;
+	BBox b;
 	_b = b;
 
 }
@@ -22,12 +22,14 @@ bool Group::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	bool hit = false;
 	for (int i = 0; i < (int)_s.size(); i++) {
 		hitRecord temp;
-//		std::cout << ray.eye << std::endl;
 		if (_s[i]->_hit(ray, t0, t1, temp)) {
 			hit = true;
 			rec = temp;
 			t1 = rec.t;
 		}
+	}
+	if (hit) {
+		if (rec.t < t0 || rec.t > t1) return false;
 	}
 	return hit;
 }

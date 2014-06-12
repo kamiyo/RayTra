@@ -1,11 +1,11 @@
 /*
- * Box.cpp
+ * BBox.cpp
  *
  *  Created on: Dec 18, 2011
  *      Author: kamiyo
  */
 
-#include "Box.h"
+#include "BBox.h"
 /*
 VARS
 vec		b[2]	(minX,minY,minZ) and (maxX,maxY,maxZ) of bounding box
@@ -15,7 +15,7 @@ vec		b[2]	(minX,minY,minZ) and (maxX,maxY,maxZ) of bounding box
 /*
 Intialize to inf
 */
-Box::Box() {
+BBox::BBox() {
 	MIN.setZero(); 
 	MAX.setZero(); 
 	MAX << nINF, nINF, nINF;
@@ -23,35 +23,35 @@ Box::Box() {
 	_m.setZero();
 }
 
-Box::Box(Vector3d min, Vector3d max) {
+BBox::BBox(Vector3d min, Vector3d max) {
 	MIN.setZero(); MAX.setZero();
 	set(min, max);
 }
 
-Box::~Box() {
+BBox::~BBox() {
 	// TODO Auto-generated destructor stub
 }
 
-Vector3d& Box::min() {
+Vector3d& BBox::min() {
 	return MIN;
 }
 
-Vector3d& Box::max() {
+Vector3d& BBox::max() {
 	return MAX;
 }
 
-Box Box::combine(Box& b1, Box& b2) {
-	Box _b(b1.MIN.cwiseMin(b2.MIN), b1.MAX.cwiseMax(b2.MAX));
+BBox BBox::combine(BBox& b1, BBox& b2) {
+	BBox _b(b1.MIN.cwiseMin(b2.MIN), b1.MAX.cwiseMax(b2.MAX));
 	return _b;
 }
 
-Box Box::combine(Box& rhs) {
-	Box _b(MIN.cwiseMin(rhs.MIN), MAX.cwiseMax(rhs.MAX));
+BBox BBox::combine(BBox& rhs) {
+	BBox _b(MIN.cwiseMin(rhs.MIN), MAX.cwiseMax(rhs.MAX));
 	return _b;
 }
 
-Box Box::transform(Matrix4d& m) {
-	Box _b;
+BBox BBox::transform(Matrix4d& m) {
+	BBox _b;
 	Eigen::Matrix<double, 8, 4> temp;
 	temp << MIN[0], MIN[1], MIN[2], 1.0
 		, MIN[0], MIN[1], MAX[2], 1.0
@@ -70,20 +70,20 @@ Box Box::transform(Matrix4d& m) {
 	return _b;
 }
 
-// Box::set also calculates midpoint
-void Box::set(Vector3d min, Vector3d max) {
+// BBox::set also calculates midpoint
+void BBox::set(Vector3d min, Vector3d max) {
 	MIN = min;
 	MAX = max;
 	_m = (MIN + MAX) / 2;
 }
 
-bool Box::operator==(const Box& rhs) {
+bool BBox::operator==(const BBox& rhs) {
 	return ((MIN.array() == rhs.MIN.array()).all() && (MAX.array() == rhs.MAX.array()).all());
 }
-bool Box::operator!=(const Box& rhs) {
+bool BBox::operator!=(const BBox& rhs) {
 	return ((MIN.array() != rhs.MIN.array()).all() && (MAX.array() != rhs.MAX.array()).all());
 }
 
-std::ostream &operator<<(std::ostream &os, Box &b) {
+std::ostream &operator<<(std::ostream &os, BBox &b) {
 	return os << "<" << b.MIN << "> <" << b.MAX << ">";
 }

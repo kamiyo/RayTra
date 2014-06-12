@@ -103,12 +103,17 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 			double fall = _l[j]->getFalloff(p);
 			
 			if ((fall != 0 && !s->_hit(sRay, 0.0001, 1, srec)) || srec.m == NULL || _shadows == false) {
+				Vector3d nn = n;
+				if (nd < 0) {
+					nd = -nd;
+					nn = -nn;
+				}
 				Vector3d I = _l[j]->_rgb;
 				l = l.normalized();
 				Vector3d h = (l.normalized() + d).normalized();
-				double nl = n.dot(l);
-				double nh = n.dot(h);
-				double dh = n.dot(h);
+				double nl = nn.dot(l);
+				double nh = nn.dot(h);
+				double dh = nn.dot(h);
 
 				/*double g = std::min((double)1.0, std::min(2 * nh * nd / dh, 2 * nh * nl / dh));
 				double alpha = acos(nh);

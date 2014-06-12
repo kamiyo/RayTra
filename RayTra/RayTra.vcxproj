@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Box.h" />
+    <ClInclude Include="BBox.h" />
     <ClInclude Include="BVH.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Circle.h" />
@@ -51,7 +51,7 @@
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Box.cpp" />
+    <ClCompile Include="BBox.cpp" />
     <ClCompile Include="BVH.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Circle.cpp" />
@@ -87,6 +87,7 @@
   <ItemGroup>
     <Text Include="..\x64\Release\scene.txt" />
     <Text Include="hanoi.txt" />
+    <Text Include="spheres.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3970B404-5622-4318-84F4-4418F3273300}</ProjectGuid>
@@ -205,7 +206,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>IlmImf-2_1.lib Imath-2_1.lib Iex-2_1.lib Half.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>IlmImf.lib Imath.lib Iex.lib Half.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>kernel32.lib;user32.lib;zlib.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

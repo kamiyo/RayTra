@@ -47,6 +47,7 @@ typedef Eigen::Vector2i Vector2i;
 typedef Eigen::Matrix3d Matrix3d;
 typedef Eigen::Matrix4d Matrix4d;
 typedef Eigen::Vector3d Vector3d;
+typedef Eigen::Vector3i Vector3i;
 typedef Eigen::Vector4d Vector4d;
 typedef Eigen::AngleAxisd AngleAxisd;
 typedef Eigen::Array2d Array2d;

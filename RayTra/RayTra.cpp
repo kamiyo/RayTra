@@ -42,7 +42,7 @@ void RayTra::sphere(Vector3d pos, double r) {
 	applyTransform(s);
 	_surfaces->addSurface(s);
 }
-void RayTra::triangle(Vector3d p1, Vector3d p2, Vector3d p3){
+void RayTra::triangle(Vector3d p1, Vector3d p2, Vector3d p3) {
 	Triangle* t = new Triangle(p1, p2, p3, last);
 	applyTransform(t);
 	_surfaces->addSurface(t);
@@ -96,13 +96,13 @@ void RayTra::torus(double R, double r) {
 	_surfaces->addSurface(t);
 }
 
-void RayTra::camera(Vector3d pos, Vector3d dir, Vector3d up, double d, double iw, double ih, int pw, int ph, double size){
+void RayTra::camera(Vector3d pos, Vector3d at, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double size){
 	if (size == nINF) {
 		field = false;
 	}
 	width = pw;
 	height = ph;
-	_cam = new Camera(pos, dir, up, d, iw, ih, pw, ph, size);
+	_cam = new Camera(pos, at, dir, up, fp, fd, d, fl, iw, ih, pw, ph, size);
 }
 void RayTra::pointLight(Vector3d pos, Vector3d rgb, Vector3d atten, double r){
 	LightP* l = new LightP(pos, rgb, atten, r);
@@ -416,7 +416,7 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 	
 	std::cout << area << std::endl;
 	if (field == OFF) lens_sampler = Sampler(samples, samples);
-	else lens_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((circular) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1)?(sample_type):(Sampler::CENTER)), true);
+	else lens_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((circular) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1) ? (sample_type):(Sampler::CENTER)), true);
 	if (area <= 1) light_sampler = Sampler(samples, samples);
 	else light_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((area == SOFTCIRCLE) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1) ? (sample_type) : (Sampler::CENTER)), true);
 	Sampler2d master_pixels = master.genPoints();
@@ -432,7 +432,7 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 		for (int i = 0; i < width; i++) {
 
 			Vector3d c = Vector3d::Zero();		// initialize color result vector (RGB)
-			
+
 			Sampler2d l_sample = light_sampler.genPoints();
 			Sampler2d s_sample = lens_sampler.genPoints();
 			Sampler2d ms_sample = ms_sampler.genPoints();
@@ -467,6 +467,11 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 			//glutSwapBuffers();
 #pragma omp atomic
 			counter += 1;
+#pragma omp critical
+			{
+				std::cout << "\r" << counter;
+				std::cout.flush();
+			}
 		}
 		clock_t end = clock();
 		double runtime = (double) (end - start) / CLOCKS_PER_SEC;
