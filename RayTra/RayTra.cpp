@@ -201,6 +201,9 @@ void RayTra::setOption(int option, int setting, int setting2) {
 		break;
 	}
 }
+void RayTra::invertNormal() {
+
+}
 void RayTra::parse(const char* name){
 	Parser::parse(name);
 	if (actualLights)
@@ -467,11 +470,6 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 			//glutSwapBuffers();
 #pragma omp atomic
 			counter += 1;
-#pragma omp critical
-			{
-				std::cout << "\r" << counter;
-				std::cout.flush();
-			}
 		}
 		clock_t end = clock();
 		double runtime = (double) (end - start) / CLOCKS_PER_SEC;

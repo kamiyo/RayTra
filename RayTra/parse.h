@@ -28,7 +28,7 @@ protected:
 	virtual void material(string s, Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten) {}
 	virtual void setOption(int option, int setting, int setting2 = 0) {}
 	virtual void getObj(const char *file, int smooth) {}
-
+	virtual void invertNormal() {}
 	Transform T;
 public:
 	virtual void parse(const char *file);

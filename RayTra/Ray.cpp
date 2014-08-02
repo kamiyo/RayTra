@@ -41,7 +41,7 @@ Ray::Ray() {
 }
 
 void Ray::reSign() {
-	sign = (inv.array() < 0);
+	sign = (inv.array() < 0).cast<int>();
 }
 
 Ray::~Ray() {

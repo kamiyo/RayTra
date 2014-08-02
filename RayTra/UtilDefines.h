@@ -58,11 +58,13 @@ typedef std::vector<Eigen::Vector2i, Eigen::aligned_allocator<Vector2i> > Sample
 
 typedef struct hitRecord {
 	double t;
+	std::vector<double> ts;
 	Vector3d n;
 	Material* m;
 	LightP* l;
 	Surface* s;
 } hitRecord;
+
 Vector3d randSphere();
 
 void seedRand();

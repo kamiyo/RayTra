@@ -54,6 +54,7 @@ class RayTra : public Parser {
 	virtual void material(string s);
 	virtual void getObj(const char *file, int smooth);
 	virtual void setOption(int option, int setting, int setting2 = 0);
+	virtual void invertNormal();
 	void createFace(int v1, int v2, int v3, int n1, int n2, int n3, int smooth);
 	void parseMtl(const char* s);
 	void splitStringToInt(const string& s, char d, vector<int>& e);

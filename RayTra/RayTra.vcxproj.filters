@@ -105,6 +105,12 @@
     <ClInclude Include="BBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Union.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interval.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BVH.cpp">
@@ -203,6 +209,12 @@
     <ClCompile Include="BBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Union.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Interval.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\x64\Release\scene.txt">
@@ -212,6 +224,9 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="spheres.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="pyr.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
