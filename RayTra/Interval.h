@@ -5,6 +5,13 @@
 class Interval;
 
 typedef std::vector<Interval> Intervals;
+/*
+class Intervals {
+	std::vector<Interval> _int;
+public:
+	Intervals();
+
+};*/
 
 class Interval
 {

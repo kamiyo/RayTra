@@ -51,6 +51,7 @@ Intervals Interval::unionize(Interval& other) {
 		return result;
 	}
 	else if (intersects(*this, other)) {
+		//std::cout << "intersecting" << std::endl;
 		Interval newInt(std::min(_min, other._min), std::max(_max, other._max));
 		result.push_back(newInt);
 		return result;
@@ -110,11 +111,13 @@ Intervals Interval::unionize(Intervals ints) {
 	for (int i = 0; i < ints.size(); i++) {
 		for (int j = i + 1; j < ints.size(); j++) {
 			Intervals temp = ints[i].unionize(ints[j]);
+			//std::cout << ints[i] << " " << ints[j] << std::endl;
+			//std::cout << "unioned: " << temp << std::endl;
 			if (temp.size() == 1) {
 				auto b = ints.begin() + j;
 				ints.erase(b);
 				ints[i] = temp[0];
-				j = i + 1;
+				j = i;
 			}
 		}
 	}
