@@ -23,6 +23,7 @@ public:
 	static Intervals unionize(Intervals ints);
 	static Interval intersect(Intervals ints);
 	static Intervals difference(Intervals a, Intervals b);
+	static Intervals append(Intervals a, Intervals b);
 };
 
 std::ostream &operator<<(std::ostream &out, Interval a);

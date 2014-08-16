@@ -13,6 +13,10 @@ Interval::~Interval()
 {
 }
 
+bool compare(Interval& a, Interval& b) {
+	return (a._min < b._min);
+}
+
 bool Interval::isEmpty() {
 	if (_min == INF && _max == nINF) return true;
 	else return false;
@@ -38,18 +42,38 @@ bool Interval::operator!=(Interval& rh) {
 
 Intervals Interval::unionize(Interval& other) {
 	Intervals result;
-	if (intersects(*this, other)) {
+	if (isEmpty()) {
+		result.push_back(other);
+		return result;
+	}
+	else if (other.isEmpty()) {
+		result.push_back(*this);
+		return result;
+	}
+	else if (intersects(*this, other)) {
 		Interval newInt(std::min(_min, other._min), std::max(_max, other._max));
 		result.push_back(newInt);
+		return result;
 	}
 	else {
-		result.push_back(*this);
-		result.push_back(other);
+		if (_min < other._min) {
+			result.push_back(*this);
+			result.push_back(other);
+			return result;
+		}
+		else {
+			result.push_back(other);
+			result.push_back(*this);
+			return result;
+		}
 	}
 	return result;
 }
 Interval Interval::intersect(Interval& other) {
 	Interval result;
+	if (isEmpty() || other.isEmpty()) {
+		return result;
+	}
 	if (intersects(*this, other)) {
 		result = Interval(std::max(_min, other._min), std::min(_max, other._max));
 	}
@@ -58,6 +82,13 @@ Interval Interval::intersect(Interval& other) {
 
 Intervals Interval::difference(Interval& diff) {
 	Intervals result;
+	if (isEmpty()) {
+		return result;
+	}
+	else if (diff.isEmpty()) {
+		result.push_back(*this);
+		return result;
+	}
 	if (intersects(*this, diff)) {
 		if (_min < diff._min) {
 			Interval temp(_min, diff._min);
@@ -69,12 +100,13 @@ Intervals Interval::difference(Interval& diff) {
 		}
 	}
 	else {
-		result.push_back(diff);
+		result.push_back(*this);
 	}
 	return result;
 }
 
 Intervals Interval::unionize(Intervals ints) {
+	std::sort(ints.begin(), ints.end(), compare);
 	for (int i = 0; i < ints.size(); i++) {
 		for (int j = i + 1; j < ints.size(); j++) {
 			Intervals temp = ints[i].unionize(ints[j]);
@@ -125,6 +157,9 @@ bool Interval::intersects(Interval& a, Interval& b) {
 }
 
 std::ostream &operator<< (std::ostream &o, Interval a) {
+	if (a.isEmpty()) {
+		return o << "()";
+	}
 	return o << "(" << a._min << ", " << a._max << ")";
 }
 
