@@ -25,5 +25,7 @@ public:
 	static Intervals difference(Intervals a, Intervals b);
 };
 
+std::ostream &operator<<(std::ostream &out, Interval a);
+std::ostream &operator<<(std::ostream &out, Intervals a);
 
 #endif

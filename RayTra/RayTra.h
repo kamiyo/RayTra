@@ -25,6 +25,7 @@
 #include "Hilbert.h"
 #include "Sampler.h"
 #include "UtilDefines.h"
+#include "Interval.h"
 #include <OpenEXR/ImfRgbaFile.h>
 #include <OpenEXR/ImfStringAttribute.h>
 #include <OpenEXR/ImfMatrixAttribute.h>

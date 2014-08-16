@@ -76,8 +76,20 @@ int main(int argc, char** argv) {
 		name = argv[1];
 		name = name.substr(0, name.find_last_of('.')) + ".exr";
 	} else {
-		cerr << "not correct number of arguments" << endl;
-		return 1;
+		Interval i(0, 1);
+		cout << i << endl;
+		cout << "should be true: " << Interval::intersects(i, Interval(-1, 0.5)) << endl;
+		cout << "should be (0, 0.5): " << i.intersect(Interval(-1, 0.5)) << endl;
+		cout << "should be (0.2, 0.8): " << i.intersect(Interval(0.2, 0.8)) << endl;
+		cout << "should be (0.5, 1): " << i.intersect(Interval(0.5, 4)) << endl;
+
+		Intervals j;
+		j.push_back(Interval(-1, 1));
+		j.push_back(Interval(1.5, 2));
+		j.push_back(Interval(2.5, 3));
+		Interval::unionize(j);
+		cout << j << endl;
+		exit(0);
 	}
 	tracer.parse(argv[1]);
 	width = tracer.width;

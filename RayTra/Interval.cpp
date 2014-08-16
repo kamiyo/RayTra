@@ -46,6 +46,7 @@ Intervals Interval::unionize(Interval& other) {
 		result.push_back(*this);
 		result.push_back(other);
 	}
+	return result;
 }
 Interval Interval::intersect(Interval& other) {
 	Interval result;
@@ -63,7 +64,7 @@ Intervals Interval::difference(Interval& diff) {
 			result.push_back(temp);
 		}
 		if (_max > diff._max) {
-			Interval temp(diff._max, _min);
+			Interval temp(diff._max, _max);
 			result.push_back(temp);
 		}
 	}
@@ -118,8 +119,22 @@ Intervals difference(Intervals a, Intervals b) {
 }
 
 bool Interval::intersects(Interval& a, Interval& b) {
-	if (a._max < b._min || b._max < a._min || a.isEmpty() || b.isEmpty())
+	if (a._max < b._min || b._max < a._min)
 		return false;
 	else return true;
 }
 
+std::ostream &operator<< (std::ostream &o, Interval a) {
+	return o << "(" << a._min << ", " << a._max << ")";
+}
+
+std::ostream &operator<< (std::ostream &o, Intervals a) {
+	o << "{";
+	for (int i = 0; i < a.size(); i++) {
+		o << a[i];
+		if (i < a.size() - 1) {
+			o << ", ";
+		}
+	}
+	return o << "}";
+}
