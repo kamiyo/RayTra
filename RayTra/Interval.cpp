@@ -13,8 +13,36 @@ Interval::~Interval()
 {
 }
 
+Intervals::Intervals() {}
+Intervals::~Intervals() {}
+
+void Intervals::push_back(Interval i) {
+	_int.push_back(i);
+}
+
+size_t Intervals::size() {
+	return _int.size();
+}
+
+Interval Intervals::pop_back() {
+	Interval temp = _int.back();
+	_int.pop_back();
+	return temp;
+}
+
+std::vector<Interval, std::allocator<Interval> >::iterator Intervals::begin() { return _int.begin(); }
+std::vector<Interval, std::allocator<Interval> >::iterator Intervals::end() { return _int.end(); }
+
+void Intervals::cat(Intervals i) {
+	_int.insert(end(), i.begin(), i.end());
+}
+
 bool compare(Interval& a, Interval& b) {
 	return (a._min < b._min);
+}
+
+Interval Intervals::operator[](int i) {
+	return _int[i];
 }
 
 bool Interval::isEmpty() {
@@ -106,32 +134,34 @@ Intervals Interval::difference(Interval& diff) {
 	return result;
 }
 
-Intervals Interval::unionize(Intervals ints) {
-	std::sort(ints.begin(), ints.end(), compare);
-	for (int i = 0; i < ints.size(); i++) {
-		for (int j = i + 1; j < ints.size(); j++) {
-			Intervals temp = ints[i].unionize(ints[j]);
+void Intervals::unionize() {
+	std::sort(begin(), end(), compare);
+	for (int i = 0; i < size(); i++) {
+		for (int j = i + 1; j < size(); j++) {
+			Intervals temp = _int[i].unionize(_int[j]);
 			//std::cout << ints[i] << " " << ints[j] << std::endl;
 			//std::cout << "unioned: " << temp << std::endl;
 			if (temp.size() == 1) {
-				auto b = ints.begin() + j;
-				ints.erase(b);
-				ints[i] = temp[0];
+				auto b = begin() + j;
+				_int.erase(b);
+				_int[i] = temp[0];
 				j = i;
 			}
 		}
 	}
-	return ints;
 }
 
-Interval Interval::intersect(Intervals ints) {
-	for (int i = 1; i < ints.size(); i++) {
-		if (ints[0].isEmpty()) {
+void Intervals::intersect() {
+	for (int i = 1; i < size(); i++) {
+		if (_int[0].isEmpty()) {
 			break;
 		}
-		ints[0] = ints[0].intersect(ints[i]);
+		_int[0] = _int[0].intersect(_int[i]);
 	}
-	return ints[0];
+}
+
+void Intervals::intersect(Intervals i) {
+
 }
 
 Intervals difference(Intervals a, Intervals b) {

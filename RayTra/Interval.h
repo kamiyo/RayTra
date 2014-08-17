@@ -4,14 +4,25 @@
 #include "UtilDefines.h"
 class Interval;
 
-typedef std::vector<Interval> Intervals;
-/*
+//typedef std::vector<Interval> Intervals;
+
 class Intervals {
 	std::vector<Interval> _int;
 public:
 	Intervals();
-
-};*/
+	~Intervals();
+	void push_back(Interval i);
+	void cat(Intervals i);
+	Interval pop_back();
+	size_t size();
+	void unionize();
+	void intersect();
+	void intersect(Intervals i);
+	void difference(Intervals i);
+	std::vector<Interval, std::allocator<Interval> >::iterator begin();
+	std::vector<Interval, std::allocator<Interval> >::iterator end();
+	Interval operator[](int i);
+};
 
 class Interval
 {
@@ -27,10 +38,6 @@ public:
 	bool operator==(Interval& rh);
 	bool operator!=(Interval& rh);
 	static bool intersects(Interval& a, Interval& b);
-	static Intervals unionize(Intervals ints);
-	static Interval intersect(Intervals ints);
-	static Intervals difference(Intervals a, Intervals b);
-	static Intervals append(Intervals a, Intervals b);
 };
 
 std::ostream &operator<<(std::ostream &out, Interval a);
