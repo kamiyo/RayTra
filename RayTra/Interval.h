@@ -5,6 +5,8 @@
 class Interval;
 
 //typedef std::vector<Interval> Intervals;
+typedef std::vector<Interval, std::allocator<Interval> >::iterator IntIter;
+typedef std::vector<Interval, std::allocator<Interval> >::const_iterator cIntIter;
 
 class Intervals {
 	std::vector<Interval> _int;
@@ -19,8 +21,10 @@ public:
 	void intersect();
 	void intersect(Intervals i);
 	void difference(Intervals i);
-	std::vector<Interval, std::allocator<Interval> >::iterator begin();
-	std::vector<Interval, std::allocator<Interval> >::iterator end();
+	IntIter begin();
+	IntIter end();
+	IntIter erase(cIntIter _where);
+	IntIter insert(cIntIter _where, cIntIter _begin, cIntIter _end);
 	Interval operator[](int i);
 };
 

@@ -30,8 +30,10 @@ Interval Intervals::pop_back() {
 	return temp;
 }
 
-std::vector<Interval, std::allocator<Interval> >::iterator Intervals::begin() { return _int.begin(); }
-std::vector<Interval, std::allocator<Interval> >::iterator Intervals::end() { return _int.end(); }
+IntIter Intervals::begin() { return _int.begin(); }
+IntIter Intervals::end() { return _int.end(); }
+IntIter Intervals::erase(cIntIter _where) { return _int.erase(_where); }
+IntIter Intervals::insert(cIntIter _where, cIntIter _begin, cIntIter _end) { return _int.insert(_where, _begin, _end); }
 
 void Intervals::cat(Intervals i) {
 	_int.insert(end(), i.begin(), i.end());
@@ -160,27 +162,39 @@ void Intervals::intersect() {
 	}
 }
 
-void Intervals::intersect(Intervals i) {
-
-}
-
-Intervals difference(Intervals a, Intervals b) {
-	for (int i = 0; i < a.size(); i++) {
-		for (int j = 0; j < b.size(); j++) {
-			Intervals temp = a[i].difference(b[j]);
-			if (temp.size() > 1) {
-				a.erase(a.begin() + i);
-				a.insert(a.begin() + i, temp.begin(), temp.end());
+void Intervals::intersect(Intervals is) {
+	Intervals result;
+	for (int i = 0; i < size(); i++) {
+		if (_int[i].isEmpty()) continue;
+		for (int j = 0; j < is.size(); j++) {
+			if (is[j].isEmpty())
+			{
+				continue;
 			}
-			else if (temp.size() == 0) {
-				a.erase(a.begin() + i);
-			}
-			else if (temp[0] != a[i]) {
-				a[i] = temp[0];
+			if (Interval::intersects(_int[i], is[j])) {
+				result.push_back(_int[i].intersect(is[j]));
 			}
 		}
 	}
-	return a;
+	_int = result._int;
+}
+
+void Intervals::difference(Intervals is) {
+	for (int i = 0; i < size(); i++) {
+		for (int j = 0; j < is.size(); j++) {
+			Intervals temp = _int[i].difference(is[j]);
+			if (temp.size() > 1) {
+				erase(begin() + i);
+				insert(begin() + i, temp.begin(), temp.end());
+			}
+			else if (temp.size() == 0) {
+				erase(begin() + i);
+			}
+			else if (temp[0] != _int[i]) {
+				_int[i] = temp[0];
+			}
+		}
+	}
 }
 
 bool Interval::intersects(Interval& a, Interval& b) {
