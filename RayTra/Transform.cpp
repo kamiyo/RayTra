@@ -38,30 +38,30 @@ Matrix4d Transform::top() {
 }
 
 void Transform::scale(double s) {
-	scale(Vector3d(s, s, s));
+	scale(Vector4d(s, s, s, 1));
 }
 
-void Transform::scale(Vector3d xyz) {
+void Transform::scale(Vector4d xyz) {
 	Matrix4d temp(Matrix4d::Identity()); temp.diagonal() << xyz(0), xyz(1), xyz(2), 1.0;
-	Matrix4d tempInv(Matrix4d::Identity()); tempInv.diagonal() << 1 / xyz(0), 1 / xyz(1), 1 / xyz(2), 1.0;
+	Matrix4d tempInv(Matrix4d::Identity()); tempInv.diagonal() << temp.diagonal().cwiseInverse();
 	_current = temp * _current;
 	_currentInv *= tempInv;
 }
 
-void Transform::translate(Vector3d xyz) {
+void Transform::translate(Vector4d xyz) {
 	Matrix4d tempInv(Matrix4d::Identity()), temp(Matrix4d::Identity());
-	temp.block<3, 1>(0, 3) = xyz;
-	tempInv.block<3, 1>(0, 3) = -1 * xyz;
+	temp.block<3, 1>(0, 3) = xyz.block<3, 1>(0, 0);
+	tempInv.block<3, 1>(0, 3) = -1 * xyz.block<3, 1>(0, 0);
 	_current = temp * _current;
 	_currentInv *= tempInv;
 }
 
-void Transform::rotate(Vector3d axis, double rot) {
+void Transform::rotate(Vector4d axis, double rot) {
 	rot = rot * M_PI / 180;
 	axis.normalize();
 	Matrix4d t(Matrix4d::Identity()), tInv(Matrix4d::Identity());
-	t.block<3, 3>(0, 0) = AngleAxisd(rot, axis).toRotationMatrix();
-	tInv.block<3, 3>(0, 0) = AngleAxisd(-rot, axis).toRotationMatrix();
+	t.block<3, 3>(0, 0) = AngleAxisd(rot, axis.block<3, 1>(0, 0)).toRotationMatrix();
+	tInv.block<3, 3>(0, 0) = AngleAxisd(-rot, axis.block<3, 1>(0, 0)).toRotationMatrix();
 	_current = t * _current;
 	_currentInv *= tInv;
 }

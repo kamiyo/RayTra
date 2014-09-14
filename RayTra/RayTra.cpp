@@ -37,21 +37,21 @@ void RayTra::populateLights() {
 	}
 }
 
-void RayTra::sphere(Vector3d pos, double r) {
+void RayTra::sphere(Vector4d pos, double r) {
 	Sphere* s = new Sphere(pos, r, last);
 	applyTransform(s);
 	_surfaces->addSurface(s);
 }
-void RayTra::triangle(Vector3d p1, Vector3d p2, Vector3d p3) {
+void RayTra::triangle(Vector4d p1, Vector4d p2, Vector4d p3) {
 	Triangle* t = new Triangle(p1, p2, p3, last);
 	applyTransform(t);
 	_surfaces->addSurface(t);
 }
-void RayTra::plane(Vector3d n, Vector3d p){
+void RayTra::plane(Vector4d n, Vector4d p){
 	Plane* pp = new Plane(n, p, last);
 	_all->addSurface(pp);
 }
-void RayTra::circle(Vector3d p, Vector3d n, double r) {
+void RayTra::circle(Vector4d p, Vector4d n, double r) {
 	Circle* c = new Circle(p, n, r, last);
 	applyTransform(c);
 	_surfaces->addSurface(c);
@@ -60,12 +60,12 @@ void RayTra::cylinder(double r, double h, char cap) {
 	Cylinder* c = new Cylinder(r, h, last);
 	applyTransform(c);
 	if (cap == 'p' || cap == 'b') {
-		Circle* top = new Circle(Vector3d(0, 0, h / 2.0), Vector3d(0, 0, 1), r, last);
+		Circle* top = new Circle(Vector4d(0, 0, h / 2.0, 0), Vector4d(0, 0, 1, 0), r, last);
 		applyTransform(top);
 		_surfaces->addSurface(top);
 	}
 	if (cap == 'n' || cap == 'b') {
-		Circle* bottom = new Circle(Vector3d(0, 0, -h / 2.0), Vector3d(0, 0, -1), r, last);
+		Circle* bottom = new Circle(Vector4d(0, 0, -h / 2.0, 0), Vector4d(0, 0, -1, 0), r, last);
 		applyTransform(bottom);
 		_surfaces->addSurface(bottom);
 	}
@@ -76,14 +76,14 @@ void RayTra::cone(double l, double u, char cap) {
 	applyTransform(c);
 	if (cap == 'p' || cap == 'b') {
 		if (u != 0) {
-			Circle* top = new Circle(Vector3d(0, 0, u), Vector3d(0, 0, 1), u, last);
+			Circle* top = new Circle(Vector4d(0, 0, u, 0), Vector4d(0, 0, 1, 0), u, last);
 			applyTransform(top);
 			_surfaces->addSurface(top);
 		}
 	}
 	if (cap == 'n' || cap == 'b') {
 		if (l != 0) {
-			Circle* bottom = new Circle(Vector3d(0, 0, l), Vector3d(0, 0, -1), l, last);
+			Circle* bottom = new Circle(Vector4d(0, 0, l, 0), Vector4d(0, 0, -1, 0), l, last);
 			applyTransform(bottom);
 			_surfaces->addSurface(bottom);
 		}
@@ -96,7 +96,7 @@ void RayTra::torus(double R, double r) {
 	_surfaces->addSurface(t);
 }
 
-void RayTra::camera(Vector3d pos, Vector3d at, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double size){
+void RayTra::camera(Vector4d pos, Vector4d at, Vector4d dir, Vector4d up, Vector4d fp, Vector4d fd, double d, double fl, double iw, double ih, int pw, int ph, double size){
 	if (size == nINF) {
 		field = false;
 	}
@@ -104,19 +104,19 @@ void RayTra::camera(Vector3d pos, Vector3d at, Vector3d dir, Vector3d up, Vector
 	height = ph;
 	_cam = new Camera(pos, at, dir, up, fp, fd, d, fl, iw, ih, pw, ph, size);
 }
-void RayTra::pointLight(Vector3d pos, Vector3d rgb, Vector3d atten, double r){
+void RayTra::pointLight(Vector4d pos, Vector4d rgb, Vector4d atten, double r){
 	LightP* l = new LightP(pos, rgb, atten, r);
 	_shading->addLight(l);
 }
-void RayTra::directionalLight(Vector3d dir, Vector3d rgb, Vector3d atten){
+void RayTra::directionalLight(Vector4d dir, Vector4d rgb, Vector4d atten){
 	LightD* l = new LightD(dir, rgb, atten);
 	_shading->addLight(l);
 }
-void RayTra::spotLight(Vector3d pos, Vector3d dir, double theta, double phi, double p, Vector3d rgb, Vector3d atten, double r){
+void RayTra::spotLight(Vector4d pos, Vector4d dir, double theta, double phi, double p, Vector4d rgb, Vector4d atten, double r){
 	LightS* l = new LightS(pos, dir, theta, phi, p, rgb, atten, r);
 	_shading->addLight(l);
 }
-void RayTra::ambientLight(Vector3d rgb){
+void RayTra::ambientLight(Vector4d rgb){
 	_shading->addAmbient(rgb);
 }
 void RayTra::material(string s) {
@@ -128,11 +128,11 @@ void RayTra::material(string s) {
 		last = (iter)->second;
 	}
 }
-void RayTra::material(Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten){
+void RayTra::material(Vector4d amb, Vector4d diff, Vector4d spec, double r, Vector4d refl, double n, Vector4d atten){
 	last = new Material(amb, diff, spec, r, refl, n, atten);
 	_m.push_back(*last);
 }
-void RayTra::material(string s, Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten) {
+void RayTra::material(string s, Vector4d amb, Vector4d diff, Vector4d spec, double r, Vector4d refl, double n, Vector4d atten) {
 	map<string, Material*>::iterator iter = mtlMap.find(s);
 	if (iter == mtlMap.end()) {
 		last = new Material(amb, diff, spec, r, refl, n, atten);
@@ -245,12 +245,12 @@ void RayTra::getObj(const char *file, int smooth) {
 				last = (iter)->second;
 			}
 		} else if (cmd=="v") {
-			Vector3d v;
+			Vector4d v;
 			iss >> v;
 			Vertex* tempvtx = new Vertex(v);
 			m_v.push_back(tempvtx);
 		} else if (cmd=="vn") {
-			Vector3d n;
+			Vector4d n;
 			iss >> n;
 			m_n.push_back(n);
 			hasnorm = true;
@@ -272,7 +272,7 @@ void RayTra::parseMtl(const char* s) {
 	ifstream in(s);
 	char buffer[1025];
 	string cmd, name = "";
-	Vector3d diff, amb, spec, refl, atten; double n = 0;
+	Vector4d diff, amb, spec, refl, atten; double n = 0;
 	diff.setZero(); amb.setZero(); spec.setZero(); refl.setZero(); atten.setZero();
 	double p = 2; int illum = 0;
 
@@ -348,10 +348,10 @@ void RayTra::createFace(int v1, int v2, int v3, int n1, int n2, int n3, int smoo
 	m_h[esf+2]->setNext(m_h[esf]);
 	tempF->setHE(m_h[esf]);
 	if (!hasnorm) {
-		Vector3d p1 = m_h[esf]->getVertex()->_p;
-		Vector3d p2 = m_h[esf+1]->getVertex()->_p;
-		Vector3d p3 = m_h[esf+2]->getVertex()->_p;
-		Vector3d norm = ((p2 - p1).cross(p3 - p1)).normalized();
+		Vector4d p1 = m_h[esf]->getVertex()->_p;
+		Vector4d p2 = m_h[esf+1]->getVertex()->_p;
+		Vector4d p3 = m_h[esf+2]->getVertex()->_p;
+		Vector4d norm = ((p2 - p1).cross3(p3 - p1)).normalized(); norm(3) = 0;
 		for (int i = 0; i < 3; i++) {
 			m_h[esf+i]->getVertex()->addNormal(norm);
 		}
@@ -434,7 +434,7 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 
 		for (int i = 0; i < width; i++) {
 
-			Vector3d c = Vector3d::Zero();		// initialize color result vector (RGB)
+			Vector4d c = Vector4d::Zero();		// initialize color result vector (RGB)
 
 			Sampler2d l_sample = light_sampler.genPoints();
 			Sampler2d s_sample = lens_sampler.genPoints();

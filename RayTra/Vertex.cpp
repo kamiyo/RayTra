@@ -7,12 +7,12 @@
 
 #include "Face.h"
 
-Vertex::Vertex(Vector3d p) {
+Vertex::Vertex(Vector4d p) {
 	_p = p;
 	_n.setZero();
 }
 
-void Vertex::addNormal(Vector3d n) {
+void Vertex::addNormal(Vector4d n) {
 	_n += n;
 }
 

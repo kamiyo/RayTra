@@ -59,23 +59,26 @@ typedef std::vector<Eigen::Vector2i, Eigen::aligned_allocator<Vector2i> > Sample
 typedef struct hitRecord {
 	double t;
 	std::vector<double> ts;
-	Vector3d n;
+	Vector4d n;
 	Material* m;
 	LightP* l;
 	Surface* s;
 } hitRecord;
 
-Vector3d randSphere();
+Vector4d randSphere();
 
 void seedRand();
 double genRand_real();
 int genRand_int(int x, int y);
 
-Vector3d cosVec(Vector3d a);
-Vector3d _cosVec(Vector3d a);
+Vector4d cosVec(Vector4d a);
+Vector4d _cosVec(Vector4d a);
 
 std::istream &operator>>(std::istream &is, Vector3d &f);
 std::ostream &operator<<(std::ostream &os, Vector3d &f);
+
+std::istream &operator>>(std::istream &is, Vector4d &f);
+std::ostream &operator<<(std::ostream &os, Vector4d &f);
 
 std::ostream &operator<<(std::ostream &os, Sampler2d &s);
 

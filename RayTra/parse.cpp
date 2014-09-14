@@ -39,26 +39,26 @@ void Parser::parse(const char *file) {
 	bool isCuboid = false;
 	int oddeven = 0;
 	string matString = "";
-	Vector3d nInfVec(nINF, nINF, nINF);
+	Vector4d nInfVec(nINF, nINF, nINF, nINF);
 	/* cam variables, initialized */
-	Vector3d ce, ca, cu, cd, fp, fd;
-	ce = ca = cu = cd = fp = fd = Vector3d(nINF, nINF, nINF);
+	Vector4d ce, ca, cu, cd, fp, fd;
+	ce = ca = cu = cd = fp = fd = Vector4d(nINF, nINF, nINF, nINF);
 	double cf = nINF, fl = nINF, iw, ih, cN = nINF; int pw, ph;
 
 	/* mat variables, initialized */
-	Vector3d ka, kd, ks, ki, alpha;
+	Vector4d ka, kd, ks, ki, alpha;
 	ka.setOnes(); kd.setZero(); ks.setZero(); ki.setZero(); alpha.setZero();
 	double r = 0, n = 0;
 
 	/*light variables, uninitialized */
-	Vector3d lpos, ldir, lrgb, latten;
+	Vector4d lpos, ldir, lrgb, latten;
 	double ltheta, lphi, lp, lrad;
 
 	/*vertex variables*/
-	Vector3d va, vb, vc, vd, ve, vf, vg, vh;
+	Vector4d va, vb, vc, vd, ve, vf, vg, vh;
 
 	/*position, radius, height*/
-	Vector3d pos, norm; double rad, Rad, height, left, right;
+	Vector4d pos, norm; double rad, Rad, height, left, right;
 	char opt;
 
 	for (int line = 1; _in.good(); line++) {
@@ -502,7 +502,7 @@ void Parser::parse(const char *file) {
 			T.setIdentity();
 		}
 		else if (cmd == "rot" || cmd == "rotate") {
-			Vector3d v; double d;
+			Vector4d v; double d;
 			_iss >> v >> d;
 			T.rotate(v, d);
 		}
@@ -511,15 +511,15 @@ void Parser::parse(const char *file) {
 			_iss >> x;
 			y = z = x;
 			_iss >> y >> z;
-			T.scale(Vector3d(x, y, z));
+			T.scale(Vector4d(x, y, z, 0));
 		}
 		else if (cmd == "move" || cmd == "trans" || cmd == "translate") {
-			Vector3d v;
+			Vector4d v;
 			_iss >> v;
 			T.translate(v);
 		}
 		else if (cmd == "s" || cmd == "sphere") {
-			Vector3d p = nInfVec; double r;
+			Vector4d p = nInfVec; double r;
 			_iss >> p >> r;
 			if (p == nInfVec) {
 				isSphere = true;
@@ -653,7 +653,7 @@ void Parser::parse(const char *file) {
 			}
 		}
 		else if (cmd == "t" || cmd == "tri" || cmd == "triangle") {
-			Vector3d a, b, c; a = nInfVec;
+			Vector4d a, b, c; a = nInfVec;
 			_iss >> a >> b >> c;
 			if (a == nInfVec) {
 				isTri = true;
@@ -664,7 +664,7 @@ void Parser::parse(const char *file) {
 			}
 		}
 		else if (cmd == "q" || cmd == "quad" || cmd == "quadrilateral") {
-			Vector3d a, b, c, d; a = nInfVec;
+			Vector4d a, b, c, d; a = nInfVec;
 			_iss >> a >> b >> c >> d;
 			if (a == nInfVec) {
 				isQuad = true;
@@ -685,7 +685,7 @@ void Parser::parse(const char *file) {
 			va = vb = vc = nInfVec;
 		}
 		else if (cmd == "p" || cmd == "plane") {
-			Vector3d n = nInfVec, p;
+			Vector4d n = nInfVec, p;
 			_iss >> n >> p;
 			if (n == nInfVec) {
 				isPlane = true;
@@ -714,14 +714,14 @@ void Parser::parse(const char *file) {
 			ltheta = 0; lphi = 0; lp = 0; lrad = 0;
 		}
 		else if (cmd == "b" || cmd == "box" || cmd == "cuboid") {
-			Vector3d a, b, c, d, e, f, g, h; a = b = c = d = e = f = g = h = nInfVec;
+			Vector4d a, b, c, d, e, f, g, h; a = b = c = d = e = f = g = h = nInfVec;
 			if (a == nInfVec) {
 				isCuboid = true;
 				va = vb = vc = vd = vf = vg = vh = nInfVec;
 			}
 			else {
 				if (c == nInfVec) {
-					Vector3d min = a, max = b;
+					Vector4d min = a, max = b;
 					d = b;
 					f = a;
 					a << max[0], max[1], min[2];
@@ -755,7 +755,7 @@ void Parser::parse(const char *file) {
 			}
 		}
 		else if (cmd == "i" || cmd == "cir" || cmd == "circle") {
-			Vector3d p, n; double r = nINF;
+			Vector4d p, n; double r = nINF;
 			_iss >> p >> n >> r;
 			if (r == nINF) {
 				isCirc = true;

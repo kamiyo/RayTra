@@ -25,20 +25,20 @@ HEdge* Face::getHE() {
 bool Face::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	HEdge* edge = _e;
 	Vertex* vert = edge->getVertex();
-	Vector3d _p1 = vert->_p; Vector3d _n1 = vert->_n.normalized();
+	Vector4d _p1 = vert->_p; Vector4d _n1 = vert->_n.normalized();
 	edge = edge->getNext();
 	vert = edge->getVertex();
-	Vector3d _p2 = vert->_p; Vector3d _n2 = vert->_n.normalized();
+	Vector4d _p2 = vert->_p; Vector4d _n2 = vert->_n.normalized();
 	edge = edge->getNext();
 	vert = edge->getVertex();
-	Vector3d _p3 = vert->_p; Vector3d _n3 = vert->_n.normalized();
+	Vector4d _p3 = vert->_p; Vector4d _n3 = vert->_n.normalized();
 
-	Vector3d dir = ray.dir;
-	Vector3d eye = ray.eye;
-	Vector3d abc = _p1 - _p2;
-	Vector3d def = _p1 - _p3;
-	Vector3d ghi = dir;
-	Vector3d jkl = _p1 - eye;
+	Vector4d dir = ray.dir;
+	Vector4d eye = ray.eye;
+	Vector4d abc = _p1 - _p2;
+	Vector4d def = _p1 - _p3;
+	Vector4d ghi = dir;
+	Vector4d jkl = _p1 - eye;
 	Matrix3d T; T << abc, def, ghi;
 
 	double M = T.determinant();
@@ -76,13 +76,13 @@ bool Face::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 void Face::boundingBox() {
 	HEdge* edge = _e;
 	Vertex* vert = edge->getVertex();
-	Vector3d _p1 = vert->_p;
+	Vector4d _p1 = vert->_p;
 	edge = _e->getNext();
 	vert = edge->getVertex();
-	Vector3d _p2 = vert->_p;
+	Vector4d _p2 = vert->_p;
 	edge = edge->getNext();
 	vert = edge->getVertex();
-	Vector3d _p3 = vert->_p;
+	Vector4d _p3 = vert->_p;
 	_b.set(_p1.cwiseMin(_p2.cwiseMin(_p3)), _p1.cwiseMax(_p2.cwiseMax(_p3)));
 }
 

@@ -7,7 +7,7 @@
 
 #include "Triangle.h"
 
-Triangle::Triangle(Vector3d p1, Vector3d p2, Vector3d p3, Material* m) {
+Triangle::Triangle(Vector4d p1, Vector4d p2, Vector4d p3, Material* m) {
 	_p1 = p1;
 	_p2 = p2;
 	_p3 = p3;
@@ -16,15 +16,15 @@ Triangle::Triangle(Vector3d p1, Vector3d p2, Vector3d p3, Material* m) {
 	_type = TRIANGLE;
 	abc = _p1 - _p2;
 	def = _p1 - _p3;
-	_n = ((_p2 - _p1).cross(_p3 - _p1)).normalized();
+	_n = ((_p2 - _p1).cross3(_p3 - _p1)).normalized(); _n(3) = 0;
 
 	//Plucker
 	_u1 = _p2 - _p1;
 	_u2 = _p3 - _p2;
 	_u3 = _p1 - _p3;
-	_v1 = _p2.cross(_p1);
-	_v2 = _p3.cross(_p2);
-	_v3 = _p1.cross(_p3);
+	_v1 = _p2.cross3(_p1); _v1(3) = 0;
+	_v2 = _p3.cross3(_p2); _v2(3) = 0;
+	_v3 = _p1.cross3(_p3); _v3(3) = 0;
 }
 
 Triangle::~Triangle() {
@@ -36,9 +36,9 @@ Triangle::~Triangle() {
 bool Triangle::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	//plucker
 
-	Vector3d e = ray.eye;
-	Vector3d u = ray.dir;
-	Vector3d v = u.cross(e);
+	Vector4d e = ray.eye;
+	Vector4d u = ray.dir;
+	Vector4d v = u.cross3(e); v(3) = 0;
 	double alpha = _u1.dot(v) + u.dot(_v1);
 	double beta = _u2.dot(v) + u.dot(_v2);
 
@@ -52,7 +52,7 @@ bool Triangle::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	double sum = alpha + beta + gamma;
 	
 	alpha /= sum; beta /= sum; gamma /= sum;
-	Vector3d p = _p1 * beta + _p2 * gamma + _p3 * alpha;
+	Vector4d p = _p1 * beta + _p2 * gamma + _p3 * alpha;
 	if ((p - e).dot(u) < 0) return false;
 	double t = (p - e).norm() / u.norm();
 	if (t > t1 || t < t0) return false;

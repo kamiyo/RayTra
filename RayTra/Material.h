@@ -11,13 +11,13 @@
 
 class Material {
 public:
-	Material(Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d ref, double index, Vector3d atten);
+	Material(Vector4d amb, Vector4d diff, Vector4d spec, double r, Vector4d ref, double index, Vector4d atten);
 	virtual ~Material();
-	Vector3d kd;
-	Vector3d ks;
-	Vector3d ki;
-	Vector3d a;
-	Vector3d ka;
+	Vector4d kd;
+	Vector4d ks;
+	Vector4d ki;
+	Vector4d a;
+	Vector4d ka;
 	double p;
 	double n;
 };

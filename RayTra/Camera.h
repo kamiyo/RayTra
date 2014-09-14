@@ -13,16 +13,16 @@
 
 class Camera {
 public:
-	Camera(Vector3d ep, Vector3d ip, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double fstop);
+	Camera(Vector4d ep, Vector4d ip, Vector4d dir, Vector4d up, Vector4d fp, Vector4d fd, double d, double fl, double iw, double ih, int pw, int ph, double fstop);
 	void generateRay(const Vector2d& p, double i, double j, Ray& r);
 	virtual ~Camera();
-	Vector3d _e;
-	Vector3d _u;
-	Vector3d _v;
-	Vector3d _w;
-	Vector3d _dir;
-	Vector3d _fp;
-	Vector3d _fd;
+	Vector4d _e;
+	Vector4d _u;
+	Vector4d _v;
+	Vector4d _w;
+	Vector4d _dir;
+	Vector4d _fp;
+	Vector4d _fd;
 	double _d;
 	double _width;
 	double _height;

@@ -8,7 +8,7 @@
 #include "Plane.h"
 #include <iostream>
 
-Plane::Plane(Vector3d n, Vector3d p, Material* m) {
+Plane::Plane(Vector4d n, Vector4d p, Material* m) {
 	_p = p;
 	_n = n;
 	_m = m;
@@ -21,8 +21,8 @@ Plane::~Plane() {
 }
 
 bool Plane::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
-	Vector3d e = ray.eye;
-	Vector3d d = ray.dir;
+	Vector4d e = ray.eye;
+	Vector4d d = ray.dir;
 	double den = _n.dot(d);
 	if (den == 0) {
 		return false;

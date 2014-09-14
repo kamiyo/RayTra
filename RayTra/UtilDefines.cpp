@@ -4,21 +4,21 @@ std::mt19937_64 mt;
 std::uniform_real_distribution<double> uni_real;
 std::uniform_int_distribution<int> uni_int;
 
-Vector3d randSphere() {
+Vector4d randSphere() {
 	double a, b, c;
 	do {
 		a = 2 * RAN - 1;
 		b = 2 * RAN - 1;
 		c = a*a + b*b;
 	} while (c >= 1);
-	Vector3d r;
+	Vector4d r;
 	r.setZero();
-	r << 2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c;
+	r << 2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c, 0;
 	return r.normalized();
 }
 
-Vector3d cosVec(Vector3d a) {
-	Vector3d r;
+Vector4d cosVec(Vector4d a) {
+	Vector4d r;
 	double c;
 	do {
 		r = randSphere();
@@ -28,19 +28,19 @@ Vector3d cosVec(Vector3d a) {
 	return r.normalized();
 }
 
-Vector3d _cosVec(Vector3d a) {
-	Vector3d w = -1.0 * a;
-	Vector3d up(0, 1, 0);
+Vector4d _cosVec(Vector4d a) {
+	Vector4d w = -1.0 * a;
+	Vector4d up(0, 1, 0, 0);
 	if (a.dot(up) == 1) {
-		up << 1, 0, 0;
+		up << 1, 0, 0, 0;
 	}
-	Vector3d u = (up.cross(w)).normalized();
-	Vector3d v = (w.cross(u)).normalized();
+	Vector4d u = (up.cross3(w)).normalized(); u(3) = 0;
+	Vector4d v = (w.cross3(u)).normalized(); v(3) = 0;
 	double ep1 = 2 * M_PI * RAN;
 	double ep2 = RAN;
 	double ep21 = 1 - ep2;
 	ep2 = sqrt(ep2);
-	return Vector3d((cos(ep1) * ep2) * u + (sin(ep1) * ep2) * v - sqrt(ep21) * w);
+	return ((cos(ep1) * ep2) * u + (sin(ep1) * ep2) * v - sqrt(ep21) * w);
 }
 
 void toDisk(double x, double y, Vector2d& v) {
@@ -111,6 +111,14 @@ std::istream &operator>>(std::istream &is, Vector3d &f) {
 }
 std::ostream &operator<<(std::ostream &os, Vector3d &f) {
 	return os << "<" << f[0] << "," << f[1] << "," << f[2] << ">";
+}
+
+std::istream &operator>>(std::istream &is, Vector4d &f) {
+	f[3] = 0;
+	return is >> f[0] >> f[1] >> f[2];
+}
+std::ostream &operator<<(std::ostream &os, Vector4d &f) {
+	return os << "<" << f[0] << "," << f[1] << "," << f[2] << "," << f[3] << ">";
 }
 
 Vector3d vmin(Vector3d &a, Vector3d &b) {

@@ -7,7 +7,7 @@
 
 #include "Sphere.h"
 
-Sphere::Sphere(Vector3d pos, double rad, Material* m) {
+Sphere::Sphere(Vector4d pos, double rad, Material* m) {
 	_p = pos;
 	_r = rad;
 	_m = m;
@@ -30,9 +30,9 @@ Sphere::~Sphere() {
 }
 
 bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
-	Vector3d e = ray.eye;
-	Vector3d d = ray.dir;
-	Vector3d ep = e - _p;
+	Vector4d e = ray.eye;
+	Vector4d d = ray.dir;
+	Vector4d ep = e - _p;
 	double dep = d.dot(ep);
 	double disc = (dep * dep) - d.dot(d) * (ep.dot(ep) - (_r*_r));
 	if (disc < 0) {
@@ -51,7 +51,7 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 				return false;
 			}
 			if (ray.type == Ray::VIEW) {
-				Vector3d n = e + rec.t * d;
+				Vector4d n = e + rec.t * d;
 				n = (n - _p).normalized();
 				rec.n = n;
 			} else if (ray.type == Ray::SHAD) {
@@ -62,7 +62,7 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		}
 		else {
 			if (ray.type == Ray::VIEW) {
-				Vector3d n = e + rec.t * d;
+				Vector4d n = e + rec.t * d;
 				n = (n - _p).normalized();
 				rec.n = n;
 				rec.l = _l;

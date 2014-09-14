@@ -35,7 +35,7 @@ fstop	fstop (distance / size)
 int		pw		width (pixels)
 ph		height (pixels)
 */
-Camera::Camera(Vector3d ep, Vector3d ip, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double fstop) {
+Camera::Camera(Vector4d ep, Vector4d ip, Vector4d dir, Vector4d up, Vector4d fp, Vector4d fd, double d, double fl, double iw, double ih, int pw, int ph, double fstop) {
 	_fd = fd;
 	_fp = fp;
 	if ((_fd.array() != nINF).all()) {
@@ -56,8 +56,8 @@ Camera::Camera(Vector3d ep, Vector3d ip, Vector3d dir, Vector3d up, Vector3d fp,
 	if (fl != nINF && (_fp.array() != nINF).all()) {
 		_fp = ep + fl * (_fp - ep).normalized();
 	}
-	_u = (up.cross(_w)).normalized();
-	_v = (_w.cross(_u)).normalized();
+	_u = (up.cross3(_w)).normalized(); _u(3) = 0;
+	_v = (_w.cross3(_u)).normalized(); _v(3) = 0;
 	_width = iw;
 	_height = ih;
 	if (d == nINF) {
@@ -85,11 +85,11 @@ void Camera::generateRay(const Vector2d& p, double i, double j, Ray& r) {
 	double u = (_width) * (i / _nx - 0.5);
 	double v = (_height) * (j / _ny - 0.5);
 	Vector2d _p = p * _size;
-	Vector3d eye = _e;
-	Vector3d dir = -1.0 * _d * _w + u * _u + v * _v;
-	Vector3d point = eye + dir;
+	Vector4d eye = _e;
+	Vector4d dir = -1.0 * _d * _w + u * _u + v * _v;
+	Vector4d point = eye + dir;
 	if ((_fd.array() != nINF).all() || (_fp.array() != nINF).all()) {
-		Vector3d e2p;
+		Vector4d e2p;
 		if ((_fd.array() == nINF).all()) {
 			_fd = -_w;
 			e2p = _fp - eye;
@@ -105,7 +105,7 @@ void Camera::generateRay(const Vector2d& p, double i, double j, Ray& r) {
 	eye = _e + _p[0] * _u + _p[1] * _v;
 	dir = point - eye;
 	std::vector<double>ref; ref.push_back(1.0);
-	std::vector<Vector3d>alph; alph.push_back(Vector3d(0.0, 0.0, 0.0));
+	std::vector<Vector4d>alph; alph.push_back(Vector4d(0.0, 0.0, 0.0, 0));
 	r = Ray(eye, dir, ref, alph, Ray::VIEW);
 }
 

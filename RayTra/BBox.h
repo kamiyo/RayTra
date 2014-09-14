@@ -22,18 +22,18 @@
 class BBox {
 public:
 	BBox();
-	BBox(Vector3d min, Vector3d max);
+	BBox(Vector4d min, Vector4d max);
 	virtual ~BBox();
 	BBox transform(Matrix4d& m);
 	BBox combine(BBox& rhs);
 	BBox combine(BBox& b1, BBox& b2);
-	Vector3d& max();
-	Vector3d& min();
-	void set(Vector3d min, Vector3d max);
+	Vector4d& max();
+	Vector4d& min();
+	void set(Vector4d min, Vector4d max);
 	bool operator==(const BBox& rhs);
 	bool operator!=(const BBox& rhs);
-	Vector3d b[2];
-	Vector3d _m;
+	Vector4d b[2];
+	Vector4d _m;
 };
 
 std::ostream &operator<<(std::ostream &os, BBox &b);

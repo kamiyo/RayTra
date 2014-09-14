@@ -17,8 +17,8 @@ Cylinder::~Cylinder()
 }
 
 bool Cylinder::hit(Ray& r, double t0, double t1, hitRecord& rec) {
-	Vector3d eye = r.eye;
-	Vector3d dir = r.dir;
+	Vector4d eye = r.eye;
+	Vector4d dir = r.dir;
 	double a = dir(0) * dir(0) + dir(1) * dir(1);
 	if (a == 0) return false;
 	double b = 2 * (eye(0) * dir(0) + eye(1) * dir(1));
@@ -37,7 +37,7 @@ bool Cylinder::hit(Ray& r, double t0, double t1, hitRecord& rec) {
 			return false;
 		}
 		if (r.type == Ray::VIEW) {
-			Vector3d n = eye + rec.t * dir;
+			Vector4d n = eye + rec.t * dir;
 			n[2] = 0;
 			rec.n = n.normalized();
 		}
@@ -49,7 +49,7 @@ bool Cylinder::hit(Ray& r, double t0, double t1, hitRecord& rec) {
 	}
 	else {
 		if (r.type == Ray::VIEW) {
-			Vector3d n = eye + rec.t * dir;
+			Vector4d n = eye + rec.t * dir;
 			n(2) = 0;
 			rec.n = n.normalized();
 		}
@@ -64,5 +64,5 @@ bool Cylinder::hit(Ray& r, double t0, double t1, hitRecord& rec) {
 }
 
 void Cylinder::boundingBox() {
-	_b.set(Vector3d(-_r, -_r, -_h / 2.), Vector3d(_r, _r, _h / 2.));
+	_b.set(Vector4d(-_r, -_r, -_h / 2., 0), Vector4d(_r, _r, _h / 2., 0));
 }

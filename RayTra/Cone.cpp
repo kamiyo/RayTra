@@ -19,8 +19,8 @@ Cone::Cone(double lower, double upper, Material *m) : _l(lower), _u(upper)
 
 bool Cone::hit(Ray& ray, double t0, double t1, hitRecord& rec)
 {
-	Vector3d eye = ray.eye;
-	Vector3d dir = ray.dir;
+	Vector4d eye = ray.eye;
+	Vector4d dir = ray.dir;
 	double a = dir(0) * dir(0) + dir(1) * dir(1) - dir(2) * dir(2);
 	if (a == 0) return false;
 	double b = 2 * (eye(0) * dir(0) + eye(1) * dir(1) - eye(2) * dir(2));
@@ -37,7 +37,7 @@ bool Cone::hit(Ray& ray, double t0, double t1, hitRecord& rec)
 		double z = eye(2) + rec.t * dir(2);
 		if (z > _u || z < _l) return false;
 		if (ray.type == Ray::VIEW) {
-			Vector3d n = eye + rec.t * dir;
+			Vector4d n = eye + rec.t * dir;
 			double nz; nz = (n(2) > 0) ? -1.0 : 1.0;
 			n(2) = 0; n.normalize();
 			n(2) = nz;
@@ -51,7 +51,7 @@ bool Cone::hit(Ray& ray, double t0, double t1, hitRecord& rec)
 	}
 	else {
 		if (ray.type == Ray::VIEW) {
-			Vector3d n = eye + rec.t * dir;
+			Vector4d n = eye + rec.t * dir;
 			double nz; nz = (n(2) > 0) ? -1.0 : 1.0;
 			n(2) = 0; n.normalize();
 			n(2) = nz;
@@ -67,7 +67,7 @@ bool Cone::hit(Ray& ray, double t0, double t1, hitRecord& rec)
 
 void Cone::boundingBox() {
 	double maxRad = std::max(abs(_u), abs(_l));
-	_b.set(Vector3d(-maxRad, -maxRad, _l), Vector3d(maxRad, maxRad, _u));
+	_b.set(Vector4d(-maxRad, -maxRad, _l, 0), Vector4d(maxRad, maxRad, _u, 0));
 }
 
 Cone::~Cone()

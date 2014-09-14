@@ -23,7 +23,7 @@ public:
 	virtual ~Face();
 	void setHE(HEdge* e);
 	HEdge* getHE();
-	Vector3d _normal;
+	Vector4d _normal;
 	bool smooth;
 private:
 	HEdge* _e;
@@ -47,11 +47,11 @@ private:
 
 class Vertex {
 public:
-	Vertex(Vector3d p);
+	Vertex(Vector4d p);
 	virtual ~Vertex();
-	void addNormal(Vector3d n);
-	Vector3d _n;
-	Vector3d _p;
+	void addNormal(Vector4d n);
+	Vector4d _n;
+	Vector4d _p;
 };
 
 #endif /* FACE_H_ */

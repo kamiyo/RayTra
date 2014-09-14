@@ -12,10 +12,10 @@
 class Light {
 public:
 	virtual ~Light();
-	virtual Vector3d getVector(Vector3d p) = 0;
-	virtual double getFalloff(Vector3d p) = 0;
-	Vector3d _atten;
-	Vector3d _rgb;
+	virtual Vector4d getVector(Vector4d p) = 0;
+	virtual double getFalloff(Vector4d p) = 0;
+	Vector4d _atten;
+	Vector4d _rgb;
 	int _type;
 	enum {POINT, DIRECTIONAL, SPOT};
 };

@@ -18,12 +18,12 @@ Intialize to inf
 BBox::BBox() {
 	MIN.setZero(); 
 	MAX.setZero(); 
-	MAX << nINF, nINF, nINF;
-	MIN << INF, INF, INF;
+	MAX << nINF, nINF, nINF, 0;
+	MIN << INF, INF, INF, 0;
 	_m.setZero();
 }
 
-BBox::BBox(Vector3d min, Vector3d max) {
+BBox::BBox(Vector4d min, Vector4d max) {
 	MIN.setZero(); MAX.setZero();
 	set(min, max);
 }
@@ -32,11 +32,11 @@ BBox::~BBox() {
 	// TODO Auto-generated destructor stub
 }
 
-Vector3d& BBox::min() {
+Vector4d& BBox::min() {
 	return MIN;
 }
 
-Vector3d& BBox::max() {
+Vector4d& BBox::max() {
 	return MAX;
 }
 
@@ -65,13 +65,13 @@ BBox BBox::transform(Matrix4d& m) {
 	Eigen::Matrix<double, 4, 8> result = m * points;
 	Array4d min = result.rowwise().minCoeff();
 	Array4d max = result.rowwise().maxCoeff();
-	_b.set(Vector3d(min(0), min(1), min(2)), Vector3d(max(0), max(1), max(2)));
+	_b.set(min, max);
 
 	return _b;
 }
 
 // BBox::set also calculates midpoint
-void BBox::set(Vector3d min, Vector3d max) {
+void BBox::set(Vector4d min, Vector4d max) {
 	MIN = min;
 	MAX = max;
 	_m = (MIN + MAX) / 2;

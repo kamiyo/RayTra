@@ -36,7 +36,7 @@ BVH::BVH(Group* g) {
 	else {
 		double m = 0;
 		BBox b = g->_b;
-		Vector3d diff = b.max() - b.min();
+		Vector4d diff = b.max() - b.min();
 		int axis;
 		double range = diff.maxCoeff(&axis);
 		//std::cout << "----" << axis << "------" << std::endl;
@@ -132,8 +132,8 @@ gains of 25% in paper
 */
 bool BVH::hitbox(Ray& ray, double t0, double t1) {
 	double tmin, tmax, tymin, tymax, tzmin, tzmax;
-	Vector3d e = ray.eye;
-	Vector3d i = ray.inv;
+	Vector4d e = ray.eye;
+	Vector4d i = ray.inv;
 	Vector3i s = ray.sign;
 
 	tmin = (_b.b[s[0]][0] - e[0]) * i[0];

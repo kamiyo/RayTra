@@ -1,7 +1,7 @@
 #include "LightS.h"
 
 
-LightS::LightS(Vector3d pos, Vector3d dir, double theta, double phi, double p, Vector3d rgb, Vector3d atten, double r) : _pos(pos), _dir(dir), _theta(theta), _phi(phi), _p(p), _r(r)
+LightS::LightS(Vector4d pos, Vector4d dir, double theta, double phi, double p, Vector4d rgb, Vector4d atten, double r) : _pos(pos), _dir(dir), _theta(theta), _phi(phi), _p(p), _r(r)
 {
 	_atten = atten;
 	_rgb = rgb;
@@ -12,14 +12,14 @@ LightS::~LightS()
 {
 }
 
-Vector3d LightS::getVector(Vector3d p) {
+Vector4d LightS::getVector(Vector4d p) {
 	return _pos - p;
 }
 
-double LightS::getFalloff(Vector3d p) {
-	Vector3d l = _dir.normalized();
+double LightS::getFalloff(Vector4d p) {
+	Vector4d l = _dir.normalized();
 	
-	Vector3d d = (p - _pos).normalized();
+	Vector4d d = (p - _pos).normalized();
 	double ld = l.dot(d);
 	//std::cout << _theta << " " << _phi << " " << l << " " << d << " " << ld << std::endl;
 	double cosPhiHalf = cos(_phi / 2);

@@ -12,11 +12,11 @@
 
 class LightP : public Light {
 public:
-	LightP(Vector3d pos, Vector3d rgb, Vector3d atten, double r);
+	LightP(Vector4d pos, Vector4d rgb, Vector4d atten, double r);
 	virtual ~LightP();
-	virtual Vector3d getVector(Vector3d p);
-	virtual double getFalloff(Vector3d p);
-	Vector3d _pos;
+	virtual Vector4d getVector(Vector4d p);
+	virtual double getFalloff(Vector4d p);
+	Vector4d _pos;
 	double _r;
 };
 

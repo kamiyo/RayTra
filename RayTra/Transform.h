@@ -14,9 +14,9 @@ public:
 	Matrix4d pop();
 	Matrix4d top();
 	void scale(double s);
-	void scale(Vector3d xyz);
-	void translate(Vector3d xyz);
-	void rotate(Vector3d axis, double rot);
+	void scale(Vector4d xyz);
+	void translate(Vector4d xyz);
+	void rotate(Vector4d axis, double rot);
 	Matrix4d _current;
 	Matrix4d _currentInv;
 	Matrix4d _normal;
@@ -29,9 +29,10 @@ inline Vector4d operator* (const Transform& t, const Vector4d& v) {
 	return t._currentInv * v;
 }
 
-inline Vector3d apply(const Matrix4d& m, const Vector3d& v, const int& i) {
+inline Vector4d apply(const Matrix4d& m, const Vector4d& v, const int& i) {
 	double h = i;
 	Vector4d vv(v(0), v(1), v(2), h);
-	return (m * vv).block<3, 1>(0, 0);
+	vv = m * vv; vv(3) = 0;
+	return vv;
 }
 #endif

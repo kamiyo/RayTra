@@ -7,7 +7,7 @@
 
 #include "Material.h"
 
-Material::Material(Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d ref, double index, Vector3d atten) {
+Material::Material(Vector4d amb, Vector4d diff, Vector4d spec, double r, Vector4d ref, double index, Vector4d atten) {
 	kd = diff;
 	ks = spec;
 	p = r;

@@ -30,7 +30,7 @@ int			t		type of ray
 
 unsigned long Ray::count = 0;
 
-Ray::Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a, int t):
+Ray::Ray(Vector4d e, Vector4d d, std::vector<double> r, std::vector<Vector4d> a, int t):
 eye(e), dir(d), ref(r), alpha(a), type(t) {
 	Ray::count++;
 	inv = dir.cwiseInverse();
@@ -41,7 +41,7 @@ Ray::Ray() {
 }
 
 void Ray::reSign() {
-	sign = (inv.array() < 0).cast<int>();
+	sign = (inv.array() < 0).block<3, 1>(0, 0).cast<int>();
 }
 
 Ray::~Ray() {

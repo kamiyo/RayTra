@@ -13,12 +13,12 @@
 
 class Sphere : public Surface {
 public:
-	Sphere(Vector3d pos, double rad, Material* m);
+	Sphere(Vector4d pos, double rad, Material* m);
 	Sphere(LightP* l);
 	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec);
 	void boundingBox();
 	~Sphere();
-	Vector3d _p;
+	Vector4d _p;
 	double _r;
 	LightP* _l;
 

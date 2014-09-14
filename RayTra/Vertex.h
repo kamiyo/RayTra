@@ -16,11 +16,11 @@
 class HEdge;
 class Vertex {
 public:
-	Vertex(Vector3d p);
+	Vertex(Vector4d p);
 	virtual ~Vertex();
-	void addNormal(Vector3d n);
-	Vector3d _n;
-	Vector3d _p;
+	void addNormal(Vector4d n);
+	Vector4d _n;
+	Vector4d _p;
 };
 
 #endif /* VERTEX_H_ */

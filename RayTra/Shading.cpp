@@ -11,7 +11,7 @@
 Shading::Shading() {
 	init_genrand(time(NULL));
 	_recurs = 0;
-	_amb = Vector3d::Zero();
+	_amb = Vector4d::Zero();
 	_shadows = false;
 	_refraction = 0;
 	_indirect = 0;
@@ -31,48 +31,48 @@ void Shading::addLight(Light* l) {
 	_l.push_back(l);
 }
 
-void Shading::addAmbient(Vector3d a) {
+void Shading::addAmbient(Vector4d a) {
 	_amb = a;
 }
 
 // form of function where recursion and refraction are not specified. 
-Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area) {
+Vector4d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area) {
 	return computeShading(v, t0, t1, s, area, _recurs, _refraction);
 }
 
 //SHADER
-Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area, int recurs, int refrac) {
+Vector4d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area, int recurs, int refrac) {
 	if (recurs == -1 || refrac == -1) {
-		return Vector3d::Zero();						//return 0 if recursion limit reached
+		return Vector4d::Zero();						//return 0 if recursion limit reached
 	}
 	hitRecord rec, srec;								// rec = light record, srec = shadow record
-	Vector3d result;									// rgb result
+	Vector4d result;									// rgb result
 	result.setZero();
-	Vector3d cook;
+	Vector4d cook;
 	cook.setZero();
 
-	Vector3d d = (-1.0 * v.dir).normalized();									// d = viewing ray direction (out of surface)
+	Vector4d d = (-1.0 * v.dir).normalized();									// d = viewing ray direction (out of surface)
 	Material* m;
 
 	if (s->_hit(v, t0, t1, rec)) {
-		Vector3d n = rec.n;						// n = normal vector of intersection
+		Vector4d n = rec.n;						// n = normal vector of intersection
 		
 		double nd = n.dot(d);
 
 		if (rec.m == NULL) {
 			std::cout << "shouldn't be here unless lightsphere" << std::endl;
-			if (rec.l == NULL) return Vector3d::Zero();
-			Vector3d light = Vector3d::Zero();
+			if (rec.l == NULL) return Vector4d::Zero();
+			Vector4d light = Vector4d::Zero();
 			light += (rec.l->_rgb) * std::max((double) 0, nd);
 			return light;
 		}
 
-		Vector3d p = v.eye + rec.t * v.dir;				// p = intersection point
+		Vector4d p = v.eye + rec.t * v.dir;				// p = intersection point
 		m = rec.m;										// material at intersection
 
-		Vector3d global; global.setZero();
+		Vector4d global; global.setZero();
 		for (int gi = 0; gi < _indirect; gi++) {
-			Vector3d newDir = COSVEC(n);
+			Vector4d newDir = COSVEC(n);
 			Ray diffR(p, v.dir.norm() * newDir, v.ref, v.alpha, Ray::VIEW);
 			global += computeShading(diffR, 0.0001, INF, s, area, recurs - 1, refrac);
 		}
@@ -81,13 +81,13 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 			result += m->kd.cwiseProduct(global / (double)_indirect);
 		}
 		for (int j = 0; j < (int)_l.size(); j++) {		// for each light
-			Vector3d l = _l[j]->getVector(p);			//		l = light position
+			Vector4d l = _l[j]->getVector(p);			//		l = light position
 			if (_l[j]->_type == Light::POINT || _l[j]->_type == Light::SPOT){						//		if light is a point
-				Vector3d w = l.normalized();			//		find the point on the "area" light
-				Vector3d up(0.0, 1.0, 0.0);
+				Vector4d w = l.normalized();			//		find the point on the "area" light
+				Vector4d up(0.0, 1.0, 0.0, 0.0);
 				if (w.dot(up) == 1) up << 1.0, 0.0, 0.0;
-				Vector3d u = (up.cross(w)).normalized();
-				Vector3d v = (w.cross(u)).normalized();
+				Vector4d u = (up.cross3(w)).normalized(); u(3) = 0;
+				Vector4d v = (w.cross3(u)).normalized(); v(3) = 0;
 				Vector2d _area = area.array() * ((LightP*)_l[j])->_r;
 				l = l + u * _area[0] + v * _area[1];
 			}
@@ -103,14 +103,14 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 			double fall = _l[j]->getFalloff(p);
 			
 			if ((fall != 0 && !s->_hit(sRay, 0.0001, 1, srec)) || srec.m == NULL || _shadows == false) {
-				Vector3d nn = n;
+				Vector4d nn = n;
 				if (nd < 0) {
 					nd = -nd;
 					nn = -nn;
 				}
-				Vector3d I = _l[j]->_rgb;
+				Vector4d I = _l[j]->_rgb;
 				l = l.normalized();
-				Vector3d h = (l.normalized() + d).normalized();
+				Vector4d h = (l.normalized() + d).normalized();
 				double nl = nn.dot(l);
 				double nh = nn.dot(h);
 				double dh = nn.dot(h);
@@ -137,13 +137,13 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 		// if reflection index is not 0 and if refractions are turned on
 		if (m->n != 0 && _refraction) {
 			//std::cout << " in reflections " << std::endl;
-			double c1, c2; Vector3d krefract, kreflect; krefract.setZero();
+			double c1, c2; Vector4d krefract, kreflect; krefract.setZero();
 			double current, to;
 			Ray v0, v1; v1.ref = v.ref; v1.alpha = v.alpha;
 			d.normalize();								// d = viewing ray direction
-			Vector3d reflect = d - 2 * (d.dot(n)) * n;	// reflect = reflected vector
+			Vector4d reflect = d - 2 * (d.dot(n)) * n;	// reflect = reflected vector
 			//reflect.normalize();
-			Vector3d t; t.setZero();
+			Vector4d t; t.setZero();
 			c1 = abs(d.dot(n));
 			current = v.ref.back();
 			refrac = refrac - 1;
@@ -205,7 +205,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 				//std::cout << "refract" << std::endl;
 				result += krefract.cwiseProduct((1 - R) * computeShading(v1, 0.001, INF, s, area, recurs, refrac));
 			}
-		} else if (m->ki != Vector3d::Zero()) {
+		} else if (m->ki != Vector4d::Zero()) {
 			d = v.dir;
 			Ray refRay(p, d - 2 * (d.dot(n)) * n, v.ref, v.alpha, Ray::VIEW);
 			result += m->ki.cwiseProduct(computeShading(refRay, 0.0001, INF, s, area, recurs - 1, refrac));
@@ -230,7 +230,7 @@ double Shading::fresnel(double index1, double index2, double c1, double c2 ) {
 	return ((rp * rp) + (rs * rs)) / 2;
 }
 
-bool Shading::refract(Vector3d d, Vector3d n, double index, double indext, Vector3d& t) {
+bool Shading::refract(Vector4d d, Vector4d n, double index, double indext, Vector4d& t) {
 	double under = 1.0 - pow(index / indext, 2) * (1 - pow(d.dot(n), 2));
 	if (under < 0) {
 		return false;
