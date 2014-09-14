@@ -107,18 +107,18 @@ int main(int argc, char** argv) {
 		j.push_back(Interval(-1, 1));
 		j.push_back(Interval(1.5, 2));
 		j.push_back(Interval(2.5, 3));
-		j = Interval::unionize(j);
+		//j = Interval::unionize(j);
 		cout << "{(-1, 1), (1.5, 2), (2.5, 3)}: " << j << endl;
 		Intervals x = j;
 		x.push_back(Interval(2, 4));
-		x = Interval::unionize(x);
+		//x = Interval::unionize(x);
 		cout << "{(-1, 1), (1.5, 4)}: " << x << endl;
 		x = j;
 		x.push_back(Interval(-5, 5));
-		cout << "{(-5, 5)}: " << Interval::unionize(x) << endl;
+		//cout << "{(-5, 5)}: " << Interval::unionize(x) << endl;
 		Intervals y; y.push_back(Interval(0, 2)); y.push_back(Interval(3, 4)); y.push_back(Interval(-3, -2));
 		x.pop_back(); x.insert(x.end(), y.begin(), y.end());
-		cout << x << endl << Interval::unionize(x) << endl;
+		//cout << x << endl << Interval::unionize(x) << endl;
 		exit(0);
 	}
 	tracer.parse(argv[1]);
