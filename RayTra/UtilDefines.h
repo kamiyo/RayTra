@@ -24,6 +24,7 @@
 #include <random>
 #include <memory>
 #include <limits>
+#include <intrin.h>
 
 class Material;
 class LightP;

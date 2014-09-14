@@ -724,13 +724,13 @@ void Parser::parse(const char *file) {
 					Vector4d min = a, max = b;
 					d = b;
 					f = a;
-					a << max[0], max[1], min[2];
-					b << min[0], max[1], min[2];
-					c << min[0], max[1], max[2];
+					a << max[0], max[1], min[2], 0;
+					b << min[0], max[1], min[2], 0;
+					c << min[0], max[1], max[2], 0;
 
-					e << max[0], min[1], min[2];
-					g << min[0], min[1], max[2];
-					h << max[0], min[1], max[2];
+					e << max[0], min[1], min[2], 0;
+					g << min[0], min[1], max[2], 0;
+					h << max[0], min[1], max[2], 0;
 
 				}
 				// min and max

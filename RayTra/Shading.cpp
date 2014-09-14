@@ -85,7 +85,7 @@ Vector4d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 			if (_l[j]->_type == Light::POINT || _l[j]->_type == Light::SPOT){						//		if light is a point
 				Vector4d w = l.normalized();			//		find the point on the "area" light
 				Vector4d up(0.0, 1.0, 0.0, 0.0);
-				if (w.dot(up) == 1) up << 1.0, 0.0, 0.0;
+				if (w.dot(up) == 1) up << 1.0, 0.0, 0.0, 0.0;
 				Vector4d u = (up.cross3(w)).normalized(); u(3) = 0;
 				Vector4d v = (w.cross3(u)).normalized(); v(3) = 0;
 				Vector2d _area = area.array() * ((LightP*)_l[j])->_r;
@@ -147,7 +147,7 @@ Vector4d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 			c1 = abs(d.dot(n));
 			current = v.ref.back();
 			refrac = refrac - 1;
-			krefract << pow(EULER, -1.0 * v1.alpha.back()[0]*rec.t), pow(EULER, -1.0 * v1.alpha.back()[1]*rec.t), pow(EULER, -1.0 * v1.alpha.back()[2]*rec.t);
+			krefract << pow(EULER, -1.0 * v1.alpha.back()[0]*rec.t), pow(EULER, -1.0 * v1.alpha.back()[1]*rec.t), pow(EULER, -1.0 * v1.alpha.back()[2]*rec.t), 0;
 			n = rec.n;
 			if (d.dot(n) < 0) {							// if viewing vector is in front of normal, i.e. entering a refracting object
 				//std::cout << "dot positive" << std::endl;

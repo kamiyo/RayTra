@@ -26,7 +26,9 @@ _ny		height (pixels)
 IN
 vec		ep		eye position
 ip		image plane location
-dir		image plane normal (= viewing direction if no shift)
+dir		image plane normal
+fp		focal point
+fd		focal direction
 up		up-vector
 double	d		distance (to image)
 iw		width (units)

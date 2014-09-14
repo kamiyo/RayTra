@@ -130,10 +130,55 @@ void BVH::boundingBox() {
 http://people.csail.mit.edu/amy/papers/box-jgt.pdf
 gains of 25% in paper
 */
+static const float flt_inf = -logf(0);
+static const float flt_ninf = logf(0);
+
 bool BVH::hitbox(Ray& ray, double t0, double t1) {
+	//__m128 inf = _mm_load1_ps(&flt_inf);
+	//__m128 ninf = _mm_load1_ps(&flt_ninf);
+
+
 	double tmin, tmax, tymin, tymax, tzmin, tzmax;
-	Vector4d e = ray.eye;
-	Vector4d i = ray.inv;
+	Vector4d e = ray.eye; e(3) = 0;
+	Vector4d i = ray.inv; i(3) = 0;
+	/*_b.MIN(3) = 0;
+	_b.MAX(3) = 0;
+
+	__m128 box_min = _mm_load_ps((float*)_b.MIN.data());
+	__m128 box_max = _mm_load_ps((float*) _b.MAX.data());
+	__m128 pos = _mm_load_ps((float*) e.data());
+	__m128 inv = _mm_load_ps((float*) i.data());
+
+	__m128 l1 = _mm_mul_ps(_mm_sub_ps(box_min, pos), inv);
+	__m128 l2 = _mm_mul_ps(_mm_sub_ps(box_max, pos), inv);
+
+	__m128 filtered_l1a = _mm_min_ps(l1, inf);
+	__m128 filtered_l2a = _mm_min_ps(l2, inf);
+	__m128 filtered_l1b = _mm_max_ps(l1, ninf);
+	__m128 filtered_l2b = _mm_max_ps(l2, ninf);
+
+	__m128 lmax = _mm_max_ps(filtered_l1a, filtered_l2a);
+	__m128 lmin = _mm_min_ps(filtered_l1b, filtered_l2b);
+
+	__m128 lmax0 = _mm_shuffle_ps(lmax, lmax, 0x39);
+	__m128 lmin0 = _mm_shuffle_ps(lmin, lmin, 0x39);
+	lmax = _mm_min_ss(lmax, lmax0);
+	lmin = _mm_max_ss(lmin, lmin0);
+
+	__m128 lmax1 = _mm_movehl_ps(lmax, lmax);
+	__m128 lmin1 = _mm_movehl_ps(lmin, lmin);
+	lmax = _mm_min_ss(lmax, lmax1);
+	lmin = _mm_max_ss(lmin, lmin1);
+	float ft0 = (float) t0;
+	float ft1 = (float) t1;
+
+	const bool ret = _mm_comige_ss(lmax, _mm_load1_ps(&ft0)) & _mm_comige_ss(lmax, lmin) & _mm_comige_ss(_mm_load1_ps(&ft1), lmin);
+	float tt0, tt1;
+	_mm_store_ss(&tt0, lmin);
+	_mm_store_ss(&tt1, lmax);
+
+	return ret;*/
+	
 	Vector3i s = ray.sign;
 
 	tmin = (_b.b[s[0]][0] - e[0]) * i[0];
@@ -149,4 +194,5 @@ bool BVH::hitbox(Ray& ray, double t0, double t1) {
 	if (tzmin > tmin) tmin = tzmin;
 	if (tzmax < tmax) tmax = tzmax;
 	return ((tmin < t1) && (tmax > t0));
+	
 }

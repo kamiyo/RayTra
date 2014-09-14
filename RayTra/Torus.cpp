@@ -79,7 +79,7 @@ bool Torus::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	rec.t = reals[0];
 	if (ray.type == Ray::VIEW) {
 		Vector4d p = e + rec.t * d;
-		Vector4d pp; pp << p(0), p(1), 0.;
+		Vector4d pp; pp << p(0), p(1), 0., 0.;
 		Vector4d c = pp.normalized() * _R; // center of tube
 		Vector4d n = (p - c).normalized();
 		rec.n = n;

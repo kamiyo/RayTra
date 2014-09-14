@@ -434,7 +434,7 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 
 		for (int i = 0; i < width; i++) {
 
-			Vector4d c = Vector4d::Zero();		// initialize color result vector (RGB)
+			Vector4d c(Vector4d::Zero());		// initialize color result vector (RGB)
 
 			Sampler2d l_sample = light_sampler.genPoints();
 			Sampler2d s_sample = lens_sampler.genPoints();

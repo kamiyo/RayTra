@@ -32,16 +32,23 @@ unsigned long Ray::count = 0;
 
 Ray::Ray(Vector4d e, Vector4d d, std::vector<double> r, std::vector<Vector4d> a, int t):
 eye(e), dir(d), ref(r), alpha(a), type(t) {
-	Ray::count++;
+#pragma omp critical
+	{
+		Ray::count = Ray::count + 1;
+	}
+
 	inv = dir.cwiseInverse();
 	reSign();
+	e(3) = 0;
+	d(3) = 0;
+	inv(3) = 0;
 }
 
 Ray::Ray() {
 }
 
 void Ray::reSign() {
-	sign = (inv.array() < 0).block<3, 1>(0, 0).cast<int>();
+	sign = (inv.array() < 0).cast<int>().block<3,1>(0, 0);
 }
 
 Ray::~Ray() {
@@ -49,5 +56,5 @@ Ray::~Ray() {
 }
 
 std::ostream &operator<<(std::ostream &os, Ray &r) {
-	return os << r.eye << ", " << r.dir << " " << r.dir.norm();
+	return os << r.eye << ", " << r.dir << " " << r.dir.norm() << " " << Ray::count;
 }
