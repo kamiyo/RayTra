@@ -21,6 +21,7 @@ public:
 	Surface* _l;
 	Surface* _r;
 	virtual ~BVH();
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* BVH_H_ */

@@ -12,5 +12,6 @@ public:
 	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec);
 	double _r;
 	double _h;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 #endif

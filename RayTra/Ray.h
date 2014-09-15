@@ -26,7 +26,7 @@ public:
 		std::vector<double> ref;
 		std::vector<Vector4d> alpha;
 		static unsigned long count;
-
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 std::ostream &operator<<(std::ostream &os, Ray &r);

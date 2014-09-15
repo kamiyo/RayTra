@@ -29,6 +29,7 @@ public:
 	double _size;
 	int _nx;
 	int _ny;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* CAMERA_H_ */

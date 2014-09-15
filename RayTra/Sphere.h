@@ -21,7 +21,7 @@ public:
 	Vector4d _p;
 	double _r;
 	LightP* _l;
-
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* SPHERE_H_ */

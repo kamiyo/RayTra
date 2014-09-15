@@ -16,6 +16,7 @@ private:
 	int nX, nY;
 	void move(int d);
 	void hilbert(int i, int front, int right, int behind, int left);
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif

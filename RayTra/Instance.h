@@ -11,5 +11,6 @@ public:
 	virtual void boundingBox();
 	~Instance();
 	Surface* _s;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 #endif

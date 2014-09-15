@@ -38,6 +38,7 @@ public:
 	bool _russian;
 	bool _shadows;
 	bool toBreak;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* SHADING_H_ */

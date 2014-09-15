@@ -11,6 +11,7 @@ public:
 	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec);
 	~Torus();
 	double _r, _R;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* TORUS_H_ */

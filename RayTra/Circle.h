@@ -17,6 +17,7 @@ public:
 	Vector4d _n;
 	double _r;
 	Light* _l;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif

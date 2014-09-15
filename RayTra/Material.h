@@ -20,6 +20,7 @@ public:
 	Vector4d ka;
 	double p;
 	double n;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* MATERIAL_H_ */

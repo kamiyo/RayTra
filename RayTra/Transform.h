@@ -23,6 +23,7 @@ public:
 	std::stack<Matrix4d> _m;
 	std::stack<Matrix4d> _mInv;
 	std::stack<Matrix4d> _mN;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 inline Vector4d operator* (const Transform& t, const Vector4d& v) {

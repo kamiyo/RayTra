@@ -18,6 +18,7 @@ public:
 	virtual double getFalloff(Vector4d p);
 	Vector4d _pos;
 	double _r;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* LIGHTP_H_ */

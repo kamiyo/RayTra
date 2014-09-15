@@ -15,8 +15,6 @@
 
 class Surface {
 public:
-	enum { NeedsToAlign = (sizeof(Vector4d) % 16) == 0 };
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign);
 	virtual bool _hit(Ray& ray, double t0, double t1, hitRecord& rec);
 	void trans(Matrix4d& m, Matrix4d& inv);
 	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec) = 0;
@@ -29,6 +27,7 @@ public:
 	BBox _b;
 	int _type;
 	enum { PLANE, SPHERE, CYLINDER, CONE, TORUS, TRIANGLE, FACE, CIRCLE, BOX, BOVOH, INSTANCE };
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* SURFACE_H_ */

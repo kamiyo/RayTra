@@ -25,6 +25,7 @@ public:
 	HEdge* getHE();
 	Vector4d _normal;
 	bool smooth;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	HEdge* _e;
 };
@@ -39,6 +40,7 @@ public:
 	HEdge* getNext();
 	Vertex* getVertex();
 	Face* getFace();
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	Vertex* _vert;
 	HEdge* _next;
@@ -52,6 +54,7 @@ public:
 	void addNormal(Vector4d n);
 	Vector4d _n;
 	Vector4d _p;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* FACE_H_ */

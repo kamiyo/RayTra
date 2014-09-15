@@ -17,7 +17,7 @@ public:
 	virtual Vector4d getVector(Vector4d p);
 	virtual double getFalloff(Vector4d p);
 	Vector4d _dir;
-
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* LIGHTD_H_ */

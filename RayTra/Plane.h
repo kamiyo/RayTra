@@ -17,6 +17,7 @@ public:
 	virtual ~Plane();
 	Vector4d _p;
 	Vector4d _n;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* PLANE_H_ */

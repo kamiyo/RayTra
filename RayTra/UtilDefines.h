@@ -25,6 +25,7 @@
 #include <memory>
 #include <limits>
 #include <intrin.h>
+#include <immintrin.h>
 
 class Material;
 class LightP;

@@ -21,6 +21,7 @@ public:
 	void addNormal(Vector4d n);
 	Vector4d _n;
 	Vector4d _p;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* VERTEX_H_ */

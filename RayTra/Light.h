@@ -18,6 +18,7 @@ public:
 	Vector4d _rgb;
 	int _type;
 	enum {POINT, DIRECTIONAL, SPOT};
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* LIGHT_H_ */

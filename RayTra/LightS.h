@@ -16,5 +16,6 @@ public:
 	double _r;
 	double _theta;
 	double _phi;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 #endif

@@ -18,6 +18,7 @@ public:
 	void boundingBox();
 	~Group();
 	std::vector<Surface*> _s;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* GROUP_H_ */

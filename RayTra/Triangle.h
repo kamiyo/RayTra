@@ -17,7 +17,7 @@ public:
 	void boundingBox();
 	virtual ~Triangle();
 	Vector4d _p1, _p2, _p3, abc, def, _n, _u1, _v1, _u2, _v2, _u3, _v3;
-
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* TRIANGLE_H_ */
