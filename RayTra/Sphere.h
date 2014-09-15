@@ -20,8 +20,8 @@ public:
 	~Sphere();
 	Vector3d _p;
 	double _r;
+	double _r2;
 	LightP* _l;
-
 };
 
 #endif /* SPHERE_H_ */

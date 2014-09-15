@@ -3,19 +3,19 @@ eye	-50 150 250
 at   0  -5  0
 u 0 1 0
 i 120 90
-p 800 600
+p 400 300
 f 14
 c
 
 o
-ms 16 3
+ms 1 3
 s 3
 gi 1
-rc 3
-rf 4
+rc 1
+rf 1
 c 1
 dof 1
-accel 1
+accel 0
 hilbert 0
 o
 
