@@ -32,8 +32,9 @@ Sphere::~Sphere() {
 
 double mydot(__m256d& a, __m256d& b) {
 	__m256d temp = _mm256_mul_pd(a, b);
-	__declspec(align(16)) double res[4];
-	temp = _mm256_hadd_pd(temp, temp);
+	__declspec(align(32)) double res[4];
+	__m256d mpte = _mm256_permute2f128_pd(temp, temp, 0x1);
+	temp = _mm256_hadd_pd(temp, mpte);
 	_mm256_store_pd(res, _mm256_hadd_pd(temp, temp));
 	return res[0];
 }
@@ -42,10 +43,17 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	Vector3d e = ray.eye;
 	Vector3d d = ray.dir;
 	Vector3d ep = e - _p;
+
 	const double* ep_data = ep.data();
 	const double* d_data = d.data();
-	__m256d ep_v = _mm256_set_pd(ep_data[0], ep_data[1], ep_data[2], 0);
-	__m256d d_v = _mm256_set_pd(d_data[0], d_data[1], d_data[2], 0);
+	__m256d ep_v = _mm256_setr_pd(ep_data[0], ep_data[1], ep_data[2], 0);
+	__m256d d_v = _mm256_setr_pd(d_data[0], d_data[1], d_data[2], 0);
+
+	//__declspec(align(32)) double ep_data[4]; memcpy(ep_data, ep.data(), sizeof(double) * 3);
+	//__declspec(align(32)) double d_data[4]; memcpy(d_data, d.data(), sizeof(double) * 3);
+	//ep_data[3] = d_data[3] = 0;
+	//__m256d ep_v = _mm256_load_pd(ep_data);
+	//__m256d d_v = _mm256_load_pd(d_data);
 	//double dep = d.dot(ep);
 	//double dd = d.dot(d);
 	double dep = mydot(ep_v, d_v);
