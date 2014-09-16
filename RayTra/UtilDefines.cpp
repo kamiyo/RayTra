@@ -4,6 +4,29 @@ std::mt19937_64 mt;
 std::uniform_real_distribution<double> uni_real;
 std::uniform_int_distribution<int> uni_int;
 
+
+Vector3d _store4d(const __m256d &d) {
+	__declspec(align(32)) double res[4];
+	_mm256_store_pd(res, d);
+	return Vector3d(res[0], res[1], res[2]);
+}
+
+double _dot(__m256d& a, __m256d& b) {
+	__m256d temp = _mm256_mul_pd(a, b);
+	__declspec(align(32)) double res[4];
+	__m256d mpte = _mm256_permute2f128_pd(temp, temp, 0x1);
+	temp = _mm256_hadd_pd(temp, mpte);
+	_mm256_store_pd(res, _mm256_hadd_pd(temp, temp));
+	return res[0];
+}
+
+__m256d _load4d(const Vector3d &v) {
+	const double* data = v.data();
+	return _mm256_setr_pd(data[0], data[1], data[2], 0);
+}
+
+double _cross(__m256d& a, __m256d& b) { return 0; }
+
 Vector3d randSphere() {
 	double a, b, c;
 	do {

@@ -65,6 +65,13 @@ typedef struct hitRecord {
 	Surface* s;
 } hitRecord;
 
+
+Vector3d _store4d(const __m256d &d);
+double _dot(__m256d& a, __m256d& b);
+double _cross(__m256d& a, __m256d& b);
+__m256d _load4d(const Vector3d &v);
+
+
 Vector3d randSphere();
 
 void seedRand();

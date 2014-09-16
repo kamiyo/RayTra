@@ -29,25 +29,6 @@ Sphere::Sphere(LightP* l) {
 Sphere::~Sphere() {
 	// TODO Auto-generated destructor stub
 }
-__m256d _load4d(const Vector3d &v) {
-	const double* data = v.data();
-	return _mm256_setr_pd(data[0], data[1], data[2], 0);
-}
-
-Vector3d _store4d(const __m256d &d) {
-	__declspec(align(32)) double res[4];
-	_mm256_store_pd(res, d);
-	return Vector3d(res[0], res[1], res[2]);
-}
-
-double _dot(__m256d& a, __m256d& b) {
-	__m256d temp = _mm256_mul_pd(a, b);
-	__declspec(align(32)) double res[4];
-	__m256d mpte = _mm256_permute2f128_pd(temp, temp, 0x1);
-	temp = _mm256_hadd_pd(temp, mpte);
-	_mm256_store_pd(res, _mm256_hadd_pd(temp, temp));
-	return res[0];
-}
 
 bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	Vector3d e = ray.eye;
@@ -76,10 +57,10 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 				return false;
 			}
 			if (ray.type == Ray::VIEW) {
-				//Vector3d n = e + rec.t * d;
-				__m256d n_v = _mm256_sub_pd(_mm256_add_pd(_load4d(e), _mm256_mul_pd(d_v, _mm256_set1_pd(rec.t))), _load4d(_p));
-				//rec.n = (n - _p).normalized();
-				rec.n = _store4d(n_v).normalized();
+				Vector3d n = e + rec.t * d;
+				//__m256d n_v = _mm256_sub_pd(_mm256_add_pd(_load4d(e), _mm256_mul_pd(d_v, _mm256_set1_pd(rec.t))), _load4d(_p));
+				rec.n = (n - _p).normalized();
+				//rec.n = _store4d(n_v).normalized();
 			} else if (ray.type == Ray::SHAD) {
 				rec.s = this;
 			}
@@ -88,10 +69,10 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		}
 		else {
 			if (ray.type == Ray::VIEW) {
-				//Vector3d n = e + rec.t * d;
-				__m256d n_v = _mm256_sub_pd(_mm256_add_pd(_load4d(e), _mm256_mul_pd(d_v, _mm256_set1_pd(rec.t))), _load4d(_p));
-				//rec.n = (n - _p).normalized();
-				rec.n = _store4d(n_v).normalized();
+				Vector3d n = e + rec.t * d;
+				//__m256d n_v = _mm256_sub_pd(_mm256_add_pd(_load4d(e), _mm256_mul_pd(d_v, _mm256_set1_pd(rec.t))), _load4d(_p));
+				rec.n = (n - _p).normalized();
+				//rec.n = _store4d(n_v).normalized();
 			}
 			else if (ray.type == Ray::SHAD) {
 				rec.s = this;
