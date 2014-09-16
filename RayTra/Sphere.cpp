@@ -29,8 +29,18 @@ Sphere::Sphere(LightP* l) {
 Sphere::~Sphere() {
 	// TODO Auto-generated destructor stub
 }
+__m256d _load4d(const Vector3d &v) {
+	const double* data = v.data();
+	return _mm256_setr_pd(data[0], data[1], data[2], 0);
+}
 
-double mydot(__m256d& a, __m256d& b) {
+Vector3d _store4d(const __m256d &d) {
+	__declspec(align(32)) double res[4];
+	_mm256_store_pd(res, d);
+	return Vector3d(res[0], res[1], res[2]);
+}
+
+double _dot(__m256d& a, __m256d& b) {
 	__m256d temp = _mm256_mul_pd(a, b);
 	__declspec(align(32)) double res[4];
 	__m256d mpte = _mm256_permute2f128_pd(temp, temp, 0x1);
@@ -44,21 +54,12 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	Vector3d d = ray.dir;
 	Vector3d ep = e - _p;
 
-	const double* ep_data = ep.data();
-	const double* d_data = d.data();
-	__m256d ep_v = _mm256_setr_pd(ep_data[0], ep_data[1], ep_data[2], 0);
-	__m256d d_v = _mm256_setr_pd(d_data[0], d_data[1], d_data[2], 0);
+	__m256d ep_v = _load4d(ep);
+	__m256d d_v = _load4d(d);
 
-	//__declspec(align(32)) double ep_data[4]; memcpy(ep_data, ep.data(), sizeof(double) * 3);
-	//__declspec(align(32)) double d_data[4]; memcpy(d_data, d.data(), sizeof(double) * 3);
-	//ep_data[3] = d_data[3] = 0;
-	//__m256d ep_v = _mm256_load_pd(ep_data);
-	//__m256d d_v = _mm256_load_pd(d_data);
-	//double dep = d.dot(ep);
-	//double dd = d.dot(d);
-	double dep = mydot(ep_v, d_v);
-	double dd = mydot(d_v, d_v);
-	double disc = (dep * dep) - dd * (mydot(ep_v, ep_v) - _r2);
+	double dep = _dot(ep_v, d_v);
+	double dd = _dot(d_v, d_v);
+	double disc = (dep * dep) - dd * (_dot(ep_v, ep_v) - _r2);
 	if (disc < 0) {
 		return false;
 	}
@@ -75,8 +76,10 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 				return false;
 			}
 			if (ray.type == Ray::VIEW) {
-				Vector3d n = e + rec.t * d;
-				rec.n = (n - _p).normalized();
+				//Vector3d n = e + rec.t * d;
+				__m256d n_v = _mm256_sub_pd(_mm256_add_pd(_load4d(e), _mm256_mul_pd(d_v, _mm256_set1_pd(rec.t))), _load4d(_p));
+				//rec.n = (n - _p).normalized();
+				rec.n = _store4d(n_v).normalized();
 			} else if (ray.type == Ray::SHAD) {
 				rec.s = this;
 			}
@@ -85,9 +88,10 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		}
 		else {
 			if (ray.type == Ray::VIEW) {
-				Vector3d n = e + rec.t * d;
-				rec.n = (n - _p).normalized();
-				rec.l = _l;
+				//Vector3d n = e + rec.t * d;
+				__m256d n_v = _mm256_sub_pd(_mm256_add_pd(_load4d(e), _mm256_mul_pd(d_v, _mm256_set1_pd(rec.t))), _load4d(_p));
+				//rec.n = (n - _p).normalized();
+				rec.n = _store4d(n_v).normalized();
 			}
 			else if (ray.type == Ray::SHAD) {
 				rec.s = this;
