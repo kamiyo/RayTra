@@ -14,6 +14,7 @@ Sphere::Sphere(Vector3d pos, double rad, Material* m) {
 	boundingBox();
 	_l = NULL;
 	_type = SPHERE;
+	_r2 = _r * _r;
 }
 
 Sphere::Sphere(LightP* l) {
@@ -33,27 +34,34 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	Vector3d e = ray.eye;
 	Vector3d d = ray.dir;
 	Vector3d ep = e - _p;
-	double dep = d.dot(ep);
-	double disc = (dep * dep) - d.dot(d) * (ep.dot(ep) - (_r*_r));
+
+	__m256d ep_v = _load4d(ep);
+	__m256d d_v = _load4d(d);
+
+	double dep = _dot(ep_v, d_v);
+	double dd = _dot(d_v, d_v);
+	double disc = (dep * dep) - dd * (_dot(ep_v, ep_v) - _r2);
 	if (disc < 0) {
 		return false;
 	}
 	else {
 		disc = sqrt(disc);
-		rec.t = (-1.0 * dep - disc) / d.dot(d);
+		rec.t = (-1.0 * dep - disc) / dd;
 		if (rec.t > t1) {
 			return false;
 		}
+		if (rec.t > t1) return false;
 		if (rec.t < t0) {
-			rec.t = (-1.0 * dep + disc) / d.dot(d);
+			rec.t = (-1.0 * dep + disc) / dd;
 
 			if (rec.t < t0 || rec.t > t1) {
 				return false;
 			}
 			if (ray.type == Ray::VIEW) {
 				Vector3d n = e + rec.t * d;
-				n = (n - _p).normalized();
-				rec.n = n;
+				//__m256d n_v = _mm256_sub_pd(_mm256_add_pd(_load4d(e), _mm256_mul_pd(d_v, _mm256_set1_pd(rec.t))), _load4d(_p));
+				rec.n = (n - _p).normalized();
+				//rec.n = _store4d(n_v).normalized();
 			} else if (ray.type == Ray::SHAD) {
 				rec.s = this;
 			}
@@ -63,9 +71,9 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		else {
 			if (ray.type == Ray::VIEW) {
 				Vector3d n = e + rec.t * d;
-				n = (n - _p).normalized();
-				rec.n = n;
-				rec.l = _l;
+				//__m256d n_v = _mm256_sub_pd(_mm256_add_pd(_load4d(e), _mm256_mul_pd(d_v, _mm256_set1_pd(rec.t))), _load4d(_p));
+				rec.n = (n - _p).normalized();
+				//rec.n = _store4d(n_v).normalized();
 			}
 			else if (ray.type == Ray::SHAD) {
 				rec.s = this;

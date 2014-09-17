@@ -76,8 +76,65 @@ int main(int argc, char** argv) {
 		name = argv[1];
 		name = name.substr(0, name.find_last_of('.')) + ".exr";
 	} else {
-		cerr << "not correct number of arguments" << endl;
-		return 1;
+		/*clock_t start = clock();
+		srand(time(NULL));
+#define __R rand() / (double)RAND_MAX
+#define __VR Vector3d(__R, __R, __R)
+		Sphere* ss = new Sphere(Vector3d(__R, __R, __R), __R, new Material(Vector3d::Ones, Vector3d::Ones, Vector3d::Ones, 0, Vector3d::Ones, 0, Vector3d::Ones));
+		bool result = false;
+		hitRecord r;
+		for (int i = 0; i < 1e6; i++) {
+			result = ss->hit(Ray(__VR, __VR, std::vector<double>(), std::vector<Vector3d>(), Ray::VIEW), nINF, INF, r);
+		}
+		clock_t ends = clock();
+		double runtime = (double) (ends - start) / CLOCKS_PER_SEC;
+		cout << runtime << " seconds" << endl;
+		return result;*/
+		/*
+		Interval i(0, 1);
+		cout << i << endl;
+		cout << "should be true: " << Interval::intersects(i, Interval(-1, 0.5)) << endl;
+		cout << "============= binary Intersects ============" << endl;
+		cout << "should be (0, 0.5): " << i.intersect(Interval(-1, 0.5)) << endl;
+		cout << "should be (0.2, 0.8): " << i.intersect(Interval(0.2, 0.8)) << endl;
+		cout << "should be (0.5, 1): " << i.intersect(Interval(0.5, 4)) << endl;
+		cout << "should be (): " << i.intersect(Interval(9, 10)) << endl;
+		cout << "should be (): " << i.intersect(Interval()) << endl;
+		cout << "============= binary Unions ================" << endl;
+		cout << "should be (0, 4) and (0, 4): " << i.unionize(Interval(1, 4)) << " " << i.unionize(Interval(0.5, 4)) << endl;
+		cout << "should be {(0, 1), (5, 6)}: " << i.unionize(Interval(5, 6)) << endl;
+		cout << "should be {(-5, -3), (0, 1)}: " << i.unionize(Interval(-5, -3)) << endl;
+		cout << "should be (-5, 5): " << i.unionize(Interval(-5, 5)) << endl;
+		cout << "should be (0, 1): " << i.unionize(Interval()) << endl;
+		cout << "============= binary Differences ===========" << endl;
+		Interval k(-5, 5);
+		cout << "should be {(-5, -2), (2, 5)}: " << k.difference(Interval(-2, 2)) << endl;
+		cout << "should be (0, 5): " << k.difference(Interval(-5, 0)) << endl;
+		cout << "should be (-5, 0): " << k.difference(Interval(0, 5)) << endl;
+		cout << "should be (): " << k.difference(k) << endl;
+		cout << "should be (): " << k.difference(Interval(-10, 10)) << endl;
+		cout << "should be (-5, 5): " << k.difference(Interval(10, 20)) << endl;
+		cout << "should be (-5, 5): " << k.difference(Interval(-20, -10)) << endl;
+		cout << "should be (-5, 5): " << k.difference(Interval()) << endl;
+		cout << "should be (): " << Interval().difference(k) << endl;
+		cout << "============= Multiple Unions ==============" << endl;
+		Intervals j;
+		j.push_back(Interval(-1, 1));
+		j.push_back(Interval(1.5, 2));
+		j.push_back(Interval(2.5, 3));
+		//j = Interval::unionize(j);
+		cout << "{(-1, 1), (1.5, 2), (2.5, 3)}: " << j << endl;
+		Intervals x = j;
+		x.push_back(Interval(2, 4));
+		//x = Interval::unionize(x);
+		cout << "{(-1, 1), (1.5, 4)}: " << x << endl;
+		x = j;
+		x.push_back(Interval(-5, 5));
+		//cout << "{(-5, 5)}: " << Interval::unionize(x) << endl;
+		Intervals y; y.push_back(Interval(0, 2)); y.push_back(Interval(3, 4)); y.push_back(Interval(-3, -2));
+		x.pop_back(); x.insert(x.end(), y.begin(), y.end());
+		//cout << x << endl << Interval::unionize(x) << endl;
+		exit(0);*/
 	}
 	tracer.parse(argv[1]);
 	width = tracer.width;

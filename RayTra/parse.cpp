@@ -207,10 +207,14 @@ void Parser::parse(const char *file) {
 			}
 			else if (cmd == "m" || "material" || cmd == "}") {
 				isMat = false;
-				if (matString == "") {
+				string tryagain; _iss >> tryagain;
+				if (matString == "" || tryagain == "") {
 					material(ka, kd, ks, r, ki, n, alpha);
 				}
 				else {
+					if (matString == "") {
+						matString = tryagain;
+					}
 					material(matString, ka, kd, ks, r, ki, n, alpha);
 				}
 			}
@@ -373,7 +377,7 @@ void Parser::parse(const char *file) {
 			}
 			else if (cmd == "s" || cmd == "sphere" || cmd == "}") {
 				sphere(pos, rad);
-				isSphere == false;
+				isSphere = false;
 			}
 		}
 		else if (isCyl) {
@@ -684,7 +688,7 @@ void Parser::parse(const char *file) {
 			Vector3d n = nInfVec, p;
 			_iss >> n >> p;
 			if (n == nInfVec) {
-				isPlane == true;
+				isPlane = true;
 				pos = norm = nInfVec;
 			}
 			else {
@@ -700,7 +704,7 @@ void Parser::parse(const char *file) {
 			ka.setOnes(); kd.setZero(); ki.setZero(); ks.setZero();
 			alpha.setZero(); n = 0; r = 0.;
 			_iss >> matString;
-			if (matString != "") {
+			if (matString != "" && matString != "{") {
 				material(matString);
 			}
 		}

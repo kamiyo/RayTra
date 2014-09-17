@@ -29,6 +29,7 @@
     <ClInclude Include="Group.h" />
     <ClInclude Include="Hilbert.h" />
     <ClInclude Include="Instance.h" />
+    <ClInclude Include="Interval.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LightD.h" />
     <ClInclude Include="LightP.h" />
@@ -47,6 +48,7 @@
     <ClInclude Include="Torus.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="Union.h" />
     <ClInclude Include="UtilDefines.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
@@ -62,6 +64,7 @@
     <ClCompile Include="HEdge.cpp" />
     <ClCompile Include="Hilbert.cpp" />
     <ClCompile Include="Instance.cpp" />
+    <ClCompile Include="Interval.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightD.cpp" />
     <ClCompile Include="LightP.cpp" />
@@ -81,12 +84,14 @@
     <ClCompile Include="Torus.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Triangle.cpp" />
+    <ClCompile Include="Union.cpp" />
     <ClCompile Include="UtilDefines.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\x64\Release\scene.txt" />
     <Text Include="hanoi.txt" />
+    <Text Include="pyr.txt" />
     <Text Include="spheres.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -140,6 +145,7 @@
     <ExecutablePath>$(DXSDK_DIR)\Utilities\bin\x64;$(ICInstallDir)bin\Intel64;$(ExecutablePath)</ExecutablePath>
     <IncludePath>$(DXSDK_DIR)\Include;$(ICIncludeDir);$(IncludePath)</IncludePath>
     <ReferencePath>$(DXSDK_DIR)\Lib\x64;$(VC_ReferencesPath_x64);</ReferencePath>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -200,14 +206,17 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>OPENEXR_DLL;_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <OptimizeReferences>false</OptimizeReferences>
       <AdditionalOptions>IlmImf.lib Imath.lib Iex.lib Half.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>kernel32.lib;user32.lib;zlib.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
