@@ -76,20 +76,20 @@ int main(int argc, char** argv) {
 		name = argv[1];
 		name = name.substr(0, name.find_last_of('.')) + ".exr";
 	} else {
-		clock_t start = clock();
+		/*clock_t start = clock();
 		srand(time(NULL));
-#define _R rand() / (double)RAND_MAX
-#define _VR Vector3d(_R, _R, _R)
-		Sphere* ss = new Sphere(Vector3d(_R, _R, _R), _R, new Material(Vector3d::Ones(), Vector3d::Ones(), Vector3d::Ones(), 0, Vector3d::Ones(), 0, Vector3d::Ones()));
+#define __R rand() / (double)RAND_MAX
+#define __VR Vector3d(__R, __R, __R)
+		Sphere* ss = new Sphere(Vector3d(__R, __R, __R), __R, new Material(Vector3d::Ones, Vector3d::Ones, Vector3d::Ones, 0, Vector3d::Ones, 0, Vector3d::Ones));
 		bool result = false;
 		hitRecord r;
 		for (int i = 0; i < 1e6; i++) {
-			result = ss->hit(Ray(_VR, _VR, std::vector<double>(), std::vector<Vector3d>(), Ray::VIEW), nINF, INF, r);
+			result = ss->hit(Ray(__VR, __VR, std::vector<double>(), std::vector<Vector3d>(), Ray::VIEW), nINF, INF, r);
 		}
 		clock_t ends = clock();
 		double runtime = (double) (ends - start) / CLOCKS_PER_SEC;
 		cout << runtime << " seconds" << endl;
-		return result;
+		return result;*/
 		/*
 		Interval i(0, 1);
 		cout << i << endl;

@@ -50,6 +50,7 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		if (rec.t > t1) {
 			return false;
 		}
+		if (rec.t > t1) return false;
 		if (rec.t < t0) {
 			rec.t = (-1.0 * dep + disc) / dd;
 

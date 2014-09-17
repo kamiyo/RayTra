@@ -24,6 +24,7 @@
 #include <random>
 #include <memory>
 #include <limits>
+#include <intrin.h>
 
 class Material;
 class LightP;
@@ -38,7 +39,7 @@ class Surface;
 //#define RAN (double)genrand_real2()
 #define RAN genRand_real()
 #define RAD sqrt((double)1.0 / M_PI)
-#define COSVEC _cosVec
+#define COSVEC cosVec
 #define DISK toDisk
 #define _PLUCKER_
 
@@ -67,8 +68,8 @@ typedef struct hitRecord {
 
 
 Vector3d _store4d(const __m256d &d);
-double _dot(__m256d& a, __m256d& b);
-double _cross(__m256d& a, __m256d& b);
+double _dot(const __m256d &a, const __m256d &b);
+double _cross(const __m256d &a, const __m256d &b);
 __m256d _load4d(const Vector3d &v);
 
 

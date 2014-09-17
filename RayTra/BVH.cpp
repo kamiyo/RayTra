@@ -130,7 +130,7 @@ void BVH::boundingBox() {
 http://people.csail.mit.edu/amy/papers/box-jgt.pdf
 gains of 25% in paper
 */
-bool BVH::hitbox(Ray& ray, double t0, double t1) {
+bool BVH::hitbox(Ray& ray, const double t0, const double t1) {
 	double tmin, tmax, tymin, tymax, tzmin, tzmax;
 	Vector3d e = ray.eye;
 	Vector3d i = ray.inv;

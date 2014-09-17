@@ -36,12 +36,12 @@ void Shading::addAmbient(Vector3d a) {
 }
 
 // form of function where recursion and refraction are not specified. 
-Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area) {
-	return computeShading(v, t0, t1, s, area, _recurs, _refraction);
+Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const Vector2d& area) {
+	return computeShading(vray, t0, t1, s, area, _recurs, _refraction);
 }
 
 //SHADER
-Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area, int recurs, int refrac) {
+Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const Vector2d& area, int recurs, int refrac) {
 	if (recurs == -1 || refrac == -1) {
 		return Vector3d::Zero();						//return 0 if recursion limit reached
 	}
@@ -51,10 +51,10 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 	Vector3d cook;
 	cook.setZero();
 
-	Vector3d d = (-1.0 * v.dir).normalized();									// d = viewing ray direction (out of surface)
+	Vector3d d = (-1.0 * vray.dir).normalized();									// d = viewing ray direction (out of surface)
 	Material* m;
 
-	if (s->_hit(v, t0, t1, rec)) {
+	if (s->_hit(vray, t0, t1, rec)) {
 		Vector3d n = rec.n;						// n = normal vector of intersection
 		
 		double nd = n.dot(d);
@@ -67,18 +67,19 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 			return light;
 		}
 
-		Vector3d p = v.eye + rec.t * v.dir;				// p = intersection point
+		const Vector3d p = vray.eye + rec.t * vray.dir;				// p = intersection point
 		m = rec.m;										// material at intersection
 
 		Vector3d global; global.setZero();
 		for (int gi = 0; gi < _indirect; gi++) {
 			Vector3d newDir = COSVEC(n);
-			Ray diffR(p, v.dir.norm() * newDir, v.ref, v.alpha, Ray::VIEW);
-			global += computeShading(diffR, 0.0001, INF, s, area, recurs - 1, refrac);
+			Ray diffR(p, vray.dir.norm() * newDir, vray.ref, vray.alpha, Ray::VIEW);
+			global += computeShading(diffR, 0.0001, t1, s, area, recurs - 1, refrac);
 		}
 
 		if (_indirect != 0) {
-			result += m->kd.cwiseProduct(global / (double)_indirect);
+			//std::cout << _indirect << std::endl;
+			result += m->kd.cwiseProduct(global / (2. * (double)_indirect));
 		}
 		for (int j = 0; j < (int)_l.size(); j++) {		// for each light
 			Vector3d l = _l[j]->getVector(p);			//		l = light position
@@ -92,7 +93,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 				l = l + u * _area[0] + v * _area[1];
 			}
 
-			Ray sRay(p, l, v.ref, v.alpha, Ray::SHAD);
+			Ray sRay(p, l, vray.ref, vray.alpha, Ray::SHAD);
 			/* if shadows are off or if a shadow is not found
 			 calculate lighting
 			 I = light's intensity in RGB
@@ -102,7 +103,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 			*/
 			double fall = _l[j]->getFalloff(p);
 			
-			if ((fall != 0 && !s->_hit(sRay, 0.0001, 1, srec)) || srec.m == NULL || _shadows == false) {
+			if ((fall != 0 && !s->_hit(sRay, 0.001, 1, srec)) || srec.m == NULL || _shadows == false) {
 				Vector3d nn = n;
 				if (nd < 0) {
 					nd = -nd;
@@ -123,7 +124,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 				*/
 				//
 				if (_indirect != 0) {
-					result += fall * ((m->kd).cwiseProduct(I) * std::max((double) 0, nl) + (m->ks).cwiseProduct(I) * std::pow(std::max((double) 0, nh), m->p));
+					result += fall * ((m->kd).cwiseProduct(I) * std::max((double) 0, nl) / 2.0 + (m->ks).cwiseProduct(I) * std::pow(std::max((double) 0, nh), m->p));
 				}
 				else {
 					result += fall * ((m->kd).cwiseProduct(I) * std::max((double) 0, nl) + (m->ks).cwiseProduct(I) * std::pow(std::max((double) 0, nh), m->p));
@@ -133,19 +134,19 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 				//result += aoao * ((m->kd).cwiseProduct(I) * std::max((double)0, nl) + (m->ks).cwiseProduct(I) * pow(std::max((double)0, nh), m->p));
 			}
 		}
-		d = v.dir;
+		d = vray.dir;
 		// if reflection index is not 0 and if refractions are turned on
-		if (m->n != 0 && _refraction) {
+		if ((m->n != 0) && _refraction) {
 			//std::cout << " in reflections " << std::endl;
 			double c1, c2; Vector3d krefract, kreflect; krefract.setZero();
 			double current, to;
-			Ray v0, v1; v1.ref = v.ref; v1.alpha = v.alpha;
+			Ray v0, v1; v1.ref = vray.ref; v1.alpha = vray.alpha;
 			d.normalize();								// d = viewing ray direction
 			Vector3d reflect = d - 2 * (d.dot(n)) * n;	// reflect = reflected vector
 			//reflect.normalize();
 			Vector3d t; t.setZero();
 			c1 = abs(d.dot(n));
-			current = v.ref.back();
+			current = vray.ref.back();
 			refrac = refrac - 1;
 			krefract << pow(EULER, -1.0 * v1.alpha.back()[0]*rec.t), pow(EULER, -1.0 * v1.alpha.back()[1]*rec.t), pow(EULER, -1.0 * v1.alpha.back()[2]*rec.t);
 			n = rec.n;
@@ -159,7 +160,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 					c2 = abs((t.normalized()).dot(n));
 				} else {
 					//std::cout << "total internal" << std::endl;
-					Ray refRay(p, reflect, v.ref, v.alpha, Ray::VIEW);
+					Ray refRay(p, reflect, vray.ref, vray.alpha, Ray::VIEW);
 					//std::cout << v.ref.size() << std::endl;
 					//std::cout << "return" << std::endl;
 					return result += krefract.cwiseProduct(computeShading(refRay, 0.001, INF, s, area, recurs, refrac));
@@ -173,7 +174,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 					c2 = abs((t.normalized()).dot(n));
 				} else {								// if total internal refraction, then only add reflection
 					//std::cout << "total internal" << std::endl;
-					Ray refRay(p, reflect, v.ref, v.alpha, Ray::VIEW);
+					Ray refRay(p, reflect, vray.ref, vray.alpha, Ray::VIEW);
 					//std::cout << v.ref.size() << std::endl;
 					//std::cout << "return" << std::endl;
 					return result += krefract.cwiseProduct(computeShading(refRay, 0.001, INF, s, area, recurs, refrac));
@@ -188,7 +189,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 			//	std::cout << v1.ref[pp] << " ";
 			//} std::cout << std::endl;
 			//std::cout << "ref " << t[0] << " " << t[1] << " " << t[2] << std::endl;
-			v0 = Ray(p, reflect, v.ref, v.alpha, Ray::VIEW);
+			v0 = Ray(p, reflect, vray.ref, vray.alpha, Ray::VIEW);
 			v1 = Ray(p, t, v1.ref, v1.alpha, Ray::VIEW);
 			//std::cout << "reflect" << std::endl;
 			if (_russian) {
@@ -206,8 +207,8 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 				result += krefract.cwiseProduct((1 - R) * computeShading(v1, 0.001, INF, s, area, recurs, refrac));
 			}
 		} else if (m->ki != Vector3d::Zero()) {
-			d = v.dir;
-			Ray refRay(p, d - 2 * (d.dot(n)) * n, v.ref, v.alpha, Ray::VIEW);
+			d = vray.dir;
+			Ray refRay(p, d - 2 * (d.dot(n)) * n, vray.ref, vray.alpha, Ray::VIEW);
 			result += m->ki.cwiseProduct(computeShading(refRay, 0.0001, INF, s, area, recurs - 1, refrac));
 		}
 		//result += cook / M_PI;
@@ -215,7 +216,7 @@ Vector3d Shading::computeShading(Ray v, double t0, double t1, Group* s, const Ve
 		return result;
 	}
 	//std::cout << "return" << std::endl;
-	return result.setZero();
+	return result;
 }
 
 double Shading::schlicks(double index, double c) {
