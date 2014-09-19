@@ -11,6 +11,12 @@ Vector3d _store4d(const __m256d &d) {
 	return Vector3d(res[0], res[1], res[2]);
 }
 
+double _stored(const __m256d &d) {
+	__declspec(align(32)) double res[4];
+	_mm256_store_pd(res, d);
+	return res[0];
+}
+
 double _dot(const __m256d &a, const __m256d &b) {
 	__m256d temp = _mm256_mul_pd(a, b);
 	__declspec(align(32)) double res[4];
@@ -27,8 +33,12 @@ __m256d _dot_mm(const __m256d &a, const __m256d &b) {
 	return _mm256_add_pd(temp, mpte);
 }
 
+inline __m256d _norm(const __m256d &a) {
+	return _mm256_sqrt_pd(_dot_mm(a, a));
+}
+
 inline __m256d _normalize(const __m256d &a) {
-	return _mm256_div_pd(a, _dot_mm(a, a));
+	return _mm256_div_pd(a, _norm(a));
 }
 
 __m256d _load4d(const Vector3d &v) {
@@ -36,7 +46,9 @@ __m256d _load4d(const Vector3d &v) {
 	return _mm256_setr_pd(data[0], data[1], data[2], 0);
 }
 
-double _cross(const __m256d& a, const __m256d& b) { return 0; }
+__m256d _cross(const __m256d& a, const __m256d& b) {
+	return _mm256_permute4x64_pd(_mm256_sub_pd(_mm256_mul_pd(a, _mm256_permute4x64_pd(b, 0xC9)), _mm256_mul_pd(b, _mm256_permute4x64_pd(a, 0xC9))), 0xC9);
+}
 
 Vector3d randSphere() {
 	double a, b, c;
@@ -76,6 +88,22 @@ Vector3d _cosVec(Vector3d a) {
 	ep2 = sqrt(ep2);
 	return Vector3d((cos(ep1) * ep2) * u + (sin(ep1) * ep2) * v - sqrt(ep21) * w).normalized();
 }
+
+__m256d _cosVecV(const __m256d &a) {
+	__m256d w = _mm256_mul_pd(_mm256_set1_pd(-1.), a);
+	__m256d up = _mm256_setr_pd(0, 1, 0, 0);
+	if (_dot(a, up) == 1) {
+		up = _mm256_setr_pd(1, 0, 0, 0);
+	}
+	__m256d u = _normalize(_cross(up, w));
+	__m256d v = _normalize(_cross(w, u));
+	double ep1 = 2 * M_PI * RAN;
+	double ep2 = RAN;
+	double ep21 = 1 - ep2;
+	ep2 = sqrt(ep2);
+	return _normalize(_mm256_sub_pd(_mm256_add_pd(_mm256_mul_pd(_mm256_set1_pd(cos(ep1) * ep2), u), _mm256_mul_pd(_mm256_set1_pd(sin(ep1) * ep2), v)), _mm256_mul_pd(_mm256_set1_pd(sqrt(ep21)), w)));
+}
+
 
 void toDisk(double x, double y, Vector2d& v) {
 	double theta = 2 * M_PI * x;

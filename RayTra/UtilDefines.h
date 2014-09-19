@@ -70,9 +70,11 @@ typedef struct hitRecord {
 Vector3d _store4d(const __m256d &d);
 double _dot(const __m256d &a, const __m256d &b);
 __m256d _dot_mm(const __m256d &a, const __m256d &b);
-double _cross(const __m256d &a, const __m256d &b);
+__m256d _cross(const __m256d &a, const __m256d &b);
 __m256d _load4d(const Vector3d &v);
-
+inline __m256d _normalize(const __m256d &a);
+inline __m256d _norm(const __m256d &a);
+double _stored(const __m256d &d);
 
 Vector3d randSphere();
 
@@ -82,6 +84,7 @@ int genRand_int(int x, int y);
 
 Vector3d cosVec(Vector3d a);
 Vector3d _cosVec(Vector3d a);
+__m256d _cosVecV(const __m256d &a);
 
 std::istream &operator>>(std::istream &is, Vector3d &f);
 std::ostream &operator<<(std::ostream &os, Vector3d &f);

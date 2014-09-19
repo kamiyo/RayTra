@@ -46,34 +46,33 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 		return Vector3d::Zero();						//return 0 if recursion limit reached
 	}
 	hitRecord rec, srec;								// rec = light record, srec = shadow record
-	Vector3d result;									// rgb result
-	result.setZero();
-	Vector3d cook;
-	cook.setZero();
-
-	Vector3d d = (-1.0 * vray.dir).normalized();									// d = viewing ray direction (out of surface)
+	__m256d result = _mm256_setzero_pd();
+	__m256d dir_0 = _load4d(vray.dir);
+	__m256d eye_0 = _load4d(vray.eye);
+	__m256d norm_0 = _norm(dir_0);
+	double norm_s = _stored(norm_0);
+	__m256d d = _mm256_div_pd(dir_0, norm_0);
 	Material* m;
 
 	if (s->_hit(vray, t0, t1, rec)) {
-		double epsilon = 0.001 / vray.dir.norm();
-		Vector3d n = rec.n;						// n = normal vector of intersection
-		
-		double nd = n.dot(d);
+		double epsilon = 0.001 / norm_s;
+		__m256d n = _load4d(rec.n);						// n = normal vector of intersection
+		__m256d nd = _dot_mm(d, n);
 
-		if (rec.m == NULL) {
+		/*if (rec.m == NULL) {
 			std::cout << "shouldn't be here unless lightsphere" << std::endl;
 			if (rec.l == NULL) return Vector3d::Zero();
 			Vector3d light = Vector3d::Zero();
 			light += (rec.l->_rgb) * std::max((double) 0, nd);
 			return light;
-		}
+		}*/
 
-		const Vector3d p = vray.eye + rec.t * vray.dir;				// p = intersection point
+		const __m256d p = _mm256_add_pd(eye_0, _mm256_mul_pd(_mm256_set1_pd(rec.t), dir_0));				// p = intersection point
 		m = rec.m;										// material at intersection
 
-		Vector3d global; global.setZero();
+		__m256d global = _mm256_setzero_pd();
 		for (int gi = 0; gi < _indirect; gi++) {
-			Vector3d newDir = COSVEC(n);
+			__m256d newDir = _cosVecV(n);
 			Ray diffR(p, vray.dir.norm() * newDir, vray.ref, vray.alpha, Ray::VIEW);
 			global += computeShading(diffR, epsilon, INF, s, area, recurs - 1, refrac);
 		}
