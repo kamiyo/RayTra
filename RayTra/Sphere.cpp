@@ -58,7 +58,8 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 				//Vector3d n = e + rec.t * d;
 				__m256d n_v = _mm256_sub_pd(_mm256_fmadd_pd(_mm256_set1_pd(rec.t), d_v, e_v), p_v);
 				//rec.n = (n - _p).normalized();
-				rec.n = _store4d(n_v).normalized();
+				__m256d n_norm = _dot_mm(n_v, n_v);
+				rec.n = _store4d(_mm256_div_pd(n_v, n_norm));
 			} else if (ray.type == Ray::SHAD) {
 				rec.s = this;
 			}
@@ -70,7 +71,8 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 				//Vector3d n = e + rec.t * d;
 				__m256d n_v = _mm256_sub_pd(_mm256_fmadd_pd(_mm256_set1_pd(rec.t), d_v, e_v), p_v);
 				//rec.n = (n - _p).normalized();
-				rec.n = _store4d(n_v).normalized();
+				__m256d n_norm = _dot_mm(n_v, n_v);
+				rec.n = _store4d(_mm256_div_pd(n_v, n_norm));
 			}
 			else if (ray.type == Ray::SHAD) {
 				rec.s = this;

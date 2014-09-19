@@ -14,10 +14,21 @@ Vector3d _store4d(const __m256d &d) {
 double _dot(const __m256d &a, const __m256d &b) {
 	__m256d temp = _mm256_mul_pd(a, b);
 	__declspec(align(32)) double res[4];
+	temp = _mm256_add_pd(temp, _mm256_permute_pd(temp, 0x5));
 	__m256d mpte = _mm256_permute2f128_pd(temp, temp, 0x1);
-	temp = _mm256_hadd_pd(temp, mpte);
-	_mm256_store_pd(res, _mm256_hadd_pd(temp, temp));
+	_mm256_store_pd(res, _mm256_add_pd(temp, mpte));
 	return res[0];
+}
+
+__m256d _dot_mm(const __m256d &a, const __m256d &b) {
+	__m256d temp = _mm256_mul_pd(a, b);
+	temp = _mm256_add_pd(temp, _mm256_permute_pd(temp, 0x5));
+	__m256d mpte = _mm256_permute2f128_pd(temp, temp, 0x1);
+	return _mm256_add_pd(temp, mpte);
+}
+
+inline __m256d _normalize(const __m256d &a) {
+	return _mm256_div_pd(a, _dot_mm(a, a));
 }
 
 __m256d _load4d(const Vector3d &v) {
