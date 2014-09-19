@@ -54,8 +54,8 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 	Vector3d d = (-1.0 * vray.dir).normalized();									// d = viewing ray direction (out of surface)
 	Material* m;
 
-	if (s->_hit(v, t0, t1, rec)) {
-		double epsilon = 0.001 / v.dir.norm();
+	if (s->_hit(vray, t0, t1, rec)) {
+		double epsilon = 0.001 / vray.dir.norm();
 		Vector3d n = rec.n;						// n = normal vector of intersection
 		
 		double nd = n.dot(d);
@@ -74,7 +74,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 		Vector3d global; global.setZero();
 		for (int gi = 0; gi < _indirect; gi++) {
 			Vector3d newDir = COSVEC(n);
-			Ray diffR(p, v.dir.norm() * newDir, v.ref, v.alpha, Ray::VIEW);
+			Ray diffR(p, vray.dir.norm() * newDir, vray.ref, vray.alpha, Ray::VIEW);
 			global += computeShading(diffR, epsilon, INF, s, area, recurs - 1, refrac);
 		}
 
@@ -94,7 +94,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 				l = l + u * _area[0] + v * _area[1];
 			}
 			double lepsilon = 0.001 / l.norm();
-			Ray sRay(p, l, v.ref, v.alpha, Ray::SHAD);
+			Ray sRay(p, l, vray.ref, vray.alpha, Ray::SHAD);
 			/* if shadows are off or if a shadow is not found
 			 calculate lighting
 			 I = light's intensity in RGB
@@ -141,7 +141,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 			//std::cout << " in reflections " << std::endl;
 			double c1, c2; Vector3d krefract, kreflect; krefract.setZero();
 			double current, to;
-			Ray v0, v1; v1.ref = v.ref; v1.alpha = v.alpha;
+			Ray v0, v1; v1.ref = vray.ref; v1.alpha = vray.alpha;
 			double dnorm = d.norm();
 			Vector3d reflect = d - 2 * (d.dot(n)) * n;	// reflect = reflected vector
 			d.normalize();								// d = viewing ray direction
@@ -208,8 +208,8 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 				result += krefract.cwiseProduct((1 - R) * computeShading(v1, epsilon, INF, s, area, recurs, refrac));
 			}
 		} else if (m->ki != Vector3d::Zero()) {
-			d = v.dir;
-			Ray refRay(p, d - 2 * (d.dot(n)) * n, v.ref, v.alpha, Ray::VIEW);
+			d = vray.dir;
+			Ray refRay(p, d - 2 * (d.dot(n)) * n, vray.ref, vray.alpha, Ray::VIEW);
 			result += m->ki.cwiseProduct(computeShading(refRay, epsilon, INF, s, area, recurs - 1, refrac));
 		}
 		//result += cook / M_PI;

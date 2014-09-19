@@ -76,6 +76,13 @@ int main(int argc, char** argv) {
 		name = argv[1];
 		name = name.substr(0, name.find_last_of('.')) + ".exr";
 	} else {
+		cout << sizeof(Vector3i) << endl;
+		cout << sizeof(Vector3d) << endl;
+		cout << sizeof(__m256d) << endl;
+		cout << sizeof(std::vector<double>) << endl;
+		cout << sizeof(std::vector<Vector3d>) << endl;
+		cout << sizeof(Ray) << endl;
+		exit(0);
 		/*clock_t start = clock();
 		srand(time(NULL));
 #define __R rand() / (double)RAND_MAX

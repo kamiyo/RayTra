@@ -21,21 +21,22 @@ Plane::~Plane() {
 }
 
 bool Plane::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
-	Vector3d e = ray.eye;
-	Vector3d d = ray.dir;
-	double den = _n.dot(d);
+	__m256d e_v = _load4d(ray.eye);
+	__m256d d_v = _load4d(ray.dir);
+	__m256d n_v = _load4d(_n);
+	double den = _dot(n_v, d_v);
 	if (den == 0) {
 		return false;
 	}
 	else {
-		double num = _n.dot(_p - e);
+		double num = _dot(n_v, _mm256_sub_pd(_load4d(_p), e_v));
 		rec.t = num / den;
 		if (rec.t < t0 || rec.t > t1) {
 			return false;
 		}
 		else {
 			if (ray.type == Ray::VIEW) {
-				rec.n = _n.normalized();
+				rec.n = _store4d(n_v).normalized();
 				rec.m = _m;
 			}
 			else {

@@ -8,11 +8,11 @@ f 14
 c
 
 o
-ms 5 3
+ms 3 3
 s 3
 gi 2
-rc 3
-rf 4
+rc 1
+rf 1
 c 1
 dof 1
 accel 1

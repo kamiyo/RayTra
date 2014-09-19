@@ -19,6 +19,7 @@ public:
 	void boundingBox();
 	~Sphere();
 	Vector3d _p;
+	__m256d _pv;
 	double _r;
 	double _r2;
 	LightP* _l;

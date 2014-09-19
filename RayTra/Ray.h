@@ -22,7 +22,7 @@ public:
 		Vector3d inv;
 		Vector3i sign;
 		int type;
-		static const int VIEW = 0, SHAD = 1, DIFF = 2, OCCL = 3;
+		enum { VIEW, SHAD, DIFF, OCCL };
 		std::vector<double> ref;
 		std::vector<Vector3d> alpha;
 		static unsigned long count;
