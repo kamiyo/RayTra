@@ -11,6 +11,8 @@ public:
 	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec);
 	~Torus();
 	double _r, _R;
+	double _R2, _R2r2;
+	BBox o_b;
 };
 
 #endif /* TORUS_H_ */

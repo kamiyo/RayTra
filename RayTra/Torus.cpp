@@ -1,5 +1,5 @@
 #include "Torus.h"
-#include "rpoly.h"
+#include <unsupported\Eigen\Polynomials>
 #include <algorithm>
 
 
@@ -8,6 +8,8 @@ Torus::Torus(double R, double r, Material* m) : _r(r), _R(R)
 	_m = m;
 	_trans = false;
 	boundingBox();
+	_R2 = _R * _R;
+	_R2r2 = _R2 - (_r * _r);
 }
 
 inline double pow2(const double& x) {
@@ -28,53 +30,32 @@ bool Torus::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	//if (!hitbox(ray, t0, t1)) return false;
 	const Vector3d d = ray.dir;
 	const Vector3d e = ray.eye;
-	double* op = (double*) malloc(sizeof(double) * 5);
-	double dx = d(0), dy = d(1), dz = d(2);
-	double dx2 = dx * dx, dy2 = dy * dy, dz2 = dz * dz;
-	double ex = e(0), ey = e(1), ez = e(2);
-	double ex2 = ex * ex, ey2 = ey * ey, ez2 = ez * ez;
-	double dxdy = dx * dy, dxdz = dx * dz, dydz = dy * dz;
-	double exey = ex * ey, exez = ex * ez, eyez = ey * ez;
-	double dxex = dx * ex, dyey = dy * ey, dzez = dz * ez;
-	double R2 = _R * _R, r2 = _r * _r;
+	double dx2 = d(0) * d(0), dy2 = d(1) * d(1);
+	double ex2 = e(0) * e(0), ey2 = e(1) * e(1);
+	double dxex = d(0) * e(0), dyey = d(1) * e(1);
 	
 	double A = d.dot(d);
 	double B = 2 * d.dot(e);
-	double C = e.dot(e) + (R2 - r2);
-	double D = 4 * R2 * (dx2 + dy2);
-	double E = 8 * R2 * (dxex + dyey);
-	double F = 4 * R2 * (ex2 + ey2);
-	/*
-	op[0] = pow2(dx2) + pow2(dy2) + pow2(dz2)
-	+ 2 * (pow2(dxdy) + pow2(dxdz) + pow2(dydz));
-	op[1] = 4 * ((dx2 + dy2 + dz2) * (dxex + dyey + dzez));
-	op[2] = 2 * (-R2 * (dx2 + dy2 - dz2) - r2 * (dx2 + dy2 + dz2)
-	+ 3 * (pow2(dxex) + pow2(dyey) + pow2(dzez))
-	+ 4 * (dxdy * exey + dxdz * exez + dyey * dzez)
-	+ dx2 * (ey2 + ez2) + dy2 * (ex2 + ez2) + dz2 * (ex2 + ey2));
-	op[3] = 4 * (R2 * (dxex + dyey + dzez) - r2 * (dxex + dyey + dzez)
-	+ (ex2 + ey2 + ez2) * (dxex + dyey + dzez));
-	op[4] = pow2(R2 - r2) + 2 * (R2 * (ex2 + ey2 + ez2) - r2 * (ex2 + ey2 + ez2) + pow2(exey) + pow2(exez) + pow2(eyez))
-	+ pow2(ex2) + pow2(ey2) + pow2(ez2);
-	*/
-	op[0] = A * A;
-	op[1] = 2 * A * B;
-	op[2] = 2 * A * C + B * B - D;
-	op[3] = 2 * B * C - E;
-	op[4] = C * C - F;
+	double C = e.dot(e) + (_R2r2);
+	double D = 4 * _R2 * (dx2 + dy2);
+	double E = 8 * _R2 * (dxex + dyey);
+	double F = 4 * _R2 * (ex2 + ey2);
 
-	int Degree = 4;
-	double* zeroi = (double*) malloc(sizeof(double) * 4), *zeror = (double*) malloc(sizeof(double) * 4);
-	rpoly(op, &Degree, zeror, zeroi);
+	Vector5d op;
+	op << C * C - F, 2 * B * C - E, 2 * A * C + B * B - D, 2 * A * B, A * A;
+
+	Eigen::PolynomialSolver<double, 4> psolve(op);
 	std::vector<double> reals;
-	for (int i = 0; i < Degree; i++) {
-		if (zeroi[i] == 0 && zeror[i] >= t0 && zeror[i] < t1) {
-			reals.push_back(zeror[i]);
+	psolve.realRoots(reals);
+
+	for (int i = (int) reals.size() - 1; i >= 0; i--) {
+		if (reals[i] < t0 || reals[i] > t1) {
+			reals.erase(reals.begin() + i);
 		}
 	}
-	free(zeror); free(zeroi); free(op);
-	zeror = zeroi = op = NULL;
+	
 	if ((size_t) reals.size() == 0) return false;
+
 	std::sort(reals.begin(), reals.end());
 	rec.t = reals[0];
 	if (ray.type == Ray::VIEW) {
@@ -97,15 +78,15 @@ bool Torus::hitbox(Ray& ray, double t0, double t1) {
 	Vector3d i = ray.inv;
 	Vector3d e = ray.eye;
 
-	tmin = (_b.b[s[0]][0] - e[0]) * i[0];
-	tmax = (_b.b[1 - s[0]][0] - e[0]) * i[0];
-	tymin = (_b.b[s[1]][1] - e[1]) * i[1];
-	tymax = (_b.b[1 - s[1]][1] - e[1]) * i[1];
+	tmin = (o_b.b[s[0]][0] - e[0]) * i[0];
+	tmax = (o_b.b[1 - s[0]][0] - e[0]) * i[0];
+	tymin = (o_b.b[s[1]][1] - e[1]) * i[1];
+	tymax = (o_b.b[1 - s[1]][1] - e[1]) * i[1];
 	if ((tmin > tymax) || (tymin > tmax)) return false;
 	if (tymin > tmin) tmin = tymin;
 	if (tymax < tmax) tmax = tymax;
-	tzmin = (_b.b[s[2]][2] - e[2]) * i[2];
-	tzmax = (_b.b[1 - s[2]][2] - e[2]) * i[2];
+	tzmin = (o_b.b[s[2]][2] - e[2]) * i[2];
+	tzmax = (o_b.b[1 - s[2]][2] - e[2]) * i[2];
 	if ((tmin > tzmax) || (tzmin > tmax)) return false;
 	if (tzmin > tmin) tmin = tzmin;
 	if (tzmax < tmax) tmax = tzmax;
@@ -119,4 +100,5 @@ Torus::~Torus()
 void Torus::boundingBox() {
 	double rR = _r + _R;
 	_b.set(Vector3d(-rR, -rR, -_r), Vector3d(rR, rR, _r));
+	o_b = _b;
 }

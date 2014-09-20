@@ -34,6 +34,7 @@ Ray::Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a,
 eye(e), dir(d), ref(r), alpha(a), type(t) {
 //#pragma omp atomic
 	Ray::count++;
+	epsilon = 0.001 / dir.norm();
 	inv = dir.cwiseInverse();
 	reSign();
 }

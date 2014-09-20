@@ -21,6 +21,7 @@ public:
 		Vector3d dir;
 		Vector3d inv;
 		Vector3i sign;
+		double epsilon;
 		int type;
 		static const int VIEW = 0, SHAD = 1, DIFF = 2, OCCL = 3;
 		std::vector<double> ref;
