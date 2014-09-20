@@ -50,7 +50,6 @@ typedef Eigen::Matrix4d Matrix4d;
 typedef Eigen::Vector3d Vector3d;
 typedef Eigen::Vector3i Vector3i;
 typedef Eigen::Vector4d Vector4d;
-typedef Eigen::Matrix<double, 5, 1> Vector5d;
 typedef Eigen::AngleAxisd AngleAxisd;
 typedef Eigen::Array2d Array2d;
 typedef Eigen::Array4d Array4d;
@@ -60,19 +59,12 @@ typedef std::vector<Eigen::Vector2i, Eigen::aligned_allocator<Vector2i> > Sample
 
 typedef struct hitRecord {
 	double t;
-	std::vector<double> ts;
+//	std::vector<double> ts;
 	Vector3d n;
 	Material* m;
 	LightP* l;
 	Surface* s;
 } hitRecord;
-
-
-Vector3d _store4d(const __m256d &d);
-double _dot(const __m256d &a, const __m256d &b);
-double _cross(const __m256d &a, const __m256d &b);
-__m256d _load4d(const Vector3d &v);
-
 
 Vector3d randSphere();
 

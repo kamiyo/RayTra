@@ -128,7 +128,6 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 			double current, to;
 			auto temp_ref = vray.ref;
 			auto temp_alpha = vray.alpha;
-			//Ray v0, v1; v1.ref = vray.ref; v1.alpha = vray.alpha;
 			double dnorm = d.norm();
 			Vector3d reflect = d - 2 * (d.dot(n)) * n;	// reflect = reflected vector
 			d.normalize();								// d = viewing ray direction
