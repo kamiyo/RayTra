@@ -8,7 +8,7 @@ f 14
 c
 
 o
-ms 5 3
+ms 3 3
 s 3
 gi 2
 rc 3
