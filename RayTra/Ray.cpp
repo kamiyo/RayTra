@@ -31,10 +31,10 @@ int			t		type of ray
 unsigned long Ray::count = 0;
 
 Ray::Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a, int t):
-eye(e), dir(d), ref(r), alpha(a), type(t) {
+eye(_load4d(e)), dir(_load4d(d)), ref(r), alpha(a), type(t) {
 //#pragma omp atomic
 	Ray::count++;
-	inv = dir.cwiseInverse();
+	inv = _mm256_div_pd(_mm256_setzero_pd(), dir);
 	reSign();
 }
 
@@ -42,6 +42,7 @@ Ray::Ray() {
 }
 
 void Ray::reSign() {
+	sign = _mm256_cmp_pd(inv, _mm256_setzero_pd(), )
 	sign = (inv.array() < 0).cast<int>();
 }
 

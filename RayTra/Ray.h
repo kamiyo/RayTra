@@ -17,10 +17,10 @@ public:
 	Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a, int t);
 	void reSign();
 	virtual ~Ray();
-		Vector3d eye;
-		Vector3d dir;
-		Vector3d inv;
-		Vector3i sign;
+		__m256d eye;
+		__m256d dir;
+		__m256d inv;
+		__m256d sign;
 		int type;
 		enum { VIEW, SHAD, DIFF, OCCL };
 		std::vector<double> ref;
