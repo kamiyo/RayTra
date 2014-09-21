@@ -35,6 +35,37 @@ void Shading::addAmbient(Vector3d a) {
 	_amb = a;
 }
 
+void Shading::initPhotonTracing() {
+	Eigen::MatrixXd ints(3, _l.size());
+	for (int i = 0; i < (int) _l.size(); i++) {
+		ints.col(i) << _l[i]->_rgb;
+	}
+	double sum = ints.sum();
+	ints /= sum;
+	for (int i = 1; i < ints.size(); i++) {
+		ints(i) += ints(i - 1);
+	}
+	_lProbs = ints.array();
+}
+
+Photon Shading::emitPhoton() {
+	double roll = RAN;
+	int color, light;
+	for (int i = 0; i < _lProbs.size(); i++) {
+		if (roll < _lProbs[i]) {
+			color = i % 3;
+			light = i / 3;
+		}
+	}
+	// get photon from light
+}
+
+std::vector<Photon> Shading::tracePhotons(Group* s) {
+	std::vector<Photon> result;
+
+}
+
+
 // form of function where recursion and refraction are not specified. 
 Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const Vector2d& area) {
 	return computeShading(vray, t0, t1, s, area, _recurs, _refraction);

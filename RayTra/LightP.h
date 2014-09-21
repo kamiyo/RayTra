@@ -16,6 +16,7 @@ public:
 	virtual ~LightP();
 	virtual Vector3d getVector(Vector3d p);
 	virtual double getFalloff(Vector3d p);
+	virtual Vector3d getRanPoint();
 	Vector3d _pos;
 	double _r;
 };

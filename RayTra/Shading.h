@@ -12,6 +12,7 @@
 #include "LightD.h"
 #include "LightS.h"
 #include "Group.h"
+#include "Photon.h"
 #include <limits>
 #include <ctime>
 #include "Circle.h"
@@ -24,6 +25,9 @@ public:
 	virtual ~Shading();
 	void addLight(Light* l);
 	void addAmbient(Vector3d a);
+	void initPhotonTracing();
+	Photon emitPhoton();
+	std::vector<Photon> tracePhotons(Group *s);
 	Vector3d computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area, int recurs, int refrac);
 	Vector3d computeShading(Ray v, double t0, double t1, Group* s, const Vector2d& area);
 	double fresnel(double index1, double index2, double c1, double c2);
@@ -32,9 +36,11 @@ public:
 	void setRecursDepth(int d);
 	Vector3d _amb;
 	std::vector<Light* > _l;
+	Eigen::ArrayXd _lProbs;
 	int _indirect;
 	int _recurs;
 	int _refraction;
+	int _numPhotons;
 	bool _russian;
 	bool _shadows;
 	bool toBreak;
