@@ -6,18 +6,18 @@ std::normal_distribution<double> uni_gauss;
 std::uniform_int_distribution<int> uni_int;
 
 Vector3d randSphere() {
-	//double a, b, c;
-	//do {
-	//	a = 2 * RAN - 1;
-	//	b = 2 * RAN - 1;
-	//	c = a*a + b*b;
-	//} while (c >= 1);
-	//Vector3d r;
-	//r.setZero();
-	//r << 2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c;
-	//return r.normalized();
-	Vector3d result(GAUSS, GAUSS, GAUSS);
-	return result.normalized();
+	double a, b, c;
+	do {
+		a = 2 * RAN - 1;
+		b = 2 * RAN - 1;
+		c = a*a + b*b;
+	} while (c >= 1);
+	Vector3d r;
+	r.setZero();
+	r << 2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c;
+	return r.normalized();
+	//Vector3d result(GAUSS, GAUSS, GAUSS);
+	//return result.normalized();
 }
 
 Vector3d cosVec(Vector3d a) {

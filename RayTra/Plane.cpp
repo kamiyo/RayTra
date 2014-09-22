@@ -21,13 +21,13 @@ Plane::~Plane() {
 }
 
 bool Plane::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
-	Vector3d e = ray.eye;
 	Vector3d d = ray.dir;
 	double den = _n.dot(d);
 	if (den == 0) {
 		return false;
 	}
 	else {
+		Vector3d e = ray.eye;
 		double num = _n.dot(_p - e);
 		rec.t = num / den;
 		if (rec.t < t0 || rec.t > t1) {

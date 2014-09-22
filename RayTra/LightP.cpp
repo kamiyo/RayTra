@@ -31,7 +31,7 @@ double LightP::getFalloff(Vector3d p) {
 // theta = 0 and phi = 0 gives point (0, 0, 1)
 void LightP::projectScene(BBox b) {
 	if ((_pos.array() < b.MAX.array()).all && (_pos.array() > b.MIN.array()).all()) {
-		_sceneMap.set(Vector3d(0, 0, 1), Vector3d(2 * M_PI, M_PI, 1));
+		_sceneMap.set(Vector3d(-M_PI / 2, -1, 1), Vector3d(M_PI / 2, 1, 1));
 		return;
 	}
 	Eigen::MatrixXd temp(8, 3);
@@ -58,7 +58,13 @@ void LightP::projectScene(BBox b) {
 		minTheta = maxTheta;
 		maxTheta = minTheta + 2 * M_PI;
 	}
-	_sceneMap.set(Vector3d(minTheta, phi.minCoeff(), 1), Vector3d(maxTheta, phi.maxCoeff(), 1));
+	double yx_min = tan(minTheta);
+	double yx_max = tan(maxTheta);
+	double z_min = cos(phi.minCoeff());
+	double z_max = cos(phi.maxCoeff());
+	// instead of storing theta = atan(y/x), store y/x, because atan is monotonically increasing. Can compare y/x directly
+	// instead of storing phi = acos(z/r), store z (r = 1), and compare ! because acos is monotonically decreasing.
+	_sceneMap.set(Vector3d(yx_min, z_min, 1), Vector3d(yx_max, z_max, 1));
 }
 
 Vector3d getRanPoint() {
