@@ -51,10 +51,18 @@ void LightP::projectScene(BBox b) {
 		theta(i) = atan2(temp(1, i), temp(0, i));
 		phi(i) = acos(temp(2, i));
 	}
-	_sceneMap.set(Vector3d(theta.minCoeff(), phi.minCoeff(), 1), Vector3d(theta.maxCoeff(), phi.maxCoeff(), 1));
+	double maxTheta = theta.maxCoeff();
+	double minTheta = theta.minCoeff();
+	if (maxTheta - minTheta > M_PI) {
+		double temp = minTheta;
+		minTheta = maxTheta;
+		maxTheta = minTheta + 2 * M_PI;
+	}
+	_sceneMap.set(Vector3d(minTheta, phi.minCoeff(), 1), Vector3d(maxTheta, phi.maxCoeff(), 1));
 }
 
 Vector3d getRanPoint() {
-
+	Vector3d result(GAUSS, GAUSS, GAUSS);
+	result.normalize();
 
 }

@@ -2,19 +2,22 @@
 
 std::mt19937_64 mt;
 std::uniform_real_distribution<double> uni_real;
+std::normal_distribution<double> uni_gauss;
 std::uniform_int_distribution<int> uni_int;
 
 Vector3d randSphere() {
-	double a, b, c;
-	do {
-		a = 2 * RAN - 1;
-		b = 2 * RAN - 1;
-		c = a*a + b*b;
-	} while (c >= 1);
-	Vector3d r;
-	r.setZero();
-	r << 2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c;
-	return r.normalized();
+	//double a, b, c;
+	//do {
+	//	a = 2 * RAN - 1;
+	//	b = 2 * RAN - 1;
+	//	c = a*a + b*b;
+	//} while (c >= 1);
+	//Vector3d r;
+	//r.setZero();
+	//r << 2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c;
+	//return r.normalized();
+	Vector3d result(GAUSS, GAUSS, GAUSS);
+	return result.normalized();
 }
 
 Vector3d cosVec(Vector3d a) {
@@ -95,10 +98,15 @@ void seedRand() {
 
 	mt = std::mt19937_64(seq);
 	uni_real = std::uniform_real_distribution<double>(0., 1.);
+	uni_gauss = std::normal_distribution<double>(0., 1.);
 }
 
 double genRand_real() {
 	return uni_real(mt);
+}
+
+double genRand_gauss() {
+	return uni_gauss(mt);
 }
 
 int genRand_int(int x, int y) {

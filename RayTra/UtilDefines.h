@@ -38,6 +38,7 @@ class Surface;
 #define EULER 2.718281828459045235360287471352
 //#define RAN (double)genrand_real2()
 #define RAN genRand_real()
+#define GAUSS genRand_gauss()
 #define RAD sqrt((double)1.0 / M_PI)
 #define COSVEC cosVec
 #define DISK toDisk
@@ -70,6 +71,7 @@ Vector3d randSphere();
 
 void seedRand();
 double genRand_real();
+double genRand_gauss();
 int genRand_int(int x, int y);
 
 Vector3d cosVec(Vector3d a);
