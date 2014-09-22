@@ -2,19 +2,45 @@
 
 std::mt19937_64 mt;
 std::uniform_real_distribution<double> uni_real;
+std::normal_distribution<double> uni_gauss;
 std::uniform_int_distribution<int> uni_int;
 
+
+Vector3d _store4d(const __m256d &d) {
+	__declspec(align(32)) double res[4];
+	_mm256_store_pd(res, d);
+	return Vector3d(res[0], res[1], res[2]);
+}
+
+double _dot(const __m256d &a, const __m256d &b) {
+	__m256d temp = _mm256_mul_pd(a, b);
+	__declspec(align(32)) double res[4];
+	__m256d mpte = _mm256_permute2f128_pd(temp, temp, 0x1);
+	temp = _mm256_hadd_pd(temp, mpte);
+	_mm256_store_pd(res, _mm256_hadd_pd(temp, temp));
+	return res[0];
+}
+
+__m256d _load4d(const Vector3d &v) {
+	const double* data = v.data();
+	return _mm256_setr_pd(data[0], data[1], data[2], 0);
+}
+
+double _cross(const __m256d& a, const __m256d& b) { return 0; }
+
 Vector3d randSphere() {
-	double a, b, c;
-	do {
-		a = 2 * RAN - 1;
-		b = 2 * RAN - 1;
-		c = a*a + b*b;
-	} while (c >= 1);
-	Vector3d r;
-	r.setZero();
-	r << 2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c;
-	return r.normalized();
+	//double a, b, c;
+	//do {
+	//	a = 2 * RAN - 1;
+	//	b = 2 * RAN - 1;
+	//	c = a*a + b*b;
+	//} while (c >= 1);
+	//Vector3d r;
+	//r.setZero();
+	//r << 2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c;
+	//return r.normalized();
+	Vector3d result(GAUSS, GAUSS, GAUSS);
+	return result.normalized();
 }
 
 Vector3d cosVec(Vector3d a) {
@@ -95,10 +121,15 @@ void seedRand() {
 
 	mt = std::mt19937_64(seq);
 	uni_real = std::uniform_real_distribution<double>(0., 1.);
+	uni_gauss = std::normal_distribution<double>(0., 1.);
 }
 
 double genRand_real() {
 	return uni_real(mt);
+}
+
+double genRand_gauss() {
+	return uni_gauss(mt);
 }
 
 int genRand_int(int x, int y) {

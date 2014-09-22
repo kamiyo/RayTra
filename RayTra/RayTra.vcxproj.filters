@@ -111,9 +111,6 @@
     <ClInclude Include="Interval.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Photon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BVH.cpp">
@@ -216,9 +213,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Interval.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Photon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

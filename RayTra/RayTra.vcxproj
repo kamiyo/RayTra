@@ -36,7 +36,6 @@
     <ClInclude Include="LightS.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="parse.h" />
-    <ClInclude Include="Photon.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="rand.h" />
     <ClInclude Include="Ray.h" />
@@ -73,7 +72,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="parse.cpp" />
-    <ClCompile Include="Photon.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="rand.cpp" />
     <ClCompile Include="Ray.cpp" />

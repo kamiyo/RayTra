@@ -8,9 +8,9 @@ f 14
 c
 
 o
-ms 5 3
+ms 3 3
 s 3
-gi 3
+gi 1
 rc 3
 rf 4
 c 1

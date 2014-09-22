@@ -11,8 +11,8 @@ o
 ms 3 3
 s 3
 gi 1
-rc 6
-rf 6
+rc 2
+rf 2
 c 1
 dof 1
 accel 1
@@ -52,20 +52,20 @@ m {
 
 sphere {
 	p 25 3 25
-	r 4.5
+	r 4.8
 }
 
 sphere {
 	p -25 3 25
-	r 4.5
+	r 4.8
 }
 sphere {
 	p -25 3 -25
-	r 4.5
+	r 4.8
 }
 sphere {
 	p 25 3 -25
-	r 4.5
+	r 4.8
 }
 
 
