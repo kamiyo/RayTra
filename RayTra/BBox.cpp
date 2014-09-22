@@ -52,7 +52,7 @@ BBox BBox::combine(BBox& rhs) {
 
 BBox BBox::transform(Matrix4d& m) {
 	BBox _b;
-	Eigen::Matrix<double, 8, 4> temp;
+	Eigen::MatrixXd temp(8, 4);
 	temp << MIN[0], MIN[1], MIN[2], 1.0
 		, MIN[0], MIN[1], MAX[2], 1.0
 		, MIN[0], MAX[1], MIN[2], 1.0
@@ -61,10 +61,10 @@ BBox BBox::transform(Matrix4d& m) {
 		, MAX[0], MIN[1], MAX[2], 1.0
 		, MAX[0], MAX[1], MIN[2], 1.0
 		, MAX[0], MAX[1], MAX[2], 1.0;
-	Eigen::Matrix<double, 4, 8> points = temp.transpose();
-	Eigen::Matrix<double, 4, 8> result = m * points;
-	Array4d min = result.rowwise().minCoeff();
-	Array4d max = result.rowwise().maxCoeff();
+	temp.transposeInPlace();
+	temp = m * temp;
+	Array4d min = temp.rowwise().minCoeff();
+	Array4d max = temp.rowwise().maxCoeff();
 	_b.set(Vector3d(min(0), min(1), min(2)), Vector3d(max(0), max(1), max(2)));
 
 	return _b;
