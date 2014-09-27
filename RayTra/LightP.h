@@ -19,7 +19,8 @@ public:
 	virtual Vector3d getRanPoint();
 	virtual void projectScene(BBox b);
 	Vector3d _pos;
-	double _r;
+	double _r, _costheta0;
+	Vector3d _u, _v, _axis;
 };
 
 #endif /* LIGHTP_H_ */

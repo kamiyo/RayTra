@@ -63,6 +63,7 @@ class RayTra : public Parser {
 	void populateLights();
 public:
 	RayTra();
+	~RayTra();
 	void render(Imf::Array2D<Imf::Rgba>& o);
 	virtual void parse(const char* name);
 	Group* _surfaces;

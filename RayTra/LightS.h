@@ -11,6 +11,7 @@ public:
 	virtual Vector3d getVector(Vector3d p);
 	virtual double getFalloff(Vector3d p);
 	virtual Vector3d getRanPoint();
+	virtual void projectScene(BBox b);
 	Vector3d _pos;
 	Vector3d _dir;
 	double _p;

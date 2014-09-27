@@ -38,3 +38,10 @@ double LightS::getFalloff(Vector3d p) {
 	//std::cout << _p << " " << res << std::endl;
 	return res;
 }
+
+Vector3d LightS::getRanPoint() {
+	return Vector3d::Zero();
+}
+void LightS::projectScene(BBox b) {
+	return;
+}

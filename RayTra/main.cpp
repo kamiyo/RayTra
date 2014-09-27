@@ -76,6 +76,17 @@ int main(int argc, char** argv) {
 		name = argv[1];
 		name = name.substr(0, name.find_last_of('.')) + ".exr";
 	} else {
+		seedRand();
+		LightP* l = new LightP(Vector3d(0, 0, 0), Vector3d(0, 0, 0), Vector3d(0, 0, 0), 0);
+		BBox b(Vector3d(3, 5, -1), Vector3d(4, 10, 1));
+		l->projectScene(b);
+		for (int i = 0; i < 200; i++) {
+			Vector3d res = l->getRanPoint().transpose();
+			cout << res[0] << ", " << res[1] << ", " << res[2] << endl;
+		}
+		delete(l);
+		l = NULL;
+		return 0;
 		/*clock_t start = clock();
 		srand(time(NULL));
 #define __R rand() / (double)RAND_MAX

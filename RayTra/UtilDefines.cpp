@@ -12,10 +12,9 @@ Vector3d randSphere() {
 		b = 2 * RAN - 1;
 		c = a*a + b*b;
 	} while (c >= 1);
-	Vector3d r;
-	r.setZero();
-	r << 2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c;
-	return r.normalized();
+	Vector3d r(2 * a * sqrt(1 - c), 2 * b * sqrt(1 - c), 1 - 2 * c);
+	return r;
+	//return r.normalized();
 	//Vector3d result(GAUSS, GAUSS, GAUSS);
 	//return result.normalized();
 }
@@ -103,6 +102,11 @@ void seedRand() {
 
 double genRand_real() {
 	return uni_real(mt);
+}
+
+double genRand_real(double x, double y) {
+	std::uniform_real_distribution<double> randouble(x, y);
+	return randouble(mt);
 }
 
 double genRand_gauss() {

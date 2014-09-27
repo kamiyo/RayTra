@@ -9,6 +9,7 @@ class Photon
 {
 public:
 	Photon(Vector3d pos, Vector3d dir, double intensity, int color);
+	Photon();
 	~Photon();
 	Vector3d m_pos;
 	Vector3d m_dir;

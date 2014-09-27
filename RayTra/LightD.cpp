@@ -26,3 +26,12 @@ Vector3d LightD::getVector(Vector3d p) {
 double LightD::getFalloff(Vector3d p) {
 	return 1.0;
 }
+
+// CHANGE CHANGE CHANGE
+Vector3d LightD::getRanPoint() {
+	return Vector3d::Zero();
+}
+
+void LightD::projectScene(BBox b) {
+	return;
+}

@@ -22,7 +22,6 @@ public:
 	Vector3d _rgb;
 	int _type;
 	enum {POINT, DIRECTIONAL, SPOT};
-	BBox _sceneMap;
 };
 
 #endif /* LIGHT_H_ */

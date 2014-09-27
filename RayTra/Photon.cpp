@@ -5,6 +5,8 @@ Photon::Photon(Vector3d pos, Vector3d dir, double intensity, int color) : m_pos(
 {
 }
 
+Photon::Photon() {}
+
 
 Photon::~Photon()
 {

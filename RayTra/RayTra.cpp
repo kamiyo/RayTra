@@ -24,6 +24,12 @@ RayTra::RayTra() {
 	actualLights = false;
 }
 
+RayTra::~RayTra() {
+	delete(_surfaces);
+	delete(_all);
+	delete(_shading);
+}
+
 void RayTra::populateLights() {
 	int size = _shading->_l.size();
 	for (int i = 0; i < size; i++) {

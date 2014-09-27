@@ -72,6 +72,7 @@ Vector3d randSphere();
 void seedRand();
 double genRand_real();
 double genRand_gauss();
+double genRand_real(double x, double y);
 int genRand_int(int x, int y);
 
 Vector3d cosVec(Vector3d a);

@@ -28,10 +28,9 @@ double LightP::getFalloff(Vector3d p) {
 	return 1 / (_atten[0] + _atten[1] * dist + _atten[2] * dist * dist);
 }
 
-// theta = 0 and phi = 0 gives point (0, 0, 1)
 void LightP::projectScene(BBox b) {
-	if ((_pos.array() < b.MAX.array()).all && (_pos.array() > b.MIN.array()).all()) {
-		_sceneMap.set(Vector3d(-M_PI / 2, -1, 1), Vector3d(M_PI / 2, 1, 1));
+	if ((_pos.array() < b.MAX.array()).all() && (_pos.array() > b.MIN.array()).all()) {
+		_axis = Vector3d(nINF, nINF, nINF);
 		return;
 	}
 	Eigen::MatrixXd temp(8, 3);
@@ -44,31 +43,37 @@ void LightP::projectScene(BBox b) {
 		, b.MAX[0], b.MAX[1], b.MIN[2]
 		, b.MAX[0], b.MAX[1], b.MAX[2];
 	temp.transposeInPlace();
+	std::cout << temp << std::endl;
 	temp = (temp.colwise() - _pos).colwise().normalized();
-	Eigen::VectorXd theta(8);
-	Eigen::VectorXd phi(8);
-	for (int i = 0; i < 8; i++) {
-		theta(i) = atan2(temp(1, i), temp(0, i));
-		phi(i) = acos(temp(2, i));
+	std::cout << temp << std::endl;
+	Vector3d v0, v1; double largestSquared = 0;
+	for (int i = 0; i < (temp.size() / 3); i++) {
+		Vector3d tv0 = temp.col(i);
+		for (int j = i + 1; j < (temp.size() / 3); j++) {
+			Vector3d tv1 = temp.col(j);
+			double tempNorm = (tv0 - tv1).squaredNorm();
+			if (tempNorm > largestSquared) {
+				largestSquared = tempNorm;
+				v0 = tv0;
+				v1 = tv1;
+			}
+		}
 	}
-	double maxTheta = theta.maxCoeff();
-	double minTheta = theta.minCoeff();
-	if (maxTheta - minTheta > M_PI) {
-		double temp = minTheta;
-		minTheta = maxTheta;
-		maxTheta = minTheta + 2 * M_PI;
-	}
-	double yx_min = tan(minTheta);
-	double yx_max = tan(maxTheta);
-	double z_min = cos(phi.minCoeff());
-	double z_max = cos(phi.maxCoeff());
-	// instead of storing theta = atan(y/x), store y/x, because atan is monotonically increasing. Can compare y/x directly
-	// instead of storing phi = acos(z/r), store z (r = 1), and compare ! because acos is monotonically decreasing.
-	_sceneMap.set(Vector3d(yx_min, z_min, 1), Vector3d(yx_max, z_max, 1));
+	_axis = (v0 + v1).normalized();
+	_costheta0 = v0.dot(_axis);
+	Vector3d w = -_axis;
+	Vector3d up = (w.dot(Vector3d(0, 1, 0)) == 1) ? Vector3d(1, 0, 0) : Vector3d(0, 1, 0);
+	_u = up.cross(w).normalized();
+	_v = w.cross(_u).normalized();
 }
 
-Vector3d getRanPoint() {
-	Vector3d result(GAUSS, GAUSS, GAUSS);
-	result.normalize();
-
+Vector3d LightP::getRanPoint() {
+	if ((_axis.cwiseEqual(nINF)).all()) {
+		return randSphere();
+	}
+	double costheta = (1 - _costheta0) * RAN + _costheta0;
+	double phi = M_PI * (2 * RAN - 1);
+	double sintheta = sqrt(1 - costheta * costheta);
+	Vector3d result = sintheta * (cos(phi) * _u + sin(phi) * _v) + costheta * _axis;
+	return result + _pos;
 }
