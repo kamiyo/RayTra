@@ -77,3 +77,9 @@ Vector3d LightP::getRanPoint() {
 	Vector3d result = sintheta * (cos(phi) * _u + sin(phi) * _v) + costheta * _axis;
 	return result + _pos;
 }
+
+Photon LightP::emitPhoton(int color) {
+	Vector3d point = getRanPoint();
+	Vector3d dir = COSVEC(-getVector(point));
+	return Photon(point, dir, _rgb[color], color)
+}

@@ -17,6 +17,7 @@ public:
 	virtual Vector3d getVector(Vector3d p) = 0;
 	virtual double getFalloff(Vector3d p) = 0;
 	virtual Vector3d getRanPoint() = 0;
+	virtual Photon emitPhoton(int color) = 0;
 	virtual void projectScene(BBox b) = 0;
 	Vector3d _atten;
 	Vector3d _rgb;

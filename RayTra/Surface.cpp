@@ -32,6 +32,22 @@ bool Surface::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	}
 }
 
+bool Surface::_hit(Photon& photon, double t0, double t1, hitRecord& rec) {
+	if (_trans) {
+		Photon tPhoton(apply(_mInv, photon.m_pos, 1), apply(_mInv, photon.m_dir, 0), photon.m_intensity, photon.m_color);
+		Photon::count -= 1;
+		bool temp = hit(tPhoton, t0, t1, rec);
+		if (temp) {
+			rec.n = apply(_mTrans, rec.n, 0);
+			rec.n.normalize();
+		}
+		return temp;
+	}
+	else {
+		return hit(photon, t0, t1, rec);
+	}
+}
+
 void Surface::trans(Matrix4d& m, Matrix4d& inv) {
 	_trans = true;
 	_mInv = inv;

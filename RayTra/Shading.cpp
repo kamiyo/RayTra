@@ -60,13 +60,14 @@ Photon Shading::emitPhoton() {
 			break;
 		}
 	}
-	Vector3d point = _l[light]->getRanPoint();
-	Vector3d dir = COSVEC(-_l[light]->getVector);
-	return Photon();
+	return _l[light]->emitPhoton(color);
 }
 
 std::vector<Photon> Shading::tracePhotons(Group* s) {
 	std::vector<Photon> result;
+	for (int i = 0; i < _numPhotons; i++) {
+		//s->hit();
+	}
 	return result;
 }
 
