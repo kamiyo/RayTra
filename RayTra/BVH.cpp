@@ -75,11 +75,10 @@ TODO: write tree display algo
 POSSIBLE?: turn into Heap instead of tree
 */
 
-bool BVH::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+bool BVH::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	if (!hitbox(ray, t0, t1)) return false;
 	if (_trans) {
-		Ray tRay(apply(_mInv, ray.eye, 1), apply(_mInv, ray.dir, 0), ray.ref, ray.alpha, Ray::VIEW);
-		Ray::count -= 1;
+		RayBase tRay(apply(_mInv, ray.m_eye, 1), apply(_mInv, ray.m_dir, 0), ray.m_type);
 		bool temp = hit(tRay, t0, t1, rec);
 		if (temp) {
 			rec.n = apply(_mTrans, rec.n, 0);
@@ -92,7 +91,7 @@ bool BVH::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	}
 }
 
-bool BVH::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	if (hitbox(ray, t0, t1)) {
 		hitRecord lrec, rrec;
 		bool leftHit = (_l != NULL) && (_l->_hit(ray, t0, t1, lrec));
@@ -130,11 +129,11 @@ void BVH::boundingBox() {
 http://people.csail.mit.edu/amy/papers/box-jgt.pdf
 gains of 25% in paper
 */
-bool BVH::hitbox(Ray& ray, const double t0, const double t1) {
+bool BVH::hitbox(RayBase& ray, const double t0, const double t1) {
 	double tmin, tmax, tymin, tymax, tzmin, tzmax;
-	Vector3d e = ray.eye;
-	Vector3d i = ray.inv;
-	Vector3i s = ray.sign;
+	Vector3d e = ray.m_eye;
+	Vector3d i = ray.m_inv;
+	Vector3i s = ray.m_sign;
 
 	tmin = (_b.b[s[0]][0] - e[0]) * i[0];
 	tmax = (_b.b[1-s[0]][0] - e[0]) * i[0];

@@ -16,10 +16,9 @@
 //	// TODO Auto-generated destructor stub
 //}
 
-bool Surface::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+bool Surface::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	if (_trans) {
-		Ray tRay(apply(_mInv, ray.eye, 1), apply(_mInv, ray.dir, 0), ray.ref, ray.alpha, Ray::VIEW);
-		Ray::count -= 1;
+		RayBase tRay(apply(_mInv, ray.m_eye, 1), apply(_mInv, ray.m_dir, 0), ray.m_type);
 		bool temp = hit(tRay, t0, t1, rec);
 		if (temp) {
 			rec.n = apply(_mTrans, rec.n, 0);
@@ -29,22 +28,6 @@ bool Surface::_hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	}
 	else {
 		return hit(ray, t0, t1, rec);
-	}
-}
-
-bool Surface::_hit(Photon& photon, double t0, double t1, hitRecord& rec) {
-	if (_trans) {
-		Photon tPhoton(apply(_mInv, photon.m_pos, 1), apply(_mInv, photon.m_dir, 0), photon.m_intensity, photon.m_color);
-		Photon::count -= 1;
-		bool temp = hit(tPhoton, t0, t1, rec);
-		if (temp) {
-			rec.n = apply(_mTrans, rec.n, 0);
-			rec.n.normalize();
-		}
-		return temp;
-	}
-	else {
-		return hit(photon, t0, t1, rec);
 	}
 }
 

@@ -18,7 +18,7 @@ void Group::addSurface(Surface* s) {
 	_b = _b.combine(s->_b);
 }
 
-bool Group::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+bool Group::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	bool hit = false;
 	for (int i = 0; i < (int)_s.size(); i++) {
 		hitRecord temp;

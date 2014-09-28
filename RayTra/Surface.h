@@ -10,19 +10,17 @@
 
 #include "Transform.h"
 #include "Material.h"
-#include "Ray.h"
 #include "Photon.h"
+#include "Ray.h"
 #include "BBox.h"
 
 class Surface {
 public:
 	enum { NeedsToAlign = (sizeof(Vector4d) % 16) == 0 };
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign);
-	virtual bool _hit(Ray& ray, double t0, double t1, hitRecord& rec);
-	virtual bool _hit(Photon& photon, double t0, double t1, hitRecord& rec);
+	virtual bool _hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	void trans(Matrix4d& m, Matrix4d& inv);
-	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec) = 0;
-	virtual bool hit(Photon& photon, double t0, double t1, hitRecord& rec) = 0;
+	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) = 0;
 	virtual void boundingBox() = 0;
 	virtual int type();
 	Matrix4d _mInv;

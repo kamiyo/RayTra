@@ -40,6 +40,7 @@
     <ClInclude Include="Plane.h" />
     <ClInclude Include="rand.h" />
     <ClInclude Include="Ray.h" />
+    <ClInclude Include="RayBase.h" />
     <ClInclude Include="RayTra.h" />
     <ClInclude Include="rpoly.h" />
     <ClInclude Include="Sampler.h" />

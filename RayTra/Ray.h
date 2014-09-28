@@ -9,24 +9,17 @@
 #define RAY_H_
 
 #include "UtilDefines.h"
+#include "RayBase.h"
 
 
-class Ray {
+class Ray : public RayBase {
 public:
 	Ray();
 	Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a, int t);
-	void reSign();
 	virtual ~Ray();
-		Vector3d eye;
-		Vector3d dir;
-		Vector3d inv;
-		Vector3i sign;
-		double epsilon;
-		int type;
-		static const int VIEW = 0, SHAD = 1, DIFF = 2, OCCL = 3;
-		std::vector<double> ref;
-		std::vector<Vector3d> alpha;
-		static unsigned long count;
+	std::vector<double> ref;
+	std::vector<Vector3d> alpha;
+	static unsigned long count;
 
 };
 

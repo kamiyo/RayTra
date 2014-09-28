@@ -30,10 +30,10 @@ Circle::~Circle(void)
 {
 }
 
-bool Circle::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+bool Circle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	//std::cout << "here" << std::endl;
-	Vector3d e = ray.eye;
-	Vector3d d = ray.dir;
+	Vector3d e = ray.m_eye;
+	Vector3d d = ray.m_dir;
 	double den = _n.dot(d);
 	if (den == 0) {
 		return false;
@@ -47,7 +47,7 @@ bool Circle::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		if (((e + d * rec.t) - _p).norm() > _r) {
 			return false;
 		}
-		if (ray.type == Ray::VIEW) {
+		if (ray.m_type == RayBase::VIEW) {
 			rec.n = _n.normalized();
 		}
 		else {

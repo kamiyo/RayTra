@@ -31,19 +31,12 @@ int			t		type of ray
 unsigned long Ray::count = 0;
 
 Ray::Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a, int t):
-eye(e), dir(d), ref(r), alpha(a), type(t) {
+RayBase(e, d, t), ref(r), alpha(a), type(t) {
 //#pragma omp atomic
 	Ray::count++;
-	epsilon = 0.0001 / dir.norm();
-	inv = dir.cwiseInverse();
-	reSign();
 }
 
 Ray::Ray() {
-}
-
-void Ray::reSign() {
-	sign = (inv.array() < 0).cast<int>();
 }
 
 Ray::~Ray() {
@@ -51,5 +44,5 @@ Ray::~Ray() {
 }
 
 std::ostream &operator<<(std::ostream &os, Ray &r) {
-	return os << r.eye << ", " << r.dir << " " << r.dir.norm();
+	return os << r.m_eye << ", " << r.m_dir << " " << r.m_dir.norm();
 }

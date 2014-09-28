@@ -86,11 +86,11 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 	Vector3d result = Vector3d::Zero();								// rgb result zero'd
 	Vector3d cook = Vector3d::Zero();
 
-	Vector3d d = (-1.0 * vray.dir).normalized();					// d = viewing ray direction (out of surface)
+	Vector3d d = (-1.0 * vray.m_dir).normalized();					// d = viewing ray direction (out of surface)
 	Material* m;
 
 	if (s->_hit(vray, t0, t1, rec)) {
-		double epsilon = vray.epsilon;
+		double epsilon = vray.m_epsilon;
 		Vector3d n = rec.n;											// n = normal vector of intersection
 		
 		double nd = n.dot(d);
@@ -103,13 +103,13 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 			return light;
 		}
 
-		const Vector3d p = vray.eye + rec.t * vray.dir;				// p = intersection point
+		const Vector3d p = vray.m_eye + rec.t * vray.m_dir;				// p = intersection point
 		m = rec.m;													// material at intersection
 
 		Vector3d global; global.setZero();
 		for (int gi = 0; gi < _indirect; gi++) {
 			Vector3d newDir = COSVEC(n);
-			Ray diffR(p, vray.dir.norm() * newDir, vray.ref, vray.alpha, Ray::VIEW);
+			Ray diffR(p, vray.m_dir.norm() * newDir, vray.ref, vray.alpha, Ray::VIEW);
 			global += computeShading(diffR, epsilon, INF, s, area, recurs - 1, refrac);
 		}
 
@@ -139,7 +139,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 			 h = bisector of l and d
 			 result += diff*I*max(0, n.l) + spec*I*max(0, n.h)^shininess
 			*/
-			if ((fall != 0 && !s->_hit(sRay, sRay.epsilon, 1, srec)) || srec.m == NULL || _shadows == false) {
+			if ((fall != 0 && !s->_hit(sRay, sRay.m_epsilon, 1, srec)) || srec.m == NULL || _shadows == false) {
 				Vector3d nn = n;
 				if (nd < 0) {
 					nd = -nd;
@@ -157,7 +157,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 				}
 			}
 		}
-		d = vray.dir;
+		d = vray.m_dir;
 		// if reflection index is not 0 and if refractions are turned on
 		if ((m->n != 0) && _refraction) {
 			double c1, c2;
@@ -215,7 +215,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 				result += krefract.cwiseProduct((1 - R) * computeShading(v1, epsilon, INF, s, area, recurs, refrac));
 			}
 		} else if (m->ki != Vector3d::Zero()) {
-			d = vray.dir;
+			d = vray.m_dir;
 			Ray refRay(p, d - 2 * (d.dot(n)) * n, vray.ref, vray.alpha, Ray::VIEW);
 			result += m->ki.cwiseProduct(computeShading(refRay, epsilon, INF, s, area, recurs - 1, refrac));
 		}
