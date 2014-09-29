@@ -26,10 +26,10 @@ inline double pow4(const double& x) {
 }
 
 
-bool Torus::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+bool Torus::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	//if (!hitbox(ray, t0, t1)) return false;
-	const Vector3d d = ray.dir;
-	const Vector3d e = ray.eye;
+	const Vector3d d = ray.m_dir;
+	const Vector3d e = ray.m_eye;
 	double* op = (double*) malloc(sizeof(double) * 5);
 	double dx = d(0), dy = d(1), dz = d(2);
 	double dx2 = d(0) * d(0), dy2 = d(1)* d(1);
@@ -63,7 +63,7 @@ bool Torus::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	if ((size_t) reals.size() == 0) return false;
 	std::sort(reals.begin(), reals.end());
 	rec.t = reals[0];
-	if (ray.type == Ray::VIEW) {
+	if (ray.m_type == RayBase::VIEW) {
 		Vector3d p = e + rec.t * d;
 		Vector3d pp; pp << p(0), p(1), 0.;
 		Vector3d c = pp.normalized() * _R; // center of tube
@@ -77,11 +77,11 @@ bool Torus::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	return true;
 }
 
-bool Torus::hitbox(Ray& ray, double t0, double t1) {
+bool Torus::hitbox(RayBase& ray, double t0, double t1) {
 	double tmin, tmax, tymin, tymax, tzmin, tzmax;
-	Vector3i s = ray.sign;
-	Vector3d i = ray.inv;
-	Vector3d e = ray.eye;
+	Vector3i s = ray.m_sign;
+	Vector3d i = ray.m_inv;
+	Vector3d e = ray.m_eye;
 
 	tmin = (_b.b[s[0]][0] - e[0]) * i[0];
 	tmax = (_b.b[1 - s[0]][0] - e[0]) * i[0];

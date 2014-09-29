@@ -17,10 +17,10 @@ Cone::Cone(double lower, double upper, Material *m) : _l(lower), _u(upper)
 	_trans = false;
 }
 
-bool Cone::hit(Ray& ray, double t0, double t1, hitRecord& rec)
+bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec)
 {
-	Vector3d eye = ray.eye;
-	Vector3d dir = ray.dir;
+	Vector3d eye = ray.m_eye;
+	Vector3d dir = ray.m_dir;
 	double a = dir(0) * dir(0) + dir(1) * dir(1) - dir(2) * dir(2);
 	if (a == 0) return false;
 	double b = 2 * (eye(0) * dir(0) + eye(1) * dir(1) - eye(2) * dir(2));
@@ -36,28 +36,28 @@ bool Cone::hit(Ray& ray, double t0, double t1, hitRecord& rec)
 		if (rec.t < t0 || rec.t > t1) return false;
 		double z = eye(2) + rec.t * dir(2);
 		if (z > _u || z < _l) return false;
-		if (ray.type == Ray::VIEW) {
+		if (ray.m_type == RayBase::VIEW) {
 			Vector3d n = eye + rec.t * dir;
 			double nz; nz = (n(2) > 0) ? -1.0 : 1.0;
 			n(2) = 0; n.normalize();
 			n(2) = nz;
 			rec.n = n.normalized();
 		}
-		else if (ray.type == Ray::SHAD) {
+		else if (ray.m_type == RayBase::SHADOW) {
 			rec.s = this;
 		}
 		rec.m = _m;
 		return true;
 	}
 	else {
-		if (ray.type == Ray::VIEW) {
+		if (ray.m_type == RayBase::VIEW) {
 			Vector3d n = eye + rec.t * dir;
 			double nz; nz = (n(2) > 0) ? -1.0 : 1.0;
 			n(2) = 0; n.normalize();
 			n(2) = nz;
 			rec.n = n.normalized();
 		}
-		else if (ray.type == Ray::SHAD) {
+		else if (ray.m_type == RayBase::SHADOW) {
 			rec.s = this;
 		}
 		rec.m = _m;

@@ -18,7 +18,7 @@ class Vertex;
 class Face : public Surface {
 public:
 	Face(Material* m);
-	bool hit(Ray& ray, double t0, double t1, hitRecord& rec);
+	bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	void boundingBox();
 	virtual ~Face();
 	void setHE(HEdge* e);

@@ -12,7 +12,7 @@
 class Plane : public Surface {
 public:
 	Plane(Vector3d n, Vector3d d, Material* m);
-	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec);
+	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	virtual void boundingBox();
 	virtual ~Plane();
 	Vector3d _p;

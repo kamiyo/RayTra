@@ -15,8 +15,8 @@ Instance::~Instance()
 {
 }
 
-bool Instance::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
-	Ray transRay(ray);
+bool Instance::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+/*	Ray transRay(ray);
 	Vector4d eye; eye.setZero(); eye << transRay.eye[0], transRay.eye[1], transRay.eye[2], 1;
 	Vector4d dir; dir.setZero(); dir << transRay.dir[0], transRay.dir[1], transRay.dir[2], 0;
 	eye = _mInv * eye;
@@ -29,6 +29,7 @@ bool Instance::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 		rec.n << n[0], n[1], n[2];
 		return true;
 	}
+	return false;*/
 	return false;
 }
 

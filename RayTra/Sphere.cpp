@@ -30,9 +30,9 @@ Sphere::~Sphere() {
 	// TODO Auto-generated destructor stub
 }
 
-bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
-	Vector3d e = ray.eye;
-	Vector3d d = ray.dir;
+bool Sphere::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+	Vector3d e = ray.m_eye;
+	Vector3d d = ray.m_dir;
 	Vector3d ep = e - _p;
 	double dep = d.dot(ep);
 	double dd = d.dot(d);
@@ -52,21 +52,22 @@ bool Sphere::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 			if (rec.t < t0 || rec.t > t1) {
 				return false;
 			}
-			if (ray.type == Ray::VIEW) {
+			if (ray.m_type == RayBase::VIEW) {
 				Vector3d n = e + rec.t * d;
 				rec.n = (n - _p).normalized();
-			} else if (ray.type == Ray::SHAD) {
+			}
+			else if (ray.m_type == RayBase::SHADOW) {
 				rec.s = this;
 			}
 			rec.m = _m;
 			return true;
 		}
 		else {
-			if (ray.type == Ray::VIEW) {
+			if (ray.m_type == RayBase::VIEW) {
 				Vector3d n = e + rec.t * d;
 				rec.n = (n - _p).normalized();
 			}
-			else if (ray.type == Ray::SHAD) {
+			else if (ray.m_type == RayBase::SHADOW) {
 				rec.s = this;
 			}
 			rec.m = _m;

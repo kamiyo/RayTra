@@ -20,21 +20,21 @@ Plane::~Plane() {
 	// TODO Auto-generated destructor stub
 }
 
-bool Plane::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
-	Vector3d d = ray.dir;
+bool Plane::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+	Vector3d d = ray.m_dir;
 	double den = _n.dot(d);
 	if (den == 0) {
 		return false;
 	}
 	else {
-		Vector3d e = ray.eye;
+		Vector3d e = ray.m_eye;
 		double num = _n.dot(_p - e);
 		rec.t = num / den;
 		if (rec.t < t0 || rec.t > t1) {
 			return false;
 		}
 		else {
-			if (ray.type == Ray::VIEW) {
+			if (ray.m_type == Ray::VIEW) {
 				rec.n = _n.normalized();
 				rec.m = _m;
 			}

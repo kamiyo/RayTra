@@ -6,7 +6,7 @@ class Union :
 {
 public:
 	Union();
-	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec);
+	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	~Union();
 };
 

@@ -7,7 +7,7 @@ Union::Union()
 	_b = b;
 }
 
-bool Union::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+bool Union::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	bool hit = false;
 	for (int i = 0; i < (int) _s.size(); i++) {
 		hitRecord temp;

@@ -7,7 +7,7 @@ class Instance : public Surface
 {
 public:
 	Instance(Surface* s, Matrix4d& m);
-	virtual bool hit(Ray& ray, double t0, double t1, hitRecord& rec);
+	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	virtual void boundingBox();
 	~Instance();
 	Surface* _s;

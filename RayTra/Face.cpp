@@ -22,7 +22,7 @@ HEdge* Face::getHE() {
 	return _e;
 }
 
-bool Face::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+bool Face::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	HEdge* edge = _e;
 	Vertex* vert = edge->getVertex();
 	Vector3d _p1 = vert->_p; Vector3d _n1 = vert->_n.normalized();
@@ -33,8 +33,8 @@ bool Face::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	vert = edge->getVertex();
 	Vector3d _p3 = vert->_p; Vector3d _n3 = vert->_n.normalized();
 
-	Vector3d dir = ray.dir;
-	Vector3d eye = ray.eye;
+	Vector3d dir = ray.m_dir;
+	Vector3d eye = ray.m_eye;
 	Vector3d abc = _p1 - _p2;
 	Vector3d def = _p1 - _p3;
 	Vector3d ghi = dir;
@@ -57,7 +57,7 @@ bool Face::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	if (beta < 0 || beta >(1 - gamma)) {
 		return false;
 	}
-	if (ray.type == Ray::VIEW) {
+	if (ray.m_type == RayBase::VIEW) {
 		rec.t = t;
 		if (smooth) {
 			rec.n = ((1 - gamma - beta) * _n1 + beta * _n2 + gamma * _n3).normalized();
@@ -66,7 +66,7 @@ bool Face::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 			rec.n = _normal;
 		}
 	}
-	else if (ray.type == Ray::SHAD) {
+	else if (ray.m_type == RayBase::SHADOW) {
 		rec.s = this;
 	}
 	rec.m = _m;

@@ -33,11 +33,11 @@ Triangle::~Triangle() {
 
 
 // TO-DO: PLUCKER COORDS?
-bool Triangle::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
+bool Triangle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	//plucker
 
-	Vector3d e = ray.eye;
-	Vector3d u = ray.dir;
+	Vector3d e = ray.m_eye;
+	Vector3d u = ray.m_dir;
 	Vector3d v = u.cross(e);
 	double alpha = _u1.dot(v) + u.dot(_v1);
 	double beta = _u2.dot(v) + u.dot(_v2);
@@ -57,7 +57,7 @@ bool Triangle::hit(Ray& ray, double t0, double t1, hitRecord& rec) {
 	double t = (p - e).norm() / u.norm();
 	if (t > t1 || t < t0) return false;
 	rec.t = t;
-	if (ray.type == Ray::VIEW) {
+	if (ray.m_type == RayBase::VIEW) {
 		rec.n = _n;
 		//if (_n.dot(u) > 0) rec.n = -_n;
 	}
