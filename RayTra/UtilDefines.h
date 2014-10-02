@@ -55,8 +55,8 @@ typedef Eigen::AngleAxisd AngleAxisd;
 typedef Eigen::Array2d Array2d;
 typedef Eigen::Array4d Array4d;
 typedef Eigen::Array33d Array33d;
-typedef std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Vector2d> > Sampler2d;
-typedef std::vector<Eigen::Vector2i, Eigen::aligned_allocator<Vector2i> > Sampler2i;
+typedef Eigen::Matrix<Vector2d, Eigen::Dynamic, Eigen::Dynamic> Sampler2d;
+typedef Eigen::Matrix<Vector2i, Eigen::Dynamic, Eigen::Dynamic> Sampler2i;
 
 typedef struct hitRecord {
 	double t;
@@ -77,13 +77,18 @@ int genRand_int(int x, int y);
 
 Vector3d cosVec(Vector3d a);
 Vector3d _cosVec(Vector3d a);
+Vector3d cosVec(Vector3d a, double p);
+
 
 std::istream &operator>>(std::istream &is, Vector3d &f);
 std::ostream &operator<<(std::ostream &os, Vector3d &f);
 
 std::ostream &operator<<(std::ostream &os, Sampler2d &s);
+std::ostream &operator<<(std::ostream &os, Sampler2i &s);
+
 
 // Takes sample in 2-D square to circle
 void toDisk(double x, double y, Vector2d& v);
+void toDisk(Vector2d& v);
 void to_unit_disk(double seedx, double seedy, Vector2d& v);
 #endif /* UTILDEFINES_H_ */

@@ -31,7 +31,7 @@ int			t		type of ray
 unsigned long Ray::count = 0;
 
 Ray::Ray(Vector3d e, Vector3d d, std::vector<double> r, std::vector<Vector3d> a, int t):
-RayBase(e, d, t), ref(r), alpha(a), type(t) {
+RayBase(e, d, t), ref(r), alpha(a) {
 //#pragma omp atomic
 	Ray::count++;
 }

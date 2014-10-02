@@ -75,9 +75,11 @@ TODO: write tree display algo
 POSSIBLE?: turn into Heap instead of tree
 */
 
+// boxes should already be pre-transformed. BVH shouldn't have its own transformation
 bool BVH::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
-	if (!hitbox(ray, t0, t1)) return false;
+	/*if (!_b.hitbox(ray, t0, t1)) return false;
 	if (_trans) {
+		std::cout << "this BVH has been transformed" << std::endl;
 		RayBase tRay(apply(_mInv, ray.m_eye, 1), apply(_mInv, ray.m_dir, 0), ray.m_type);
 		bool temp = hit(tRay, t0, t1, rec);
 		if (temp) {
@@ -86,13 +88,13 @@ bool BVH::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 		}
 		return temp;
 	}
-	else {
+	else {*/
 		return hit(ray, t0, t1, rec);
-	}
+	//}
 }
 
 bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
-	if (hitbox(ray, t0, t1)) {
+	if (_b.hitbox(ray, t0, t1)) {
 		hitRecord lrec, rrec;
 		bool leftHit = (_l != NULL) && (_l->_hit(ray, t0, t1, lrec));
 		bool rightHit = (_r != NULL) && (_r->_hit(ray, t0, t1, rrec));
@@ -123,29 +125,4 @@ bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 }
 
 void BVH::boundingBox() {
-}
-
-/*
-http://people.csail.mit.edu/amy/papers/box-jgt.pdf
-gains of 25% in paper
-*/
-bool BVH::hitbox(RayBase& ray, const double t0, const double t1) {
-	double tmin, tmax, tymin, tymax, tzmin, tzmax;
-	Vector3d e = ray.m_eye;
-	Vector3d i = ray.m_inv;
-	Vector3i s = ray.m_sign;
-
-	tmin = (_b.b[s[0]][0] - e[0]) * i[0];
-	tmax = (_b.b[1-s[0]][0] - e[0]) * i[0];
-	tymin = (_b.b[s[1]][1] - e[1]) * i[1];
-	tymax = (_b.b[1-s[1]][1] - e[1]) * i[1];
-	if ((tmin > tymax) || (tymin > tmax)) return false;
-	if (tymin > tmin) tmin = tymin;
-	if (tymax < tmax) tmax = tymax;
-	tzmin = (_b.b[s[2]][2] - e[2]) * i[2];
-	tzmax = (_b.b[1-s[2]][2] - e[2]) * i[2];
-	if ((tmin > tzmax) || (tzmin > tmax)) return false;
-	if (tzmin > tmin) tmin = tzmin;
-	if (tzmax < tmax) tmax = tzmax;
-	return ((tmin < t1) && (tmax > t0));
 }

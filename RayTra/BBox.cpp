@@ -32,11 +32,36 @@ BBox::~BBox() {
 	// TODO Auto-generated destructor stub
 }
 
-Vector3d& BBox::min() {
+/*
+http://people.csail.mit.edu/amy/papers/box-jgt.pdf
+gains of 25% in paper
+*/
+bool BBox::hitbox(RayBase& ray, const double t0, const double t1) {
+	double tmin, tmax, tymin, tymax, tzmin, tzmax;
+	Vector3d e = ray.m_eye;
+	Vector3d i = ray.m_inv;
+	Vector3i s = ray.m_sign;
+
+	tmin = (b[s[0]][0] - e[0]) * i[0];
+	tmax = (b[1 - s[0]][0] - e[0]) * i[0];
+	tymin = (b[s[1]][1] - e[1]) * i[1];
+	tymax = (b[1 - s[1]][1] - e[1]) * i[1];
+	if ((tmin > tymax) || (tymin > tmax)) return false;
+	if (tymin > tmin) tmin = tymin;
+	if (tymax < tmax) tmax = tymax;
+	tzmin = (b[s[2]][2] - e[2]) * i[2];
+	tzmax = (b[1 - s[2]][2] - e[2]) * i[2];
+	if ((tmin > tzmax) || (tzmin > tmax)) return false;
+	if (tzmin > tmin) tmin = tzmin;
+	if (tzmax < tmax) tmax = tzmax;
+	return ((tmin < t1) && (tmax > t0));
+}
+
+Vector3d BBox::min() {
 	return MIN;
 }
 
-Vector3d& BBox::max() {
+Vector3d BBox::max() {
 	return MAX;
 }
 

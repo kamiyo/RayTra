@@ -19,6 +19,10 @@ LightD::~LightD() {
 	// TODO Auto-generated destructor stub
 }
 
+Photon LightD::emitPhoton(int color) {
+	return Photon();
+}
+
 Vector3d LightD::getVector(Vector3d p) {
 	return _dir;
 }

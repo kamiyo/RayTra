@@ -7,7 +7,6 @@ class Torus :
 public:
 	Torus(double R, double r, Material* m);
 	void boundingBox();
-	bool hitbox(RayBase& ray, double t0, double t1);
 	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	~Torus();
 	double _r, _R;

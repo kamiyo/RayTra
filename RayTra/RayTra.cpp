@@ -158,9 +158,8 @@ void RayTra::setOption(int option, int setting, int setting2) {
 	switch (option) {
 	case SHADOWS:
 		area = setting;
-		if (area >= 1) {
+		if (area >= 1)
 			_shading->_shadows = true;
-		}
 		break;
 	case DOF:
 		field = setting;
@@ -172,9 +171,7 @@ void RayTra::setOption(int option, int setting, int setting2) {
 		}
 		break;
 	case RUSSIAN:
-		if (setting == 1) {
-			_shading->_russian = true;
-		}
+		(setting == 1) ? _shading->_russian = true : _shading->_russian = false;
 		break;
 	case REFRACT:
 		_shading->_refraction = setting;
@@ -189,20 +186,14 @@ void RayTra::setOption(int option, int setting, int setting2) {
 		_shading->_indirect = setting;
 		break;
 	case LIGHTS:
-		if (setting == 0) {
-			actualLights = false;
-		}
-		else {
-			actualLights = true;
-		}
+		(setting == 0) ? actualLights = false :	actualLights = true;
 		break;
 	case ORDER:
 		order = setting;
 		break;
 	case CIRCULAR:
-		if (setting != 0) {
-			circular = true;
-		}
+		(setting != 0) ? circular = true : circular = false;
+		break;
 	default:
 		break;
 	}
@@ -406,24 +397,12 @@ void RayTra::splitStringToInt(const string& s, char d, vector<int>& e) {
 //TODO make a sampler class and move the sample grid stuff off
 // render function
 void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
-	init_genrand(time(NULL));
 	seedRand();					// seed rand
-	Sampler2i bert;
-	std::cout << samples << " " << order << std::endl;
-	//Vector2i* ples;
-	if (order == HILBERT) {
-		std::cout << "Hilbert on" << std::endl;
-		Hilbert global(width, height);
-		bert = global.getPoints();
-		//Hilbert sam(samples, samples);
-		//ples = sam.getPoints();
-	}
 
 	Sampler master(width, height, Sampler::INTEGRAL, Sampler::SQUARE, ((order == HILBERT) ? (Sampler::HILBERT) : 0), Sampler::CENTER, false);
-	Sampler ms_sampler(samples, samples, Sampler::FRACTIONAL, Sampler::SQUARE, Sampler::LINEAR, ((samples > 1) ? (sample_type) : (Sampler::CENTER)), true);
+	Sampler ms_sampler(samples, samples, Sampler::FRACTIONAL, Sampler::SQUARE, ((order == HILBERT) ? (Sampler::HILBERT) : 0), ((samples > 1) ? (sample_type) : (Sampler::CENTER)), true);
 	Sampler lens_sampler, light_sampler;
 	
-	std::cout << area << std::endl;
 	if (field == OFF) lens_sampler = Sampler(samples, samples);
 	else lens_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((circular) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1) ? (sample_type):(Sampler::CENTER)), true);
 	if (area <= 1) light_sampler = Sampler(samples, samples);
@@ -448,21 +427,19 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 			Sampler::shuffle(s_sample, true);
 			Sampler::shuffle(l_sample, true);
 
-			int current_pixel = j * width + i;
-			int x = master_pixels[current_pixel][0];
-			int y = master_pixels[current_pixel][1];
+			int x = master_pixels(i, j)[0];
+			int y = master_pixels(i, j)[1];
 			// multisampling raytracing
 			for (int q = 0; q < samples; q++) {
 				for (int p = 0; p < samples; p++) {
 
 					int current_sample = q * samples + p;
-					int current_pixel = j * width + i;
 					Ray r;
-					_cam->generateRay(s_sample[current_sample], x + ms_sample[current_sample][0], y + ms_sample[current_sample][1], r);
-					c += _shading->computeShading(r, 0, INF, _all, l_sample[current_sample]);				// SHADE
+					_cam->generateRay(s_sample(current_sample), x + ms_sample(current_sample)[0], y + ms_sample(current_sample)[1], r);
+					c += _shading->computeShading(r, 0, INF, _all, l_sample(current_sample));				// SHADE
 				}
 			}
-			c = c / (samples * samples);		// normalize result
+			c /= (samples * samples);		// normalize result
 			int invHeight = height - (y + 1);
 			o[invHeight][x].r = c[0];
 			o[invHeight][x].g = c[1];

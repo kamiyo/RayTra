@@ -16,6 +16,10 @@ Vector3d LightS::getVector(Vector3d p) {
 	return _pos - p;
 }
 
+Photon LightS::emitPhoton(int color) {
+	return Photon();
+}
+
 double LightS::getFalloff(Vector3d p) {
 	Vector3d l = _dir.normalized();
 	

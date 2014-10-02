@@ -63,10 +63,104 @@ Photon Shading::emitPhoton() {
 	return _l[light]->emitPhoton(color);
 }
 
+
+/*
+if ((m->n != 0) && _refraction) {
+double c1, c2;
+double current, to;
+auto temp_ref = p.m_refIndices;
+auto temp_alpha = p.m_atten;
+double dnorm = d.norm();
+Vector3d reflect = d - 2 * (d.dot(n)) * n;	// reflect = reflected vector
+d.normalize();								// d = viewing ray direction
+Vector3d t = Vector3d::Zero();
+c1 = abs(d.dot(n));
+current = p.m_refIndices.back();
+krefract = exp(-1.0 * temp_alpha.back());
+if (d.dot(n) < 0) {							// if viewing vector is in front of normal, i.e. entering a refracting object
+to = m->n;
+temp_ref.push_back(to);
+temp_alpha.push_back(m->a(p.m_color));
+if (refract(d, n, current, to, t)) {
+// TRANSMIT
+c2 = abs((t.normalized()).dot(n));
+}
+else {
+// REFLECT RAY
+Ray refRay(p, reflect, vray.ref, vray.alpha, Ray::VIEW);
+return result += krefract.cwiseProduct(computeShading(refRay, epsilon, INF, s, area, recurs, refrac));
+}
+}
+else {
+// exiting a refracting object
+temp_ref.pop_back();
+to = temp_ref.back();
+temp_alpha.pop_back();
+if (refract(d, -1.0 * n, current, to, t)) {
+// TRANSMIT
+c2 = abs((t.normalized()).dot(n));
+}
+else {								// if total internal refraction, then only add reflection
+Ray refRay(p, reflect, vray.ref, vray.alpha, Ray::VIEW);
+return result += krefract.cwiseProduct(computeShading(refRay, epsilon, INF, s, area, recurs, refrac));
+}
+}
+R = fresnel(current, to, c1, c2);
+Ray v0(p, reflect, vray.ref, vray.alpha, Ray::VIEW);
+Ray v1(p, t, temp_ref, temp_alpha, Ray::VIEW);
+else {
+result += krefract.cwiseProduct(R * computeShading(v0, epsilon, INF, s, area, recurs, refrac));
+result += krefract.cwiseProduct((1 - R) * computeShading(v1, epsilon, INF, s, area, recurs, refrac));
+}
+}*/
+
 std::vector<Photon> Shading::tracePhotons(Group* s) {
 	std::vector<Photon> result;
 	for (int i = 0; i < _numPhotons; i++) {
-		//s->hit();
+		Photon p = emitPhoton();
+		p.m_intensity /= _numPhotons;
+		hitRecord rec;
+		while (1) {
+			if (s->hit(p, p.m_epsilon, INF, rec)) {
+				Vector3d p1 = p.getPoint(rec.t);
+				if (rec.m->kd.all() != 0) result.push_back(Photon(p1, -p.m_dir, p.m_intensity, p.m_color));
+				Material* m = rec.m;
+				double diff = m->kd(p.m_color);
+				double spec = m->ki(p.m_color);
+				double krefract = 1., R;
+				double index = m->n;
+				Vector3d d = p.m_dir;
+				Vector3d n = rec.n;
+				Vector3d nn = (d.dot(n) <= 0) ? n : -n;
+				double roll;
+				if (krefract < 1) {
+					roll = RAN;
+					if (roll > krefract) {
+						break;
+					} //absorbed in deBeer's effect
+				}
+				int max = 0;
+				if (diff > 0) max++;
+				if (spec > 0) max++;
+				roll = (double) max * RAN;
+
+				// russian roulette
+				if (roll < diff) { // diffuse
+					Vector3d diffuseVec = COSVEC(n);
+					p.set(p1, diffuseVec);
+				}
+				else if (roll < (diff + spec)) { // spec
+					Vector3d reflectVec = (m->p == -1) ? (d - 2 * (d.dot(n)) * n) : (COSVEC((d - 2 * (d.dot(n)) * n).normalized(), m->p));
+					p.set(p1, reflectVec);
+				}
+				else {
+					break;
+				} // absorbed
+			}
+			else {
+				break;
+			}
+		}
 	}
 	return result;
 }
@@ -82,17 +176,14 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 	if (recurs == -1 || refrac == -1) {
 		return Vector3d::Zero();									//return 0 if recursion limit reached
 	}
-	hitRecord rec, srec;											// rec = light record, srec = shadow record
+	hitRecord rec;											// rec = light record, srec = shadow record
 	Vector3d result = Vector3d::Zero();								// rgb result zero'd
-	Vector3d cook = Vector3d::Zero();
-
 	Vector3d d = (-1.0 * vray.m_dir).normalized();					// d = viewing ray direction (out of surface)
 	Material* m;
 
 	if (s->_hit(vray, t0, t1, rec)) {
 		double epsilon = vray.m_epsilon;
 		Vector3d n = rec.n;											// n = normal vector of intersection
-		
 		double nd = n.dot(d);
 
 		if (rec.m == NULL) {
@@ -103,7 +194,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 			return light;
 		}
 
-		const Vector3d p = vray.m_eye + rec.t * vray.m_dir;				// p = intersection point
+		const Vector3d p = vray.getPoint(rec.t);				// p = intersection point
 		m = rec.m;													// material at intersection
 
 		Vector3d global; global.setZero();
@@ -131,7 +222,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 				l = l + u * _area[0] + v * _area[1];
 			}
 
-			Ray sRay(p, l, vray.ref, vray.alpha, Ray::SHAD);
+			Ray sRay(p, l, vray.ref, vray.alpha, RayBase::SHADOW);
 			/* if shadows are off or if a shadow is not found
 			 calculate lighting
 			 I = light's intensity in RGB
@@ -139,6 +230,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 			 h = bisector of l and d
 			 result += diff*I*max(0, n.l) + spec*I*max(0, n.h)^shininess
 			*/
+			hitRecord srec;
 			if ((fall != 0 && !s->_hit(sRay, sRay.m_epsilon, 1, srec)) || srec.m == NULL || _shadows == false) {
 				Vector3d nn = n;
 				if (nd < 0) {
@@ -157,7 +249,8 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 				}
 			}
 		}
-		d = vray.m_dir;
+
+		d = vray.m_dir;	// reset d just in case
 		// if reflection index is not 0 and if refractions are turned on
 		if ((m->n != 0) && _refraction) {
 			double c1, c2;
@@ -216,7 +309,9 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 			}
 		} else if (m->ki != Vector3d::Zero()) {
 			d = vray.m_dir;
-			Ray refRay(p, d - 2 * (d.dot(n)) * n, vray.ref, vray.alpha, Ray::VIEW);
+			//std::cout << m->p << std::endl;
+			Vector3d newDir = (m->p == -1) ? (d - 2 * (d.dot(n)) * n) : (COSVEC((d - 2 * (d.dot(n)) * n).normalized(), m->p));
+			Ray refRay(p, newDir, vray.ref, vray.alpha, Ray::VIEW);
 			result += m->ki.cwiseProduct(computeShading(refRay, epsilon, INF, s, area, recurs - 1, refrac));
 		}
 		return result;

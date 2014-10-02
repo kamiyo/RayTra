@@ -6,7 +6,7 @@ class Hilbert {
 public:
 	Hilbert(int x, int y);
 	~Hilbert();
-	Sampler2i& getPoints();
+	Sampler2i getPoints();
 	int size();
 private:
 	Sampler2i _points;

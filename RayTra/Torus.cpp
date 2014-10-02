@@ -77,27 +77,6 @@ bool Torus::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	return true;
 }
 
-bool Torus::hitbox(RayBase& ray, double t0, double t1) {
-	double tmin, tmax, tymin, tymax, tzmin, tzmax;
-	Vector3i s = ray.m_sign;
-	Vector3d i = ray.m_inv;
-	Vector3d e = ray.m_eye;
-
-	tmin = (_b.b[s[0]][0] - e[0]) * i[0];
-	tmax = (_b.b[1 - s[0]][0] - e[0]) * i[0];
-	tymin = (_b.b[s[1]][1] - e[1]) * i[1];
-	tymax = (_b.b[1 - s[1]][1] - e[1]) * i[1];
-	if ((tmin > tymax) || (tymin > tmax)) return false;
-	if (tymin > tmin) tmin = tymin;
-	if (tymax < tmax) tmax = tymax;
-	tzmin = (_b.b[s[2]][2] - e[2]) * i[2];
-	tzmax = (_b.b[1 - s[2]][2] - e[2]) * i[2];
-	if ((tmin > tzmax) || (tzmin > tmax)) return false;
-	if (tzmin > tmin) tmin = tzmin;
-	if (tzmax < tmax) tmax = tzmax;
-	return ((tmin < t1) && (tmax > t0));
-}
-
 Torus::~Torus()
 {
 }

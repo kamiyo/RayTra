@@ -21,10 +21,11 @@ Vector3d randSphere() {
 
 Vector3d cosVec(Vector3d a) {
 	Vector3d r;
+	a.normalize();
 	double c;
 	do {
 		r = randSphere();
-		r = r + a.normalized();
+		r = r + a;
 		c = r.norm();
 	} while (c == 0);
 	return r.normalized();
@@ -45,12 +46,34 @@ Vector3d _cosVec(Vector3d a) {
 	return Vector3d((cos(ep1) * ep2) * u + (sin(ep1) * ep2) * v - sqrt(ep21) * w).normalized();
 }
 
+Vector3d cosVec(Vector3d a, double p) {
+	Vector3d w = -1.0 * a;
+	Vector3d up(0, 1, 0);
+	if (a.dot(up) == 1) {
+		up << 1, 0, 0;
+	}
+	Vector3d u = (up.cross(w)).normalized();
+	Vector3d v = (w.cross(u)).normalized();
+	double eps1 = RAN;
+	double eps2 = RAN;
+	double sinarccos = sqrt(1 - pow(pow(1 - eps2, 1 / (1 + p)), 2));
+	return Vector3d(cos(2 * M_PI * eps1) * sinarccos * u + sin(2 * M_PI * eps1) * sinarccos * v - pow(1 - eps2, 1 / (1 + p)) * w).normalized();
+}
+
 void toDisk(double x, double y, Vector2d& v) {
 	double theta = 2 * M_PI * x;
 	double r = sqrt(y);
 	v = Vector2d(r * cos(theta), r * sin(theta));
 }
+
+void toDisk(Vector2d& v) {
+	double theta = 2 * M_PI * v(0);
+	double r = sqrt(v(1));
+	v << r * cos(theta), r * sin(theta);
+}
 // Takes sample in 2-D square to circle
+
+
 void to_unit_disk(double seedx, double seedy, Vector2d& v)
 {
 	double phi, r;
@@ -151,11 +174,22 @@ Vector3d vmax(std::vector<Vector3d> &v) {
 
 std::ostream &operator<<(std::ostream &os, Sampler2d &s) {
 	for (int i = 0; i < s.size(); i++) {
-		os << s[i][0] << " " << s[i][1] << std::endl;
-		os << "--- " << s[i].norm() << " ---";
-		if (i != s.size() - 1) {
+		os << s(i)[0] << " " << s(i)[1] << " " << i << std::endl;
+		//os << "--- " << s[i].norm() << " ---";
+		/*if (i != s.size() - 1) {
 			os << "\n";
-		}
+		}*/
+	}
+	return os;
+}
+
+std::ostream &operator<<(std::ostream &os, Sampler2i &s) {
+	for (int i = 0; i < s.size(); i++) {
+		os << s(i)[0] << " " << s(i)[1] << " " << i << std::endl;
+		//os << "--- " << s[i].norm() << " ---";
+		/*if (i != s.size() - 1) {
+		os << "\n";
+		}*/
 	}
 	return os;
 }

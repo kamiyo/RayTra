@@ -9,6 +9,7 @@
 #define BBOX_H_
 
 #include "UtilDefines.h"
+#include "RayBase.h"
 
 #ifndef MAX
 #define MAX b[1]
@@ -27,8 +28,9 @@ public:
 	BBox transform(Matrix4d& m);
 	BBox combine(BBox& rhs);
 	BBox combine(BBox& b1, BBox& b2);
-	Vector3d& max();
-	Vector3d& min();
+	bool hitbox(RayBase& ray, const double t0, const double t1);
+	Vector3d max();
+	Vector3d min();
 	void set(Vector3d min, Vector3d max);
 	bool operator==(const BBox& rhs);
 	bool operator!=(const BBox& rhs);

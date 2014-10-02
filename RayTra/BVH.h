@@ -17,7 +17,6 @@ public:
 	bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	bool _hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	void boundingBox();
-	bool hitbox(RayBase& ray, double t0, double t1);
 	Surface* _l;
 	Surface* _r;
 	virtual ~BVH();

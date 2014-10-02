@@ -10,8 +10,8 @@ Sampler::Sampler(int dim_x, int dim_y, int type, int shape, int order, int algo,
 	if (_shape == CIRCLE) {
 		int N = _x * _y;
 		double temp = sqrt((double) N / M_PI);
-		_y = round(temp);
-		_x = round(temp * M_PI);
+		_y = (int)round(temp);
+		_x = (int)round(temp * M_PI);
 		if (_x * _y < N) {
 			_y += 1;
 		}
@@ -19,6 +19,13 @@ Sampler::Sampler(int dim_x, int dim_y, int type, int shape, int order, int algo,
 	Hilbert hilbert(_x, _y);
 	points = hilbert.getPoints();
 	xy = Vector2d((double) _x, (double) _y);
+	xy = xy.cwiseInverse();
+	rooks.resize(_x, _y);
+	for (int i = 0; i < _x; i++) {
+		for (int j = 0; j < _y; j++) {
+			rooks(i, j) = Vector2d((double) j / _y, (double) i / _x);
+		}
+	}
 }
 
 Sampler::Sampler(int dim_x, int dim_y) : _x(dim_x), _y(dim_y), _zero(true)
@@ -31,14 +38,10 @@ Sampler::~Sampler()
 
 Sampler2d Sampler::genPoints() {
 	Sampler2d out;
-	out.resize(_x * _y);
+	out.resize(_x, _y);
 	Vector2d adjust(0., 0.);
 	if (_zero) {
-		for (int q = 0; q < _y; q++) {
-			for (int p = 0; p < _x; p++) {
-				out[q * _x + p] = Vector2d(0., 0.);
-			}
-		}
+		out.setConstant(Vector2d(0, 0));
 		return out;
 	}
 	if (_center) {
@@ -50,19 +53,14 @@ Sampler2d Sampler::genPoints() {
 				if (_type == FRACTIONAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(((double) p + RAN), ((double) q + RAN));
-							temp -= adjust;
-							temp.array() /= xy.array();
-							out[q * _x + p] = temp;
+							out(p, q) = (Vector2d(((double) p + RAN), ((double) q + RAN)) - adjust).cwiseProduct(xy);
 						}
 					}
 				}
 				else if (_type == INTEGRAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(((double) p + RAN), ((double) q + RAN));
-							temp -= adjust;
-							out[q * _x + p] = temp;
+							out(p, q) = Vector2d(((double) p + RAN), ((double) q + RAN)) - adjust;
 						}
 					}
 				}
@@ -70,10 +68,9 @@ Sampler2d Sampler::genPoints() {
 			else if (_shape == CIRCLE) {
 				for (int q = 0; q < _y; q++) {
 					for (int p = 0; p < _x; p++) {
-						Vector2d temp(((double) p + RAN), ((double) q + RAN));
-						temp.array() /= xy.array();
-						DISK(temp[0], temp[1], temp);
-						out[q * _x + p] = temp / 2.;
+						Vector2d temp = Vector2d(((double) p + RAN), ((double) q + RAN)).cwiseProduct(xy);
+						DISK(temp);
+						out(p, q) = temp / 2.;
 					}
 				}
 			}
@@ -83,19 +80,14 @@ Sampler2d Sampler::genPoints() {
 				if (_type == FRACTIONAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(((double) p + RAN), ((double) q + RAN));
-							temp -= adjust;
-							temp.array() /= xy.array();
-							out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp;
+							out(p, q) = (Vector2d(RAN, RAN) + points(p, q).cast<double>() - adjust).cwiseProduct(xy);
 						}
 					}
 				}
 				else if (_type == INTEGRAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(((double) p + RAN), ((double) q + RAN));
-							temp -= adjust;
-							out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp;
+							out(p, q) = Vector2d(RAN, RAN) + points(p, q).cast<double>() - adjust;
 						}
 					}
 				}
@@ -103,10 +95,9 @@ Sampler2d Sampler::genPoints() {
 			else if (_shape == CIRCLE) {
 				for (int q = 0; q < _y; q++) {
 					for (int p = 0; p < _x; p++) {
-						Vector2d temp(((double) p + RAN), ((double) q + RAN));
-						temp.array() /= xy.array();
-						DISK(temp[0], temp[1], temp);
-						out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp / 2.;
+						Vector2d temp = (Vector2d(RAN, RAN) + points(q * _x + p).cast<double>()).cwiseProduct(xy);
+						DISK(temp);
+						out(p, q) = temp / 2;
 					}
 				}
 			}
@@ -118,19 +109,14 @@ Sampler2d Sampler::genPoints() {
 				if (_type == FRACTIONAL){
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(((double) p + 0.5), ((double) q + 0.5));
-							temp -= adjust;
-							temp.array() /= xy.array();
-							out[q * _x + p] = (temp);
+							out(p, q) = (Vector2d(((double) p + 0.5), ((double) q + 0.5)) - adjust).cwiseProduct(xy);
 						}
 					}
 				}
 				else if (_type == INTEGRAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(((double) p + 0.5), ((double) q + 0.5));
-							temp -= adjust;
-							out[q * _x + p] = temp;
+							out(p, q) = Vector2d(((double) p + 0.5), ((double) q + 0.5)) - adjust;
 						}
 					}
 				}
@@ -138,10 +124,9 @@ Sampler2d Sampler::genPoints() {
 			else if (_shape == CIRCLE) {
 				for (int q = 0; q < _y; q++) {
 					for (int p = 0; p < _x; p++) {
-						Vector2d temp((double) p, (double) q);
-						temp.array() /= xy.array();
-						DISK(temp[0], temp[1], temp);
-						out[q * _x + p] = temp / 2.;
+						Vector2d temp = (Vector2d((double) p + 0.5, (double) q + 0.5)).cwiseProduct(xy);
+						DISK(temp);
+						out(p, q) = temp / 2.;
 					}
 				}
 			}
@@ -151,19 +136,14 @@ Sampler2d Sampler::genPoints() {
 				if (_type == FRACTIONAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(((double) p + 0.5), ((double) q + 0.5));
-							temp -= adjust;
-							temp.array() /= xy.array();
-							out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp;
+							out(p, q) = (Vector2d(.5, .5) + points(q * _x + p).cast<double>() - adjust).cwiseProduct(xy);
 						}
 					}
 				}
 				else if (_type == INTEGRAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(((double) p + 0.5), ((double) q + 0.5));
-							temp -= adjust;
-							out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp;
+							out(p, q) = Vector2d(.5, .5) + points(q * _x + p).cast<double>() - adjust;
 						}
 					}
 				}
@@ -171,34 +151,29 @@ Sampler2d Sampler::genPoints() {
 			else if (_shape == CIRCLE) {
 				for (int q = 0; q < _y; q++) {
 					for (int p = 0; p < _x; p++) {
-						Vector2d temp((double) p, (double) q);
-						temp.array() /= xy.array();
-						DISK(temp[0], temp[1], temp);
-						out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp / 2.;
+						Vector2d temp = (Vector2d(.5, .5) + points(q * _x + p).cast<double>()).cwiseProduct(xy);
+						DISK(temp);
+						out(p, q) = temp / 2.;
 					}
 				}
 			}
 		}
 	}
 	else if (_algo == NROOKS || _algo == NROOKS_CORR) {
+		(_algo == NROOKS)?shuffle(rooks, false):shuffle_correlated(rooks, _x, _y);
 		if (_order == LINEAR) {
 			if (_shape == SQUARE) {
 				if (_type == FRACTIONAL){
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(p + (q + RAN) / _y, q + (p + RAN) / _x);
-							temp -= adjust;
-							temp.array() /= xy.array();
-							out[q * _x + p] = (temp);
+							out(p, q) = (Vector2d(p, q) + rooks(p, q) - adjust).cwiseProduct(xy);
 						}
 					}
 				}
 				else if (_type == INTEGRAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(p + (q + RAN) / _y, q + (p + RAN) / _x);
-							temp -= adjust;
-							out[q * _x + p] = (temp);
+							out(p, q) = Vector2d(p, q) + rooks(p, q) - adjust;
 						}
 					}
 				}
@@ -206,10 +181,9 @@ Sampler2d Sampler::genPoints() {
 			else if (_shape == CIRCLE) {
 				for (int q = 0; q < _y; q++) {
 					for (int p = 0; p < _x; p++) {
-						Vector2d temp(p + (q + RAN) / _y, q + (p + RAN) / _x);
-						temp.array() /= xy.array();
-						DISK(temp[0], temp[1], temp);
-						out[q * _x + p] = temp / 2.;
+						Vector2d temp = (Vector2d(p, q) + rooks(p, q)).cwiseProduct(xy);
+						DISK(temp);
+						out(p, q) = temp / 2.;
 					}
 				}
 			}
@@ -219,19 +193,15 @@ Sampler2d Sampler::genPoints() {
 				if (_type == FRACTIONAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(p + (q + RAN) / _y, q + (p + RAN) / _x);
-							temp -= adjust;
-							temp.array() /= xy.array();
-							out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp;
+							out(p, q) = (points(p, q).cast<double>() + rooks(p, q) - adjust).cwiseProduct(xy);
 						}
 					}
 				}
 				else if (_type == INTEGRAL) {
 					for (int q = 0; q < _y; q++) {
 						for (int p = 0; p < _x; p++) {
-							Vector2d temp(p + (q + RAN) / _y, q + (p + RAN) / _x);
-							temp -= adjust;
-							out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp;
+							out(p, q) = points(p, q).cast<double>() + rooks(p, q) - adjust;
+
 						}
 					}
 				}
@@ -239,20 +209,12 @@ Sampler2d Sampler::genPoints() {
 			else if (_shape == CIRCLE) {
 				for (int q = 0; q < _y; q++) {
 					for (int p = 0; p < _x; p++) {
-						Vector2d temp(p + (q + RAN) / _y, q + (p + RAN) / _x);
-						temp.array() /= xy.array();
-						DISK(temp[0], temp[1], temp);
-						out[points[q * _x + p][1] * _x + points[q * _x + p][0]] = temp / 2.;
+						Vector2d temp = (points(p, q).cast<double>() + rooks(p, q)).cwiseProduct(xy);
+						DISK(temp);
+						out(p, q) = temp / 2.;
 					}
 				}
 			}
-		}
-		//shuffle n-rooks
-		if (_algo == NROOKS) {
-			shuffle(out, true);
-		}
-		else if (_algo == NROOKS_CORR) {
-			shuffle_correlated(out, _x, _y, true);
 		}
 	}
 	return out;
@@ -260,43 +222,34 @@ Sampler2d Sampler::genPoints() {
 
 void Sampler::shuffle(Sampler2d& samples, bool together) {
 	if (together) {
-		for (int i = (int) samples.size() - 1; i > 1; i--) {
+		for (int i = (int) samples.size() - 1; i > 0; i--) {
 			int random = genRand_int(0, i);
-			std::swap(samples[i], samples[random]);
+			std::swap(samples(i), samples(random));
 		}
 	}
 	else {
-		for (int i = (int) samples.size() - 1; i > 1; i--) {
+		for (int i = (int) samples.size() - 1; i > 0; i--) {
 			int randomx = genRand_int(0, i);
 			int randomy = genRand_int(0, i);
-			std::swap(samples[i][0], samples[randomx][1]);
-			std::swap(samples[i][1], samples[randomy][1]);
+			std::swap(samples(i)(0), samples(randomx)(0));
+			std::swap(samples(i)(1), samples(randomy)(1));
 		}
 	}
 }
 
 
-void Sampler::shuffle_correlated(Sampler2d& samples, int m, int n, bool together) {
-	if (together) {
-		for (int j = n - 1; j > 1; j--) {
-			int random = genRand_int(0, j);
-			for (int i = m - 1; m > 1; m--) {
-				std::swap(samples[j * m + i], samples[random]);
-			}
+void Sampler::shuffle_correlated(Sampler2d& samples, int m, int n) {
+	for (int j = n - 1; j > 0; j--) {
+		int random = genRand_int(0, j);
+		for (int i = m - 1; i > 0; i--) {
+			std::swap(samples(i, j)(0), samples(i, random)(0));
 		}
 	}
-	else {
-		for (int j = n - 1; j > 1; j--) {
-			int random = genRand_int(0, j);
-			for (int i = m - 1; m > 1; m--) {
-				std::swap(samples[j * m + i][0], samples[random][0]);
-			}
-		}
-		for (int i = m - 1; m > 1; m--) {
-			int random = genRand_int(0, i);
-			for (int j = n - 1; j > 1; j--) {
-				std::swap(samples[j * m + i][1], samples[random][1]);
-			}
+	for (int i = m - 1; i > 0; i--) {
+		int random = genRand_int(0, i);
+		for (int j = n - 1; j > 0; j--) {
+			std::swap(samples(i, j)(1), samples(random, j)(1));
 		}
 	}
+
 }

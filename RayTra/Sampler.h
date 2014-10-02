@@ -12,8 +12,9 @@ public:
 	~Sampler();
 	Sampler2d genPoints();
 	static void shuffle(Sampler2d& samples, bool together = false);
-	static void shuffle_correlated(Sampler2d& samples, int m, int n, bool together = false);
+	static void shuffle_correlated(Sampler2d& samples, int m, int n);
 	Sampler2i points;
+	Sampler2d rooks;
 	Vector2d xy;
 	int _x, _y, _type, _shape, _order, _algo;
 	bool _center;

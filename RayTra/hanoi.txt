@@ -6,30 +6,32 @@ u 0 1 0
 d 114.6
 i 40 30
 p 400 300
-f 10
+f 22
 c
 
 o
-ms 3 4
+ms 5 2
 s 3
-gi 3
-rc 3
+gi 1
+rc 2
 rf 0
 c 1
 dof 1
 accel 1
-hilbert 0
+hilbert 1
 o
 
 m
 ki 1 1 1
+p 1023
 m
 p 0 1 0 0 -0.1 0
 
 m
 kd 0.65 0.5 0.39
-ks 0.3 0.25 0.2
-p 20
+ki 0.1 0.07 0.06
+ks 0.3 0.25 0.1
+p 511
 m
 
 push
