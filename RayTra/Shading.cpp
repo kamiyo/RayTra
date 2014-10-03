@@ -27,7 +27,7 @@ void Shading::setRecursDepth(int d) {
 
 // to-do set Refrac depth, set _shadows, etc
 
-void Shading::addLight(Light* l) {
+void Shading::addLight(s_ptr<Light> l) {
 	_l.push_back(l);
 }
 
@@ -114,8 +114,8 @@ result += krefract.cwiseProduct((1 - R) * computeShading(v1, epsilon, INF, s, ar
 }
 }*/
 
-std::vector<Photon> Shading::tracePhotons(Group* s) {
-	std::vector<Photon> result;
+Photons* Shading::tracePhotons(Group* s) {
+	Photons* result = new Photons();
 	for (int i = 0; i < _numPhotons; i++) {
 		Photon p = emitPhoton();
 		p.m_intensity /= _numPhotons;
@@ -123,8 +123,8 @@ std::vector<Photon> Shading::tracePhotons(Group* s) {
 		while (1) {
 			if (s->hit(p, p.m_epsilon, INF, rec)) {
 				Vector3d p1 = p.getPoint(rec.t);
-				if (rec.m->kd.all() != 0) result.push_back(Photon(p1, -p.m_dir, p.m_intensity, p.m_color));
-				Material* m = rec.m;
+				if (rec.m->kd.all() != 0) result->push_back(Photon(p1, -p.m_dir, p.m_intensity, p.m_color));
+				s_ptr<Material> m = rec.m;
 				double diff = m->kd(p.m_color);
 				double spec = m->ki(p.m_color);
 				double krefract = 1., R;
@@ -167,19 +167,19 @@ std::vector<Photon> Shading::tracePhotons(Group* s) {
 
 
 // form of function where recursion and refraction are not specified. 
-Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const Vector2d& area) {
+Vector3d Shading::computeShading(Ray vray, double t0, double t1, s_ptr<Group> s, const Vector2d& area) {
 	return computeShading(vray, t0, t1, s, area, _recurs, _refraction);
 }
 
 //SHADER
-Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const Vector2d& area, int recurs, int refrac) {
+Vector3d Shading::computeShading(Ray vray, double t0, double t1, s_ptr<Group> s, const Vector2d& area, int recurs, int refrac) {
 	if (recurs == -1 || refrac == -1) {
 		return Vector3d::Zero();									//return 0 if recursion limit reached
 	}
 	hitRecord rec;											// rec = light record, srec = shadow record
 	Vector3d result = Vector3d::Zero();								// rgb result zero'd
 	Vector3d d = (-1.0 * vray.m_dir).normalized();					// d = viewing ray direction (out of surface)
-	Material* m;
+	s_ptr<Material> m;
 
 	if (s->_hit(vray, t0, t1, rec)) {
 		double epsilon = vray.m_epsilon;
@@ -218,7 +218,7 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, Group* s, const
 				if (w.dot(up) == 1) up << 1.0, 0.0, 0.0;
 				Vector3d u = (up.cross(w)).normalized();
 				Vector3d v = (w.cross(u)).normalized();
-				Vector2d _area = area.array() * ((LightP*)_l[j])->_r;
+				Vector2d _area = area.array() * (std::static_pointer_cast<LightP>(_l[j]))->_r;
 				l = l + u * _area[0] + v * _area[1];
 			}
 

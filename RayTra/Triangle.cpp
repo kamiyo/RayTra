@@ -7,7 +7,7 @@
 
 #include "Triangle.h"
 
-Triangle::Triangle(Vector3d p1, Vector3d p2, Vector3d p3, Material* m) {
+Triangle::Triangle(Vector3d p1, Vector3d p2, Vector3d p3, s_ptr<Material> m) {
 	_p1 = p1;
 	_p2 = p2;
 	_p3 = p3;
@@ -62,7 +62,7 @@ bool Triangle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 		//if (_n.dot(u) > 0) rec.n = -_n;
 	}
 	else {
-		rec.s = this;
+		rec.s = shared_from_this();
 	}
 	rec.m = _m;
 	return true;

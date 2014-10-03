@@ -120,7 +120,7 @@ void Parser::parse(const char *file) {
 			}
 			else if (cmd == "c" || cmd == "camera" || cmd == "}") {
 				isCam = false;
-				camera(ce, ca, cd, cu, fp, fd, cf, fl, iw, ih, pw, ph, cN);
+				createCamera(ce, ca, cd, cu, fp, fd, cf, fl, iw, ih, pw, ph, cN);
 			}
 		}
 		else if (isOpt) {
@@ -162,17 +162,12 @@ void Parser::parse(const char *file) {
 			else if (cmd == "actualLights" || cmd == "aL") {
 				int setting;
 				_iss >> setting;
-				setOption(LIGHTS, setting);
+				setOption(ACTUALLIGHTS, setting);
 			}
 			else if (cmd == "hilbert" || cmd == "h") {
 				int setting;
 				_iss >> setting;
 				setOption(ORDER, setting);
-			}
-			else if (cmd == "circular" || cmd == "c") {
-				int setting;
-				_iss >> setting;
-				setOption(CIRCULAR, setting);
 			}
 			else if (cmd == "russian" || cmd == "rr") {
 				int setting;

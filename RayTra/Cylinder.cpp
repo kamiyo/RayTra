@@ -1,7 +1,7 @@
 #include "Cylinder.h"
 
 
-Cylinder::Cylinder(double r, double h, Material* m)
+Cylinder::Cylinder(double r, double h, s_ptr<Material> m)
 {
 	_m = m;
 	_r = r;
@@ -42,7 +42,7 @@ bool Cylinder::hit(RayBase& r, double t0, double t1, hitRecord& rec) {
 			rec.n = n.normalized();
 		}
 		else if (r.m_type == RayBase::SHADOW) {
-			rec.s = this;
+			rec.s = shared_from_this();
 		}
 		rec.m = _m;
 		return true;
@@ -54,7 +54,7 @@ bool Cylinder::hit(RayBase& r, double t0, double t1, hitRecord& rec) {
 			rec.n = n.normalized();
 		}
 		else if (r.m_type == RayBase::SHADOW) {
-			rec.s = this;
+			rec.s = shared_from_this();
 		}
 		rec.m = _m;
 		return true;

@@ -6,8 +6,8 @@ class Cone :
 	public Surface
 {
 public:
-	Cone(double h, Material* m);
-	Cone(double lower, double upper, Material* m);
+	Cone(double h, s_ptr<Material> m);
+	Cone(double lower, double upper, s_ptr<Material> m);
 	void boundingBox();
 	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	~Cone();

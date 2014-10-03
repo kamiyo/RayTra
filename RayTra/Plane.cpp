@@ -6,9 +6,8 @@
  */
 
 #include "Plane.h"
-#include <iostream>
 
-Plane::Plane(Vector3d n, Vector3d p, Material* m) {
+Plane::Plane(Vector3d n, Vector3d p, s_ptr<Material> m) {
 	_p = p;
 	_n = n;
 	_m = m;
@@ -39,7 +38,7 @@ bool Plane::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 				rec.m = _m;
 			}
 			else {
-				rec.s = this;
+				rec.s = shared_from_this();
 			}
 			return true;
 		}

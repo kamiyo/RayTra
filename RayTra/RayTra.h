@@ -19,6 +19,7 @@
 #include "Cone.h"
 #include "Torus.h"
 #include "Shading.h"
+#include "PhotonMap.h"
 #include "Instance.h"
 #include "Face.h"
 #include "BVH.h"
@@ -44,8 +45,8 @@ class RayTra : public Parser {
 	virtual void cylinder(double r, double h, char cap);
 	virtual void cone(double l, double u, char cap);
 	virtual void torus(double R, double r);
-	virtual void applyTransform(Surface* s);
-	virtual void camera(Vector3d pos, Vector3d at, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double size);
+	virtual void applyTransform(s_ptr<Surface> &s);
+	virtual void createCamera(Vector3d pos, Vector3d at, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double size);
 	virtual void pointLight(Vector3d pos, Vector3d rgb, Vector3d atten, double r);
 	virtual void directionalLight(Vector3d dir, Vector3d rgb, Vector3d atten);
 	virtual void spotLight(Vector3d pos, Vector3d dir, double theta, double phi, double p, Vector3d rgb, Vector3d atten, double r);
@@ -66,35 +67,34 @@ public:
 	~RayTra();
 	void render(Imf::Array2D<Imf::Rgba>& o);
 	virtual void parse(const char* name);
-	Group* _surfaces;
-	Group* _all;
-	Camera* _cam;
-	Shading* _shading;
-	vector<Material> _m;
-	Material* last;
-	vector<HEdge*> m_h;
-	vector<Vertex*> m_v;
-	vector<Face*> m_f;
+	s_ptr<Group> surfaces;		// does not include planes
+	s_ptr<Group> allSurfaces;		// includes planes
+	u_ptr<Camera> camera;
+	u_ptr<Shading> shading;
+	vector<Material> materials;
+	s_ptr<Material> prevMaterial;
+	vector<s_ptr<HEdge> > m_h;
+	vector<s_ptr<Vertex> > m_v;
+	vector<s_ptr<Face> > m_f;
 	vector<Vector3d> m_n;
 	map<pair<int, int>, int> pairs;
-	map<int, string> m_mtl;
-	map<string, Material*> mtlMap;
-	int order;
+	map<int, string> mtl;
+	map<string, s_ptr<Material> > mtlMap;
+	int renderOrder;			//Render Order: Linear or Hilbert
 	int width, height;
 	int esf;
-	int structure;
-	int samples;
-	int area;
-	int field;
-	int sample_type;
-	enum { OFF, HARD, SOFTSQUARE, SOFTCIRCLE };
-	enum { OFF_0, SQUARE, CIRCLE };
-	enum { LINEAR, HILBERT };
-	enum { LIST, BoVoH, BiSpPa };
-	enum { CENTER, RANDOM, STRATIFIED, NROOKS, NROOKSCORR};
-	bool hasnorm;
+	int accelerationStructure;	// List or BVH (for now)
+	int sampleType;				// center, random, stratified, nrooks, nrooks correlated
+	int numSamples;				// number of samples for each pixel, will be squared.
+	int shadowSetting;			// Off, hard, soft square, soft circle
+	int dofSetting;				// DoF: Off, Square, or Circle
+	static const int OFF = 0, HARD = 1, SOFTSQUARE = 2, SOFTCIRCLE = 3;
+	static const int SQUARE = 1, CIRCLE = 2;
+	static const int LINEAR = 0, HILBERT = 1;
+	static const int LIST = 0, BoVoH = 1;
+	static const int CENTER = 0, RANDOM = 1, STRATIFIED = 2, NROOKS = 3, NROOKSCORR = 4;
+	bool hasNorm;
 	bool startMaterial;
-	bool circular;
 	bool circleLight;
 	bool actualLights;
 

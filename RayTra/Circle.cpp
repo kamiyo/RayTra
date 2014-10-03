@@ -1,7 +1,7 @@
 #include "Circle.h"
 
 
-Circle::Circle(Vector3d pos, Vector3d norm, double rad, Material* m)
+Circle::Circle(Vector3d pos, Vector3d norm, double rad, s_ptr<Material> m)
 {
 	_p = pos;
 	_r = rad;
@@ -13,7 +13,7 @@ Circle::Circle(Vector3d pos, Vector3d norm, double rad, Material* m)
 	_trans = false;
 }
 
-Circle::Circle(Vector3d pos, Vector3d norm, double rad, Light* l)
+Circle::Circle(Vector3d pos, Vector3d norm, double rad, s_ptr<Light> l)
 {
 	_p = pos;
 	_r = rad;
@@ -51,7 +51,7 @@ bool Circle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 			rec.n = _n.normalized();
 		}
 		else {
-			rec.s = this;
+			rec.s = shared_from_this();
 		}
 		rec.m = _m;
 

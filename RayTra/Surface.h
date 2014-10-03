@@ -14,7 +14,7 @@
 #include "Ray.h"
 #include "BBox.h"
 
-class Surface {
+class Surface : public std::enable_shared_from_this<Surface> {
 public:
 	enum { NeedsToAlign = (sizeof(Vector4d) % 16) == 0 };
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign);
@@ -25,7 +25,7 @@ public:
 	virtual int type();
 	Matrix4d _mInv;
 	Matrix4d _mTrans;
-	Material* _m;
+	s_ptr<Material> _m;
 	bool _trans;
 	BBox _b;
 	int _type;

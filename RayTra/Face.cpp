@@ -7,24 +7,24 @@
 
 #include "Face.h"
 
-Face::Face(Material* m) {
+Face::Face(s_ptr<Material> m) {
 	_m = m;
 	_normal.setZero();
 	smooth = false;
 	_type = FACE;
 }
 
-void Face::setHE(HEdge* e) {
+void Face::setHE(s_ptr<HEdge> e) {
 	_e = e;
 }
 
-HEdge* Face::getHE() {
+s_ptr<HEdge> Face::getHE() {
 	return _e;
 }
 
 bool Face::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
-	HEdge* edge = _e;
-	Vertex* vert = edge->getVertex();
+	s_ptr<HEdge> edge = _e;
+	s_ptr<Vertex> vert = edge->getVertex();
 	Vector3d _p1 = vert->_p; Vector3d _n1 = vert->_n.normalized();
 	edge = edge->getNext();
 	vert = edge->getVertex();
@@ -67,15 +67,15 @@ bool Face::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 		}
 	}
 	else if (ray.m_type == RayBase::SHADOW) {
-		rec.s = this;
+		rec.s = shared_from_this();
 	}
 	rec.m = _m;
 	return true;
 }
 
 void Face::boundingBox() {
-	HEdge* edge = _e;
-	Vertex* vert = edge->getVertex();
+	s_ptr<HEdge> edge = _e;
+	s_ptr<Vertex> vert = edge->getVertex();
 	Vector3d _p1 = vert->_p;
 	edge = _e->getNext();
 	vert = edge->getVertex();

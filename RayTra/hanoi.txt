@@ -10,15 +10,14 @@ f 22
 c
 
 o
-ms 5 2
+ms 2 2
 s 3
 gi 1
 rc 2
 rf 0
-c 1
-dof 1
-accel 1
-hilbert 1
+dof 2
+accel 0
+hilbert 0
 o
 
 m

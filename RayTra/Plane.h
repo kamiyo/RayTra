@@ -11,7 +11,7 @@
 
 class Plane : public Surface {
 public:
-	Plane(Vector3d n, Vector3d d, Material* m);
+	Plane(Vector3d n, Vector3d d, s_ptr<Material> m);
 	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	virtual void boundingBox();
 	virtual ~Plane();

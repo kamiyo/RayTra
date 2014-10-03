@@ -5,7 +5,7 @@ class Torus :
 	public Surface
 {
 public:
-	Torus(double R, double r, Material* m);
+	Torus(double R, double r, s_ptr<Material> m);
 	void boundingBox();
 	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	~Torus();

@@ -18,7 +18,7 @@ protected:
 	virtual void cylinder(double r, double h, char cap) {}
 	virtual void cone(double l, double u, char cap) {}
 	virtual void torus(double R, double r) {}
-	virtual void camera(Vector3d pos, Vector3d at, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double size) {}
+	virtual void createCamera(Vector3d pos, Vector3d at, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double size) {}
 	virtual void pointLight(Vector3d pos, Vector3d rgb, Vector3d atten, double r) {}
 	virtual void directionalLight(Vector3d dir, Vector3d rgb, Vector3d atten) {}
 	virtual void spotLight(Vector3d pos, Vector3d dir, double theta, double phi, double p, Vector3d rgb, Vector3d atten, double r) {}
@@ -32,7 +32,7 @@ protected:
 	Transform T;
 public:
 	virtual void parse(const char *file);
-	enum { SHADOWS, SAMPLES, REFRACT, STRUCT, RECURSE, DOF, INDIRECT, LIGHTS, ORDER, CIRCULAR, RUSSIAN };
+	const static int SHADOWS = 0, SAMPLES = 1, REFRACT = 2, STRUCT = 3, RECURSE = 4, DOF = 5, INDIRECT = 6, ACTUALLIGHTS = 7, ORDER = 8, RUSSIAN = 9;
 };
 
 #endif

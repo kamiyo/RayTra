@@ -58,13 +58,19 @@ typedef Eigen::Array33d Array33d;
 typedef Eigen::Matrix<Vector2d, Eigen::Dynamic, Eigen::Dynamic> Sampler2d;
 typedef Eigen::Matrix<Vector2i, Eigen::Dynamic, Eigen::Dynamic> Sampler2i;
 
+template <typename Object>
+using u_ptr = std::unique_ptr<Object>;
+
+template <typename Object>
+using s_ptr = std::shared_ptr<Object>;
+
 typedef struct hitRecord {
 	double t;
 //	std::vector<double> ts;
 	Vector3d n;
-	Material* m;
-	LightP* l;
-	Surface* s;
+	s_ptr<Material> m;
+	s_ptr<LightP> l;
+	s_ptr<Surface> s;
 } hitRecord;
 
 Vector3d randSphere();

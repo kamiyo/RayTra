@@ -17,21 +17,21 @@ surface*	_l	pointer to left node
 surface*	_r	pointer to right node
 */
 
-BVH::BVH(Group* g) {
+BVH::BVH(s_ptr<Group> &g) {
 	_type = BOVOH;
-	std::vector<Surface*> s = g->_s;
+	std::vector<s_ptr<Surface> > &s = g->_s;
 	size_t N = s.size();
 	if (N == 0) {
 		return;
 		_b = BBox();
 	}
 	if (N == 1) {
-		_l = s[0];
-		_r = NULL;
+		_l = std::move(s[0]);
+		_r = nullptr;
 	}
 	else if (N == 2) {
-		_l = s[0];
-		_r = s[1];
+		_l = std::move(s[0]);
+		_r = std::move(s[1]);
 	}
 	else {
 		double m = 0;
@@ -51,8 +51,8 @@ BVH::BVH(Group* g) {
 		}
 		m /= (double) N;
 		//std::cout << m << " " << allSame << std::endl;
-		Group* left = new Group();
-		Group* right = new Group();
+		s_ptr<Group> left = std::make_shared<Group>();
+		s_ptr<Group> right = std::make_shared<Group>();
 		for (int i = 0; i < (int) N; i++) {
 			if ((s[i]->_b._m[axis] < m && !allSame) || (allSame && i < (int) N / 2)) {
 				left->addSurface(s[i]);
@@ -61,12 +61,13 @@ BVH::BVH(Group* g) {
 				right->addSurface(s[i]);
 			}
 		}
-		_l = new BVH(left);
-		_r = new BVH(right);
+		_l = std::make_shared<BVH>(left);
+		_r = std::make_shared<BVH>(right);
 	}
 	_b = g->_b;
 }
-BVH::~BVH() {}
+BVH::~BVH() {
+}
 
 /*
 traverses BVH and finds if ray hits any object
@@ -96,8 +97,8 @@ bool BVH::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	if (_b.hitbox(ray, t0, t1)) {
 		hitRecord lrec, rrec;
-		bool leftHit = (_l != NULL) && (_l->_hit(ray, t0, t1, lrec));
-		bool rightHit = (_r != NULL) && (_r->_hit(ray, t0, t1, rrec));
+		bool leftHit = (_l != nullptr) && (_l->_hit(ray, t0, t1, lrec));
+		bool rightHit = (_r != nullptr) && (_r->_hit(ray, t0, t1, rrec));
 		if (leftHit && rightHit) {
 			if (lrec.t < rrec.t) {
 				rec = lrec;

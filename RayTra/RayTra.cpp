@@ -7,149 +7,257 @@
 
 #include "RayTra.h"
 
+void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
+	seedRand();					// seed rand
+	/*
+	_shading->initPhotonTracing();
+	int numPhotons = _shading->_numPhotons;
+	Photons* allPhotons = new Photons();
+	vector<Photon> photons = allPhotons->photons;
+	#pragma omp parallel
+	{
+	Photons *photons = _shading->tracePhotons(_all);
+	vector<Photon> threadPhotons = photons->photons;
+	#pragma omp critical
+	photons.insert(photons.end(), threadPhotons.begin(), threadPhotons.end());
+	}
+	PhotonMap* photonMap = new PhotonMap(allPhotons);
+	*/
+
+	Sampler master(width, height,
+					Sampler::INTEGRAL,
+					Sampler::SQUARE,
+					((renderOrder == HILBERT) ? (Sampler::HILBERT) : 0),
+					Sampler::CENTER,
+					false);
+	Sampler multiSampler(numSamples, numSamples,
+					Sampler::FRACTIONAL,
+					Sampler::SQUARE,
+					((renderOrder == HILBERT) ? (Sampler::HILBERT) : 0), 
+					((numSamples > 1) ? (sampleType) : (Sampler::CENTER)),
+					true);
+	Sampler lensSampler, lightSampler;
+
+	if (dofSetting == OFF) lensSampler = Sampler(numSamples, numSamples);
+	else lensSampler = Sampler(numSamples, numSamples,
+							Sampler::FRACTIONAL,
+							((dofSetting == CIRCLE) ? (Sampler::CIRCLE) : (Sampler::SQUARE)),
+							Sampler::LINEAR,
+							((numSamples > 1) ? (sampleType) : (Sampler::CENTER)),
+							true);
+	if (shadowSetting <= 1) lightSampler = Sampler(numSamples, numSamples);
+	else lightSampler = Sampler(numSamples, numSamples,
+							Sampler::FRACTIONAL,
+							((shadowSetting == SOFTCIRCLE) ? (Sampler::CIRCLE) : (Sampler::SQUARE)),
+							Sampler::LINEAR,
+							((numSamples > 1) ? (sampleType) : (Sampler::CENTER)),
+							true);
+	Sampler2d masterPixels = master.genPoints();
+
+	int counter = 0;
+	clock_t master_start = clock();
+#pragma omp parallel for schedule(dynamic)
+	for (int j = 0; j < height; j++) {
+
+		clock_t start = clock();
+		int startray = Ray::count;
+
+		for (int i = 0; i < width; i++) {
+
+			Vector3d c = Vector3d::Zero();		// initialize color result vector (RGB)
+
+			Sampler2d lightSample = lightSampler.genPoints();
+			Sampler2d lensSample = lensSampler.genPoints();
+			Sampler2d multiSample = multiSampler.genPoints();
+			Sampler::shuffle(lensSample, true);
+			Sampler::shuffle(lightSample, true);
+
+			int x = (int)masterPixels(i, j)[0];
+			int y = (int)masterPixels(i, j)[1];
+			// multisampling raytracing
+			for (int q = 0; q < numSamples; q++) {
+				for (int p = 0; p < numSamples; p++) {
+
+					int currentSample = q * numSamples + p;
+					Ray r;
+					camera->generateRay(lensSample(currentSample), x + multiSample(currentSample)[0], y + multiSample(currentSample)[1], r);
+					c += shading->computeShading(r, 0, INF, allSurfaces, lightSample(currentSample));				// SHADE
+				}
+			}
+			c /= (numSamples * numSamples);		// normalize result
+			int invHeight = height - (y + 1);
+			o[invHeight][x].r = (float) c[0];
+			o[invHeight][x].g = (float) c[1];
+			o[invHeight][x].b = (float) c[2];
+			o[invHeight][x].a = 1.0;
+
+			//pixels[j*width + i] = toInt(c[0]) | (toInt(c[1]) << 8) | (toInt(c[2]) << 16);
+			//glClear(GL_COLOR | GL_DEPTH);
+			//glRasterPos2i(0, 0);
+			//glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+			//glutSwapBuffers();
+#pragma omp atomic
+			counter += 1;
+		}
+		clock_t end = clock();
+		double runtime = (double) (end - start) / CLOCKS_PER_SEC;
+		double total = (double) (height * width);
+		double perc = (double) counter / total;
+		int raysince = Ray::count - startray;
+		perc *= 100;
+#pragma omp critical
+		{
+			std::cout << "\rprogress: " << floor(perc) << "% : " << counter << " " << Ray::count << " rays - " << ((double) raysince / runtime) << " r/s";
+			std::cout.flush();
+		}
+	}
+	clock_t master_stop = clock();
+	double master_run = (double) (master_stop - master_start) / CLOCKS_PER_SEC;
+	{
+		std::cout << "\r\rprogress: 100%, " << Ray::count << " rays at " << ((double) Ray::count / master_run) << " r/s\t\t\t" << endl;
+		std::cout.flush();
+	}
+	return;
+}
+
 RayTra::RayTra() {
-	_surfaces = new Group();
-	_all = new Group();
-	_shading = new Shading();
-	hasnorm = false;
-	startMaterial = true;
-	structure = LIST;
-	field = OFF_0;
+	surfaces = make_shared<Group>();
+	allSurfaces = make_shared<Group>();
+	shading = make_unique<Shading>();
 	esf = 0;
-	samples = 1;
-	area = OFF;
-	order = LINEAR;
-	circular = false;
+	numSamples = 1;
+	shadowSetting = OFF;
+	accelerationStructure = LIST;
+	renderOrder = LINEAR;
+	hasNorm = false;
+	startMaterial = true;
+	dofSetting = OFF;
 	circleLight = false;
 	actualLights = false;
 }
 
-RayTra::~RayTra() {
-	delete(_surfaces);
-	delete(_all);
-	delete(_shading);
-}
+RayTra::~RayTra() {}
 
 void RayTra::populateLights() {
-	int size = _shading->_l.size();
-	for (int i = 0; i < size; i++) {
-		Light* l = _shading->_l[i];
+	size_t size = shading->_l.size();
+	for (size_t i = 0; i < size; i++) {
+		s_ptr<Light> l = shading->_l[i];
 		if (l->_type == Light::POINT) {
 			std::cout << "populating lights" << std::endl;
-			LightP* p = (LightP*)l;
-			Sphere* s = new Sphere(p);
-			_surfaces->addSurface(s);
+			s_ptr<LightP> p = static_pointer_cast<LightP>(l);
+			s_ptr<Surface> s = make_shared<Sphere>(p);
+			surfaces->addSurface(s);
 		}
 	}
 }
 
 void RayTra::sphere(Vector3d pos, double r) {
-	Sphere* s = new Sphere(pos, r, last);
+	s_ptr<Surface> s = make_shared<Sphere>(pos, r, prevMaterial);
 	applyTransform(s);
-	_surfaces->addSurface(s);
+	surfaces->addSurface(s);
 }
 void RayTra::triangle(Vector3d p1, Vector3d p2, Vector3d p3) {
-	Triangle* t = new Triangle(p1, p2, p3, last);
+	s_ptr<Surface> t = make_shared<Triangle>(p1, p2, p3, prevMaterial);
 	applyTransform(t);
-	_surfaces->addSurface(t);
+	surfaces->addSurface(t);
 }
 void RayTra::plane(Vector3d n, Vector3d p){
-	Plane* pp = new Plane(n, p, last);
-	_all->addSurface(pp);
+	s_ptr<Surface> pp = make_shared<Plane>(n, p, prevMaterial);
+	allSurfaces->addSurface(pp);
 }
 void RayTra::circle(Vector3d p, Vector3d n, double r) {
-	Circle* c = new Circle(p, n, r, last);
+	s_ptr<Surface> c = make_shared<Circle>(p, n, r, prevMaterial);
 	applyTransform(c);
-	_surfaces->addSurface(c);
+	surfaces->addSurface(c);
 }
 void RayTra::cylinder(double r, double h, char cap) {
-	Cylinder* c = new Cylinder(r, h, last);
+	s_ptr<Surface> c = make_shared<Cylinder>(r, h, prevMaterial);
 	applyTransform(c);
 	if (cap == 'p' || cap == 'b') {
-		Circle* top = new Circle(Vector3d(0, 0, h / 2.0), Vector3d(0, 0, 1), r, last);
+		s_ptr<Surface> top = make_shared<Circle>(Vector3d(0, 0, h / 2.0), Vector3d(0, 0, 1), r, prevMaterial);
 		applyTransform(top);
-		_surfaces->addSurface(top);
+		surfaces->addSurface(top);
 	}
 	if (cap == 'n' || cap == 'b') {
-		Circle* bottom = new Circle(Vector3d(0, 0, -h / 2.0), Vector3d(0, 0, -1), r, last);
+		s_ptr<Surface> bottom = make_shared<Circle>(Vector3d(0, 0, -h / 2.0), Vector3d(0, 0, -1), r, prevMaterial);
 		applyTransform(bottom);
-		_surfaces->addSurface(bottom);
+		surfaces->addSurface(bottom);
 	}
-	_surfaces->addSurface(c);
+	surfaces->addSurface(c);
 }
 void RayTra::cone(double l, double u, char cap) {
-	Cone* c = new Cone(l, u, last);
+	s_ptr<Surface> c = make_shared<Cone>(l, u, prevMaterial);
 	applyTransform(c);
 	if (cap == 'p' || cap == 'b') {
 		if (u != 0) {
-			Circle* top = new Circle(Vector3d(0, 0, u), Vector3d(0, 0, 1), u, last);
+			s_ptr<Surface> top = make_shared<Circle>(Vector3d(0, 0, u), Vector3d(0, 0, 1), u, prevMaterial);
 			applyTransform(top);
-			_surfaces->addSurface(top);
+			surfaces->addSurface(top);
 		}
 	}
 	if (cap == 'n' || cap == 'b') {
 		if (l != 0) {
-			Circle* bottom = new Circle(Vector3d(0, 0, l), Vector3d(0, 0, -1), l, last);
+			s_ptr<Surface> bottom = make_shared<Circle>(Vector3d(0, 0, l), Vector3d(0, 0, -1), l, prevMaterial);
 			applyTransform(bottom);
-			_surfaces->addSurface(bottom);
+			surfaces->addSurface(bottom);
 		}
 	}
-	_surfaces->addSurface(c);
+	surfaces->addSurface(c);
 }
 void RayTra::torus(double R, double r) {
-	Torus* t = new Torus(R, r, last);
+	s_ptr<Surface> t = make_shared<Torus>(R, r, prevMaterial);
 	applyTransform(t);
-	_surfaces->addSurface(t);
+	surfaces->addSurface(t);
 }
 
-void RayTra::camera(Vector3d pos, Vector3d at, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double size){
+void RayTra::createCamera(Vector3d pos, Vector3d at, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double size){
 	if (size == nINF) {
-		field = false;
+		dofSetting = OFF;
 	}
 	width = pw;
 	height = ph;
-	_cam = new Camera(pos, at, dir, up, fp, fd, d, fl, iw, ih, pw, ph, size);
+	camera = make_unique<Camera>(pos, at, dir, up, fp, fd, d, fl, iw, ih, pw, ph, size);
 }
 void RayTra::pointLight(Vector3d pos, Vector3d rgb, Vector3d atten, double r){
-	LightP* l = new LightP(pos, rgb, atten, r);
-	_shading->addLight(l);
+	s_ptr<LightP> l = make_shared<LightP>(pos, rgb, atten, r);
+	shading->addLight(l);
 }
 void RayTra::directionalLight(Vector3d dir, Vector3d rgb, Vector3d atten){
-	LightD* l = new LightD(dir, rgb, atten);
-	_shading->addLight(l);
+	s_ptr<LightD> l = make_shared<LightD>(dir, rgb, atten);
+	shading->addLight(l);
 }
 void RayTra::spotLight(Vector3d pos, Vector3d dir, double theta, double phi, double p, Vector3d rgb, Vector3d atten, double r){
-	LightS* l = new LightS(pos, dir, theta, phi, p, rgb, atten, r);
-	_shading->addLight(l);
+	s_ptr<LightS> l = make_shared<LightS>(pos, dir, theta, phi, p, rgb, atten, r);
+	shading->addLight(l);
 }
 void RayTra::ambientLight(Vector3d rgb){
-	_shading->addAmbient(rgb);
+	shading->addAmbient(rgb);
 }
 void RayTra::material(string s) {
-	map<string, Material*>::iterator iter = mtlMap.find(s);
+	auto iter = mtlMap.find(s);
 	if (iter == mtlMap.end()) {
 		cerr << "material string does not exist; ignoring" << endl;
 	}
 	else {
-		last = (iter)->second;
+		prevMaterial = (iter)->second;
 	}
 }
 void RayTra::material(Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten){
-	last = new Material(amb, diff, spec, r, refl, n, atten);
-	_m.push_back(*last);
+	prevMaterial = make_shared<Material>(amb, diff, spec, r, refl, n, atten);
+	materials.push_back(*prevMaterial);
 }
 void RayTra::material(string s, Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten) {
-	map<string, Material*>::iterator iter = mtlMap.find(s);
+	auto iter = mtlMap.find(s);
 	if (iter == mtlMap.end()) {
-		last = new Material(amb, diff, spec, r, refl, n, atten);
-		mtlMap.insert(pair<string, Material*>(s, last));
+		prevMaterial = make_shared<Material>(amb, diff, spec, r, refl, n, atten);
+		mtlMap.insert(pair<string, s_ptr<Material> >(s, prevMaterial));
 	} else {
-		last = new Material(amb, diff, spec, r, refl, n, atten);
-		(iter)->second = last;
+		prevMaterial = make_shared<Material>(amb, diff, spec, r, refl, n, atten);
+		(iter)->second = prevMaterial;
 		cerr << "material string exists, overwriting old entry" << endl;
 	}
 }
-void RayTra::applyTransform(Surface* s) {
+void RayTra::applyTransform(s_ptr<Surface> &s) {
 	if ((T._current != Matrix4d::Identity())) {
 		s->trans(T._current, T._currentInv);
 	}
@@ -157,42 +265,39 @@ void RayTra::applyTransform(Surface* s) {
 void RayTra::setOption(int option, int setting, int setting2) {
 	switch (option) {
 	case SHADOWS:
-		area = setting;
-		if (area >= 1)
-			_shading->_shadows = true;
+		shadowSetting = setting;
+		if (shadowSetting >= 1)
+			shading->_shadows = true;
 		break;
 	case DOF:
-		field = setting;
+		dofSetting = setting;
 		break;
 	case SAMPLES:
 		if (setting != 0) {
-			samples = setting;
-			sample_type = setting2;
+			numSamples = setting;
+			sampleType = setting2;
 		}
 		break;
 	case RUSSIAN:
-		(setting == 1) ? _shading->_russian = true : _shading->_russian = false;
+		(setting == 1) ? shading->_russian = true : shading->_russian = false;
 		break;
 	case REFRACT:
-		_shading->_refraction = setting;
+		shading->_refraction = setting;
 		break;
 	case RECURSE:
-		_shading->_recurs = setting;
+		shading->_recurs = setting;
 		break;
 	case STRUCT:
-		structure = setting;
+		accelerationStructure = setting;
 		break;
 	case INDIRECT:
-		_shading->_indirect = setting;
+		shading->_indirect = setting;
 		break;
-	case LIGHTS:
+	case ACTUALLIGHTS:
 		(setting == 0) ? actualLights = false :	actualLights = true;
 		break;
 	case ORDER:
-		order = setting;
-		break;
-	case CIRCULAR:
-		(setting != 0) ? circular = true : circular = false;
+		renderOrder = setting;
 		break;
 	default:
 		break;
@@ -205,13 +310,12 @@ void RayTra::parse(const char* name){
 	Parser::parse(name);
 	if (actualLights)
 		populateLights();
-	if (structure == BoVoH) {
-		BVH* objects = new BVH(_surfaces);
-		_all->addSurface(objects);
-	} else if (structure == BiSpPa) {
-
+	if (accelerationStructure == BoVoH) {
+		s_ptr<Surface> objects = make_shared<BVH>(surfaces);
+		allSurfaces->addSurface(objects);
 	} else {
-		_all->addSurface(_surfaces);
+		s_ptr<Surface> s = surfaces;
+		allSurfaces->addSurface(s);
 	}
 }
 void RayTra::getObj(const char *file, int smooth) {
@@ -237,28 +341,28 @@ void RayTra::getObj(const char *file, int smooth) {
 			parseMtl(cmd.c_str());
 		} else if (cmd=="usemtl") {
 			iss >> cmd;
-			map<string, Material*>::iterator iter = mtlMap.find(cmd);
+			auto iter = mtlMap.find(cmd);
 			if (iter != mtlMap.end()) {
-				last = (iter)->second;
+				prevMaterial = (iter)->second;
 			}
 		} else if (cmd=="v") {
 			Vector3d v;
 			iss >> v;
-			Vertex* tempvtx = new Vertex(v);
+			s_ptr<Vertex> tempvtx(make_shared<Vertex>(v));
 			m_v.push_back(tempvtx);
 		} else if (cmd=="vn") {
 			Vector3d n;
 			iss >> n;
 			m_n.push_back(n);
-			hasnorm = true;
+			hasNorm = true;
 		} else if (cmd=="f") {
 			getline(iss, cmd);
 			vector<int> e;
 			vector<int> nv;
 			splitStringToInt(cmd.substr(1), ' ', e);
 			splitStringToNormals(cmd.substr(1), ' ', nv);
-			int n = 2 + e.size() - 4;
-			for (int i = 0; i < n; i++) {
+			size_t n = 2 + e.size() - 4;
+			for (size_t i = 0; i < n; i++) {
 				createFace(e[0], e[i+1], e[i+2], nv[0], nv[i+1], nv[i+2], smooth);
 			}
 		}
@@ -286,7 +390,7 @@ void RayTra::parseMtl(const char* s) {
 					if (illum >= 4) {
 						refl.setOnes();
 					}
-					mtlMap.insert(pair<string, Material*>(name, new Material(amb, diff, spec, p, refl, n, atten)));
+					mtlMap.insert(pair<string, s_ptr<Material> >(name, make_shared<Material>(amb, diff, spec, p, refl, n, atten)));
 					diff.setZero(); amb.setZero(); spec.setZero(); refl.setZero(); p = 2; illum = 0;
 				} else {
 					startMaterial = false;
@@ -311,21 +415,21 @@ void RayTra::parseMtl(const char* s) {
 		if (illum >= 4) {
 			refl.setOnes();
 		}
-		mtlMap.insert(pair<string, Material*>(name, new Material(amb, diff, spec, p, refl, n, atten)));
+		mtlMap.insert(pair<string, s_ptr<Material> >(name, make_shared<Material>(amb, diff, spec, p, refl, n, atten)));
 
 }
 
 void RayTra::createFace(int v1, int v2, int v3, int n1, int n2, int n3, int smooth) {
-	Face* tempF = new Face(last);
+	s_ptr<Face> tempF(make_shared<Face>(prevMaterial));
 	vector<int> vs;
 	vector<int> ns;
 	vs.push_back(v1 - 1); vs.push_back(v2 - 1); vs.push_back(v3 - 1);
 	ns.push_back(n1 - 1); ns.push_back(n2 - 1); ns.push_back(n3 - 1);
 	for (int i = 0; i < 3; i++) {
 		int index = vs[(i + 1) % 3];
-		HEdge* tempE = new HEdge();
+		s_ptr<HEdge> tempE(make_shared<HEdge>());
 		tempE->setVertex(m_v[index]);
-		if (hasnorm) {
+		if (hasNorm) {
 			int nindex = ns[(i + 1) % 3];
 			m_v[index]->addNormal(m_n[nindex]);
 			tempF->_normal = m_n[nindex];
@@ -344,13 +448,13 @@ void RayTra::createFace(int v1, int v2, int v3, int n1, int n2, int n3, int smoo
 	m_h[esf+2]->setFace(tempF);
 	m_h[esf+2]->setNext(m_h[esf]);
 	tempF->setHE(m_h[esf]);
-	if (!hasnorm) {
+	if (!hasNorm) {
 		Vector3d p1 = m_h[esf]->getVertex()->_p;
-		Vector3d p2 = m_h[esf+1]->getVertex()->_p;
-		Vector3d p3 = m_h[esf+2]->getVertex()->_p;
+		Vector3d p2 = m_h[esf + 1]->getVertex()->_p;
+		Vector3d p3 = m_h[esf + 2]->getVertex()->_p;
 		Vector3d norm = ((p2 - p1).cross(p3 - p1)).normalized();
 		for (int i = 0; i < 3; i++) {
-			m_h[esf+i]->getVertex()->addNormal(norm);
+			m_h[esf + i]->getVertex()->addNormal(norm);
 		}
 		tempF->_normal = norm;
 		if (smooth == 0) {
@@ -360,7 +464,8 @@ void RayTra::createFace(int v1, int v2, int v3, int n1, int n2, int n3, int smoo
 		}
 	}
 	tempF->boundingBox();
-	_surfaces->addSurface(tempF);
+	s_ptr<Surface> tempS = static_pointer_cast<Surface>(tempF);
+	surfaces->addSurface(tempS);
 	esf += 3;
 }
 
@@ -396,81 +501,3 @@ void RayTra::splitStringToInt(const string& s, char d, vector<int>& e) {
 }
 //TODO make a sampler class and move the sample grid stuff off
 // render function
-void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
-	seedRand();					// seed rand
-
-	Sampler master(width, height, Sampler::INTEGRAL, Sampler::SQUARE, ((order == HILBERT) ? (Sampler::HILBERT) : 0), Sampler::CENTER, false);
-	Sampler ms_sampler(samples, samples, Sampler::FRACTIONAL, Sampler::SQUARE, ((order == HILBERT) ? (Sampler::HILBERT) : 0), ((samples > 1) ? (sample_type) : (Sampler::CENTER)), true);
-	Sampler lens_sampler, light_sampler;
-	
-	if (field == OFF) lens_sampler = Sampler(samples, samples);
-	else lens_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((circular) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1) ? (sample_type):(Sampler::CENTER)), true);
-	if (area <= 1) light_sampler = Sampler(samples, samples);
-	else light_sampler = Sampler(samples, samples, Sampler::FRACTIONAL, ((area == SOFTCIRCLE) ? (Sampler::CIRCLE) : (Sampler::SQUARE)), Sampler::LINEAR, ((samples > 1) ? (sample_type) : (Sampler::CENTER)), true);
-	Sampler2d master_pixels = master.genPoints();
-
-	int counter = 0;
-	clock_t master_start = clock();
-#pragma omp parallel for schedule(dynamic)
-	for (int j = 0; j < height; j++) {
-		
-		clock_t start = clock();
-		int startray = Ray::count;
-
-		for (int i = 0; i < width; i++) {
-
-			Vector3d c = Vector3d::Zero();		// initialize color result vector (RGB)
-
-			Sampler2d l_sample = light_sampler.genPoints();
-			Sampler2d s_sample = lens_sampler.genPoints();
-			Sampler2d ms_sample = ms_sampler.genPoints();
-			Sampler::shuffle(s_sample, true);
-			Sampler::shuffle(l_sample, true);
-
-			int x = master_pixels(i, j)[0];
-			int y = master_pixels(i, j)[1];
-			// multisampling raytracing
-			for (int q = 0; q < samples; q++) {
-				for (int p = 0; p < samples; p++) {
-
-					int current_sample = q * samples + p;
-					Ray r;
-					_cam->generateRay(s_sample(current_sample), x + ms_sample(current_sample)[0], y + ms_sample(current_sample)[1], r);
-					c += _shading->computeShading(r, 0, INF, _all, l_sample(current_sample));				// SHADE
-				}
-			}
-			c /= (samples * samples);		// normalize result
-			int invHeight = height - (y + 1);
-			o[invHeight][x].r = c[0];
-			o[invHeight][x].g = c[1];
-			o[invHeight][x].b = c[2];
-			o[invHeight][x].a = 1.0;
-
-			//pixels[j*width + i] = toInt(c[0]) | (toInt(c[1]) << 8) | (toInt(c[2]) << 16);
-			//glClear(GL_COLOR | GL_DEPTH);
-			//glRasterPos2i(0, 0);
-			//glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-			//glutSwapBuffers();
-#pragma omp atomic
-			counter += 1;
-		}
-		clock_t end = clock();
-		double runtime = (double) (end - start) / CLOCKS_PER_SEC;
-		double total = (double) (height * width);
-		double perc = (double) counter / total;
-		int raysince = Ray::count - startray;
-		perc *= 100;
-#pragma omp critical
-		{
-			std::cout << "\rprogress: " << floor(perc) << "% : " << counter << " " << Ray::count << " rays - " << ((double)raysince / runtime) << " r/s";
-			std::cout.flush();
-		}
-	}
-	clock_t master_stop = clock();
-	double master_run = (double) (master_stop - master_start) / CLOCKS_PER_SEC;
-	{
-		std::cout << "\r\rprogress: 100%, " << Ray::count << " rays at " << ((double) Ray::count / master_run) << " r/s\t\t\t" << endl;
-		std::cout.flush();
-	}
-	return;
-}

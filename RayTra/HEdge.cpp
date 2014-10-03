@@ -13,27 +13,27 @@ HEdge::HEdge(){
 	_face = NULL;
 }
 
-void HEdge::setVertex(Vertex* v){
+void HEdge::setVertex(s_ptr<Vertex> v){
 	_vert = v;
 }
 
-void HEdge::setNext(HEdge* n) {
+void HEdge::setNext(s_ptr<HEdge> n) {
 	_next = n;
 }
 
-void HEdge::setFace(Face* f) {
+void HEdge::setFace(s_ptr<Face> f) {
 	_face = f;
 }
 
-HEdge* HEdge::getNext() {
+s_ptr<HEdge> HEdge::getNext() {
 	return _next;
 }
 
-Vertex* HEdge::getVertex() {
+s_ptr<Vertex> HEdge::getVertex() {
 	return _vert;
 }
 
-Face* HEdge::getFace() {
+s_ptr<Face> HEdge::getFace() {
 	return _face;
 }
 

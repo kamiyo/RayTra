@@ -13,9 +13,9 @@ Group::Group() {
 
 }
 
-void Group::addSurface(Surface* s) {
-	_s.push_back(s);
+void Group::addSurface(s_ptr<Surface> s) {
 	_b = _b.combine(s->_b);
+	_s.push_back(s);
 }
 
 bool Group::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {

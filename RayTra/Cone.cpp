@@ -1,7 +1,7 @@
 #include "Cone.h"
 
 
-Cone::Cone(double h, Material* m) : _l(0), _u(h)
+Cone::Cone(double h, s_ptr<Material> m) : _l(0), _u(h)
 {
 	_m = m;
 	_type = CONE;
@@ -9,7 +9,7 @@ Cone::Cone(double h, Material* m) : _l(0), _u(h)
 	_trans = false;
 }
 
-Cone::Cone(double lower, double upper, Material *m) : _l(lower), _u(upper)
+Cone::Cone(double lower, double upper, s_ptr<Material> m) : _l(lower), _u(upper)
 {
 	_m = m;
 	_type = CONE;
@@ -44,7 +44,7 @@ bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec)
 			rec.n = n.normalized();
 		}
 		else if (ray.m_type == RayBase::SHADOW) {
-			rec.s = this;
+			rec.s = shared_from_this();
 		}
 		rec.m = _m;
 		return true;
@@ -58,7 +58,7 @@ bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec)
 			rec.n = n.normalized();
 		}
 		else if (ray.m_type == RayBase::SHADOW) {
-			rec.s = this;
+			rec.s = shared_from_this();
 		}
 		rec.m = _m;
 		return true;

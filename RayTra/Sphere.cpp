@@ -7,7 +7,7 @@
 
 #include "Sphere.h"
 
-Sphere::Sphere(Vector3d pos, double rad, Material* m) {
+Sphere::Sphere(Vector3d pos, double rad, s_ptr<Material> m) {
 	_p = pos;
 	_r = rad;
 	_m = m;
@@ -17,7 +17,7 @@ Sphere::Sphere(Vector3d pos, double rad, Material* m) {
 	_r2 = _r * _r;
 }
 
-Sphere::Sphere(LightP* l) {
+Sphere::Sphere(s_ptr<LightP> l) {
 	_p = l->_pos;
 	_r = l->_r;
 	_m = NULL;
@@ -57,7 +57,7 @@ bool Sphere::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 				rec.n = (n - _p).normalized();
 			}
 			else if (ray.m_type == RayBase::SHADOW) {
-				rec.s = this;
+				rec.s = shared_from_this();
 			}
 			rec.m = _m;
 			return true;
@@ -68,7 +68,7 @@ bool Sphere::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 				rec.n = (n - _p).normalized();
 			}
 			else if (ray.m_type == RayBase::SHADOW) {
-				rec.s = this;
+				rec.s = shared_from_this();
 			}
 			rec.m = _m;
 			return true;

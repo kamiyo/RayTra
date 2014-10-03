@@ -2,7 +2,7 @@
 
 /*NEEDS LOTS OF WORK*/
 
-Instance::Instance(Surface* s, Matrix4d& m) : _s(s)
+Instance::Instance(s_ptr<Surface> s, Matrix4d& m) : _s(s)
 {
 	_b = _s->_b;
 	_mInv = m.inverse();

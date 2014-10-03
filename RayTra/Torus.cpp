@@ -3,7 +3,7 @@
 #include <algorithm>
 
 
-Torus::Torus(double R, double r, Material* m) : _r(r), _R(R)
+Torus::Torus(double R, double r, s_ptr<Material> m) : _r(r), _R(R)
 {
 	_m = m;
 	_trans = false;
@@ -71,7 +71,7 @@ bool Torus::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 		rec.n = n;
 	}
 	else {
-		rec.s = this;
+		rec.s = shared_from_this();
 	}
 	rec.m = _m;
 	return true;

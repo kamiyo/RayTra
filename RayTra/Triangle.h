@@ -12,7 +12,7 @@
 
 class Triangle : public Surface {
 public:
-	Triangle(Vector3d p1, Vector3d p2, Vector3d p3, Material* m);
+	Triangle(Vector3d p1, Vector3d p2, Vector3d p3, s_ptr<Material> m);
 	bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	void boundingBox();
 	virtual ~Triangle();

@@ -9,19 +9,18 @@
 #define SPHERE_H_
 #include "Surface.h"
 #include "LightP.h"
-#include <iostream>
 
 class Sphere : public Surface {
 public:
-	Sphere(Vector3d pos, double rad, Material* m);
-	Sphere(LightP* l);
+	Sphere(Vector3d pos, double rad, s_ptr<Material> m);
+	Sphere(s_ptr<LightP> l);
 	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
 	void boundingBox();
 	~Sphere();
 	Vector3d _p;
 	double _r;
 	double _r2;
-	LightP* _l;
+	s_ptr<LightP> _l;
 };
 
 #endif /* SPHERE_H_ */
