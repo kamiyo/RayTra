@@ -18,11 +18,11 @@ class Vertex;
 class Face : public Surface {
 public:
 	Face(s_ptr<Material> m);
-	bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
+	bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
 	void boundingBox();
 	virtual ~Face();
 	void setHE(s_ptr<HEdge> e);
-	s_ptr<HEdge> getHE();
+	s_ptr<HEdge> getHE() const;
 	Vector3d _normal;
 	bool smooth;
 private:
@@ -35,14 +35,11 @@ public:
 	virtual ~HEdge();
 	void setNext(s_ptr<HEdge> n);
 	void setVertex(s_ptr<Vertex> v);
-	void setFace(s_ptr<Face> f);
-	s_ptr<HEdge> getNext();
-	s_ptr<Vertex> getVertex();
-	s_ptr<Face> getFace();
+	s_ptr<HEdge> getNext() const;
+	s_ptr<Vertex> getVertex() const;
 private:
 	s_ptr<Vertex> _vert;
-	s_ptr<HEdge> _next;
-	s_ptr<Face> _face;
+	w_ptr<HEdge> _next;
 };
 
 class Vertex {

@@ -10,7 +10,7 @@ class Circle : public Surface {
 public:
 	Circle(Vector3d pos, Vector3d norm, double rad, s_ptr<Material> m);
 	Circle(Vector3d pos, Vector3d norm, double rad, s_ptr<Light> l);
-	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
+	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
 	void boundingBox();
 	~Circle();
 	Vector3d _p;

@@ -18,11 +18,11 @@ void Face::setHE(s_ptr<HEdge> e) {
 	_e = e;
 }
 
-s_ptr<HEdge> Face::getHE() {
+s_ptr<HEdge> Face::getHE() const {
 	return _e;
 }
 
-bool Face::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+bool Face::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	s_ptr<HEdge> edge = _e;
 	s_ptr<Vertex> vert = edge->getVertex();
 	Vector3d _p1 = vert->_p; Vector3d _n1 = vert->_n.normalized();
@@ -67,7 +67,7 @@ bool Face::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 		}
 	}
 	else if (ray.m_type == RayBase::SHADOW) {
-		rec.s = shared_from_this();
+		;
 	}
 	rec.m = _m;
 	return true;

@@ -30,10 +30,10 @@ Circle::~Circle(void)
 {
 }
 
-bool Circle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+bool Circle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	//std::cout << "here" << std::endl;
-	Vector3d e = ray.m_eye;
-	Vector3d d = ray.m_dir;
+	const Vector3d& e = ray.m_eye;
+	const Vector3d& d = ray.m_dir;
 	double den = _n.dot(d);
 	if (den == 0) {
 		return false;
@@ -51,7 +51,7 @@ bool Circle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 			rec.n = _n.normalized();
 		}
 		else {
-			rec.s = shared_from_this();
+			;
 		}
 		rec.m = _m;
 

@@ -8,10 +8,10 @@ class LightS :
 public:
 	LightS(Vector3d pos, Vector3d dir, double theta, double phi, double p, Vector3d rgb, Vector3d atten, double r);
 	virtual ~LightS();
-	virtual Vector3d getVector(Vector3d p);
-	virtual double getFalloff(Vector3d p);
-	virtual Vector3d getRanPoint();
-	virtual Photon emitPhoton(int color);
+	virtual Vector3d getVector(Vector3d p) const;
+	virtual double getFalloff(Vector3d p) const;
+	virtual Vector3d getRanPoint() const;
+	virtual Photon emitPhoton(int color) const;
 	virtual void projectScene(BBox b);
 	Vector3d _pos;
 	Vector3d _dir;

@@ -17,9 +17,9 @@ surface*	_l	pointer to left node
 surface*	_r	pointer to right node
 */
 
-BVH::BVH(s_ptr<Group> g) {
+BVH::BVH(u_ptr<Group>& g) {
 	_type = BOVOH;
-	std::vector<s_ptr<Surface> > s = g->_s;
+	std::vector<u_ptr<Surface> >& s = g->_s;
 	size_t N = s.size();
 	if (N == 0) {
 		return;
@@ -51,8 +51,8 @@ BVH::BVH(s_ptr<Group> g) {
 		}
 		m /= (double) N;
 		//std::cout << m << " " << allSame << std::endl;
-		s_ptr<Group> left = std::make_shared<Group>();
-		s_ptr<Group> right = std::make_shared<Group>();
+		u_ptr<Group> left = std::make_unique<Group>();
+		u_ptr<Group> right = std::make_unique<Group>();
 		for (int i = 0; i < (int) N; i++) {
 			if ((s[i]->_b._m[axis] < m && !allSame) || (allSame && i < (int) N / 2)) {
 				left->addSurface(s[i]);
@@ -61,8 +61,8 @@ BVH::BVH(s_ptr<Group> g) {
 				right->addSurface(s[i]);
 			}
 		}
-		_l = std::make_shared<BVH>(left);
-		_r = std::make_shared<BVH>(right);
+		_l = std::make_unique<BVH>(left);
+		_r = std::make_unique<BVH>(right);
 	}
 	_b = g->_b;
 }
@@ -77,7 +77,7 @@ POSSIBLE?: turn into Heap instead of tree
 */
 
 // boxes should already be pre-transformed. BVH shouldn't have its own transformation
-bool BVH::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+bool BVH::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	/*if (!_b.hitbox(ray, t0, t1)) return false;
 	if (_trans) {
 		std::cout << "this BVH has been transformed" << std::endl;
@@ -94,7 +94,7 @@ bool BVH::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	//}
 }
 
-bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	if (_b.hitbox(ray, t0, t1)) {
 		hitRecord lrec, rrec;
 		bool leftHit = (_l) && (_l->_hit(ray, t0, t1, lrec));

@@ -10,12 +10,12 @@ public:
 	virtual ~Transform();
 	void setIdentity();
 	void push();
-	void push(Matrix4d &m);
+	void push(const Matrix4d &m);
 	Matrix4d pop();
-	Matrix4d top();
+	Matrix4d top() const;
 	void scale(double s);
-	void scale(Vector3d xyz);
-	void translate(Vector3d xyz);
+	void scale(const Vector3d& xyz);
+	void translate(const Vector3d& xyz);
 	void rotate(Vector3d axis, double rot);
 	Matrix4d _current;
 	Matrix4d _currentInv;

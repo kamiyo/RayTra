@@ -48,7 +48,7 @@ void Shading::initPhotonTracing() {
 	_lProbs = ints.array();
 }
 
-Photon Shading::emitPhoton() {
+Photon Shading::emitPhoton() const {
 	double roll = RAN;
 	int color, light;
 	for (int i = 0; i < _lProbs.size(); i++) {
@@ -114,7 +114,7 @@ result += krefract.cwiseProduct((1 - R) * computeShading(v1, epsilon, INF, s, ar
 }
 }*/
 
-Photons* Shading::tracePhotons(Group* s) {
+Photons* Shading::tracePhotons(Group* s) const {
 	Photons* result = new Photons();
 	for (int i = 0; i < _numPhotons; i++) {
 		Photon p = emitPhoton();
@@ -167,23 +167,23 @@ Photons* Shading::tracePhotons(Group* s) {
 
 
 // form of function where recursion and refraction are not specified. 
-Vector3d Shading::computeShading(Ray vray, double t0, double t1, s_ptr<Group> s, const Vector2d& area) {
+Vector3d Shading::computeShading(Ray vray, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const {
 	return computeShading(vray, t0, t1, s, area, _recurs, _refraction);
 }
 
 //SHADER
-Vector3d Shading::computeShading(Ray vray, double t0, double t1, s_ptr<Group> s, const Vector2d& area, int recurs, int refrac) {
+Vector3d Shading::computeShading(Ray vray, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area, int recurs, int refrac) const {
 	if (recurs == -1 || refrac == -1) {
 		return Vector3d::Zero();									//return 0 if recursion limit reached
 	}
-	hitRecord rec;											// rec = light record, srec = shadow record
+	hitRecord rec;													// rec = light record, srec = shadow record
 	Vector3d result = Vector3d::Zero();								// rgb result zero'd
 	Vector3d d = (-1.0 * vray.m_dir).normalized();					// d = viewing ray direction (out of surface)
 	s_ptr<Material> m;
 
 	if (s->_hit(vray, t0, t1, rec)) {
-		double epsilon = vray.m_epsilon;
-		Vector3d n = rec.n;											// n = normal vector of intersection
+		const double &epsilon = vray.m_epsilon;
+		const Vector3d &n = rec.n;											// n = normal vector of intersection
 		double nd = n.dot(d);
 
 		if (rec.m == NULL) {
@@ -266,7 +266,6 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, s_ptr<Group> s,
 			current = vray.ref.back();
 			refrac--;
 			krefract = (-1.0 * temp_alpha.back()).array().exp();
-			n = rec.n;
 			if (d.dot(n) < 0) {							// if viewing vector is in front of normal, i.e. entering a refracting object
 				to = m->n;
 				temp_ref.push_back(to);
@@ -319,19 +318,19 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, s_ptr<Group> s,
 	return result;
 }
 
-double Shading::schlicks(double index, double c) {
+double Shading::schlicks(double index, double c) const {
 	double R0 = pow((index - 1) / (index + 1), 2);
 	double R = R0 + (1 - R0) * pow ((1 - c), 5);
 	return R;
 }
 
-double Shading::fresnel(double index1, double index2, double c1, double c2 ) {
+double Shading::fresnel(double index1, double index2, double c1, double c2) const {
 	double rp = (index2 * c2 - index1 * c1) / (index2 * c2 + index1 * c1);
 	double rs = (index1 * c1 - index2 * c2) / (index1 * c1 + index2 * c2);
 	return ((rp * rp) + (rs * rs)) / 2;
 }
 
-bool Shading::refract(Vector3d d, Vector3d n, double index, double indext, Vector3d& t) {
+bool Shading::refract(const Vector3d& d, const Vector3d& n, double index, double indext, Vector3d& t) const {
 	double under = 1.0 - pow(index / indext, 2) * (1 - pow(d.dot(n), 2));
 	if (under < 0) {
 		return false;

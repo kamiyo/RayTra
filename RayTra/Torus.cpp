@@ -26,10 +26,10 @@ inline double pow4(const double& x) {
 }
 
 
-bool Torus::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+bool Torus::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	//if (!hitbox(ray, t0, t1)) return false;
-	const Vector3d d = ray.m_dir;
-	const Vector3d e = ray.m_eye;
+	const Vector3d& d = ray.m_dir;
+	const Vector3d& e = ray.m_eye;
 	double* op = (double*) malloc(sizeof(double) * 5);
 	double dx = d(0), dy = d(1), dz = d(2);
 	double dx2 = d(0) * d(0), dy2 = d(1)* d(1);
@@ -71,7 +71,7 @@ bool Torus::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 		rec.n = n;
 	}
 	else {
-		rec.s = shared_from_this();
+		;
 	}
 	rec.m = _m;
 	return true;

@@ -14,7 +14,7 @@ class Sphere : public Surface {
 public:
 	Sphere(Vector3d pos, double rad, s_ptr<Material> m);
 	Sphere(s_ptr<LightP> l);
-	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
+	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
 	void boundingBox();
 	~Sphere();
 	Vector3d _p;

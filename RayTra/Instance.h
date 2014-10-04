@@ -7,7 +7,7 @@ class Instance : public Surface
 {
 public:
 	Instance(s_ptr<Surface> s, Matrix4d& m);
-	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
+	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
 	virtual void boundingBox();
 	~Instance();
 	s_ptr<Surface> _s;

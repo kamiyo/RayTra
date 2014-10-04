@@ -13,12 +13,12 @@
 
 class BVH : public Surface{
 public:
-	BVH(s_ptr<Group> g);
-	bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
-	bool _hit(RayBase& ray, double t0, double t1, hitRecord& rec);
+	BVH(u_ptr<Group>& g);
+	bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
+	bool _hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
 	void boundingBox();
-	s_ptr<Surface> _l;
-	s_ptr<Surface> _r;
+	u_ptr<Surface> _l;
+	u_ptr<Surface> _r;
 	virtual ~BVH();
 };
 

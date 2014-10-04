@@ -68,7 +68,6 @@
     <ClCompile Include="Hilbert.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Interval.cpp" />
-    <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightD.cpp" />
     <ClCompile Include="LightP.cpp" />
     <ClCompile Include="LightS.cpp" />

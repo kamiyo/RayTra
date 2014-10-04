@@ -19,11 +19,11 @@ LightP::~LightP() {
 	// TODO Auto-generated destructor stub
 }
 
-Vector3d LightP::getVector(Vector3d p) {
+Vector3d LightP::getVector(Vector3d p) const {
 	return (_pos - p);
 }
 
-double LightP::getFalloff(Vector3d p) {
+double LightP::getFalloff(Vector3d p) const {
 	double dist = (p - _pos).norm();
 	return 1 / (_atten[0] + _atten[1] * dist + _atten[2] * dist * dist);
 }
@@ -67,7 +67,7 @@ void LightP::projectScene(BBox b) {
 	_v = w.cross(_u).normalized();
 }
 
-Vector3d LightP::getRanPoint() {
+Vector3d LightP::getRanPoint() const {
 	if ((_axis.cwiseEqual(nINF)).all()) {
 		return randSphere();
 	}
@@ -78,7 +78,7 @@ Vector3d LightP::getRanPoint() {
 	return result + _pos;
 }
 
-Photon LightP::emitPhoton(int color) {
+Photon LightP::emitPhoton(int color) const {
 	Vector3d point = getRanPoint();
 	Vector3d dir = COSVEC(-getVector(point));
 	return Photon(point, dir, _rgb[color], color);

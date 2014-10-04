@@ -121,8 +121,8 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 }
 
 RayTra::RayTra() {
-	surfaces = make_shared<Group>();
-	allSurfaces = make_shared<Group>();
+	surfaces = make_unique<Group>();
+	allSurfaces = make_unique<Group>();
 	shading = make_unique<Shading>();
 	esf = 0;
 	numSamples = 1;
@@ -145,59 +145,59 @@ void RayTra::populateLights() {
 		if (l->_type == Light::POINT) {
 			std::cout << "populating lights" << std::endl;
 			s_ptr<LightP> p = static_pointer_cast<LightP>(l);
-			s_ptr<Surface> s = make_shared<Sphere>(p);
+			u_ptr<Surface> s = make_unique<Sphere>(p);
 			surfaces->addSurface(s);
 		}
 	}
 }
 
 void RayTra::sphere(Vector3d pos, double r) {
-	s_ptr<Surface> s = make_shared<Sphere>(pos, r, prevMaterial);
+	u_ptr<Surface> s = make_unique<Sphere>(pos, r, prevMaterial);
 	applyTransform(s);
 	surfaces->addSurface(s);
 }
 void RayTra::triangle(Vector3d p1, Vector3d p2, Vector3d p3) {
-	s_ptr<Surface> t = make_shared<Triangle>(p1, p2, p3, prevMaterial);
+	u_ptr<Surface> t = make_unique<Triangle>(p1, p2, p3, prevMaterial);
 	applyTransform(t);
 	surfaces->addSurface(t);
 }
 void RayTra::plane(Vector3d n, Vector3d p){
-	s_ptr<Surface> pp = make_shared<Plane>(n, p, prevMaterial);
+	u_ptr<Surface> pp = make_unique<Plane>(n, p, prevMaterial);
 	allSurfaces->addSurface(pp);
 }
 void RayTra::circle(Vector3d p, Vector3d n, double r) {
-	s_ptr<Surface> c = make_shared<Circle>(p, n, r, prevMaterial);
+	u_ptr<Surface> c = make_unique<Circle>(p, n, r, prevMaterial);
 	applyTransform(c);
 	surfaces->addSurface(c);
 }
 void RayTra::cylinder(double r, double h, char cap) {
-	s_ptr<Surface> c = make_shared<Cylinder>(r, h, prevMaterial);
+	u_ptr<Surface> c = make_unique<Cylinder>(r, h, prevMaterial);
 	applyTransform(c);
 	if (cap == 'p' || cap == 'b') {
-		s_ptr<Surface> top = make_shared<Circle>(Vector3d(0, 0, h / 2.0), Vector3d(0, 0, 1), r, prevMaterial);
+		u_ptr<Surface> top = make_unique<Circle>(Vector3d(0, 0, h / 2.0), Vector3d(0, 0, 1), r, prevMaterial);
 		applyTransform(top);
 		surfaces->addSurface(top);
 	}
 	if (cap == 'n' || cap == 'b') {
-		s_ptr<Surface> bottom = make_shared<Circle>(Vector3d(0, 0, -h / 2.0), Vector3d(0, 0, -1), r, prevMaterial);
+		u_ptr<Surface> bottom = make_unique<Circle>(Vector3d(0, 0, -h / 2.0), Vector3d(0, 0, -1), r, prevMaterial);
 		applyTransform(bottom);
 		surfaces->addSurface(bottom);
 	}
 	surfaces->addSurface(c);
 }
 void RayTra::cone(double l, double u, char cap) {
-	s_ptr<Surface> c = make_shared<Cone>(l, u, prevMaterial);
+	u_ptr<Surface> c = make_unique<Cone>(l, u, prevMaterial);
 	applyTransform(c);
 	if (cap == 'p' || cap == 'b') {
 		if (u != 0) {
-			s_ptr<Surface> top = make_shared<Circle>(Vector3d(0, 0, u), Vector3d(0, 0, 1), u, prevMaterial);
+			u_ptr<Surface> top = make_unique<Circle>(Vector3d(0, 0, u), Vector3d(0, 0, 1), u, prevMaterial);
 			applyTransform(top);
 			surfaces->addSurface(top);
 		}
 	}
 	if (cap == 'n' || cap == 'b') {
 		if (l != 0) {
-			s_ptr<Surface> bottom = make_shared<Circle>(Vector3d(0, 0, l), Vector3d(0, 0, -1), l, prevMaterial);
+			u_ptr<Surface> bottom = make_unique<Circle>(Vector3d(0, 0, l), Vector3d(0, 0, -1), l, prevMaterial);
 			applyTransform(bottom);
 			surfaces->addSurface(bottom);
 		}
@@ -205,7 +205,7 @@ void RayTra::cone(double l, double u, char cap) {
 	surfaces->addSurface(c);
 }
 void RayTra::torus(double R, double r) {
-	s_ptr<Surface> t = make_shared<Torus>(R, r, prevMaterial);
+	u_ptr<Surface> t = make_unique<Torus>(R, r, prevMaterial);
 	applyTransform(t);
 	surfaces->addSurface(t);
 }
@@ -257,7 +257,7 @@ void RayTra::material(string s, Vector3d amb, Vector3d diff, Vector3d spec, doub
 		cerr << "material string exists, overwriting old entry" << endl;
 	}
 }
-void RayTra::applyTransform(s_ptr<Surface> s) {
+void RayTra::applyTransform(u_ptr<Surface>& s) {
 	cout << "transforming" << endl << T._current << endl;
 	if ((T._current != Matrix4d::Identity())) {
 		s->trans(T._current, T._currentInv);
@@ -312,10 +312,10 @@ void RayTra::parse(const char* name){
 	if (actualLights)
 		populateLights();
 	if (accelerationStructure == BoVoH) {
-		s_ptr<Surface> objects = make_shared<BVH>(surfaces);
+		u_ptr<Surface> objects = make_unique<BVH>(surfaces);
 		allSurfaces->addSurface(objects);
 	} else {
-		s_ptr<Surface> s = surfaces;
+		u_ptr<Surface> s = std::move(surfaces);
 		allSurfaces->addSurface(s);
 	}
 }
@@ -421,7 +421,7 @@ void RayTra::parseMtl(const char* s) {
 }
 
 void RayTra::createFace(int v1, int v2, int v3, int n1, int n2, int n3, int smooth) {
-	s_ptr<Face> tempF(make_shared<Face>(prevMaterial));
+	u_ptr<Face> tempF(make_unique<Face>(prevMaterial));
 	vector<int> vs;
 	vector<int> ns;
 	vs.push_back(v1 - 1); vs.push_back(v2 - 1); vs.push_back(v3 - 1);
@@ -442,11 +442,8 @@ void RayTra::createFace(int v1, int v2, int v3, int n1, int n2, int n3, int smoo
 		}
 		m_h.push_back(tempE);
 	}
-	m_h[esf]->setFace(tempF);
 	m_h[esf]->setNext(m_h[esf+1]);
-	m_h[esf+1]->setFace(tempF);
 	m_h[esf+1]->setNext(m_h[esf+2]);
-	m_h[esf+2]->setFace(tempF);
 	m_h[esf+2]->setNext(m_h[esf]);
 	tempF->setHE(m_h[esf]);
 	if (!hasNorm) {
@@ -465,7 +462,7 @@ void RayTra::createFace(int v1, int v2, int v3, int n1, int n2, int n3, int smoo
 		}
 	}
 	tempF->boundingBox();
-	s_ptr<Surface> tempS = static_pointer_cast<Surface>(tempF);
+	u_ptr<Surface> tempS = std::move(tempF);
 	surfaces->addSurface(tempS);
 	esf += 3;
 }

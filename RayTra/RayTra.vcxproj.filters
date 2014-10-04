@@ -143,9 +143,6 @@
     <ClCompile Include="Hilbert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LightD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

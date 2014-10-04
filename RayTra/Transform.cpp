@@ -21,7 +21,7 @@ void Transform::push() {
 	_mInv.push(_currentInv);
 }
 
-void Transform::push(Matrix4d &m) {
+void Transform::push(const Matrix4d &m) {
 	_m.push(m);
 	_mInv.push(m.inverse());
 }
@@ -33,7 +33,7 @@ Matrix4d Transform::pop() {
 	return _currentInv;
 }
 
-Matrix4d Transform::top() {
+Matrix4d Transform::top() const {
 	return _currentInv;
 }
 
@@ -41,14 +41,14 @@ void Transform::scale(double s) {
 	scale(Vector3d(s, s, s));
 }
 
-void Transform::scale(Vector3d xyz) {
+void Transform::scale(const Vector3d& xyz) {
 	Matrix4d temp(Matrix4d::Identity()); temp.diagonal() << xyz(0), xyz(1), xyz(2), 1.0;
 	Matrix4d tempInv(Matrix4d::Identity()); tempInv.diagonal() << 1 / xyz(0), 1 / xyz(1), 1 / xyz(2), 1.0;
 	_current = temp * _current;
 	_currentInv *= tempInv;
 }
 
-void Transform::translate(Vector3d xyz) {
+void Transform::translate(const Vector3d& xyz) {
 	Matrix4d tempInv(Matrix4d::Identity()), temp(Matrix4d::Identity());
 	temp.block<3, 1>(0, 3) = xyz;
 	tempInv.block<3, 1>(0, 3) = -1 * xyz;

@@ -14,10 +14,10 @@ class LightP : public Light {
 public:
 	LightP(Vector3d pos, Vector3d rgb, Vector3d atten, double r);
 	virtual ~LightP();
-	virtual Vector3d getVector(Vector3d p);
-	virtual double getFalloff(Vector3d p);
-	virtual Vector3d getRanPoint();
-	virtual Photon emitPhoton(int color);
+	virtual Vector3d getVector(Vector3d p) const;
+	virtual double getFalloff(Vector3d p) const;
+	virtual Vector3d getRanPoint() const;
+	virtual Photon emitPhoton(int color) const;
 	virtual void projectScene(BBox b);
 	Vector3d _pos;
 	double _r, _costheta0;

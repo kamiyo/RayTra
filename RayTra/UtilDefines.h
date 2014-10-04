@@ -64,6 +64,9 @@ using u_ptr = std::unique_ptr<Object>;
 template <typename Object>
 using s_ptr = std::shared_ptr<Object>;
 
+template <typename Object>
+using w_ptr = std::weak_ptr<Object>;
+
 typedef struct hitRecord {
 	double t;
 //	std::vector<double> ts;

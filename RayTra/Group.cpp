@@ -13,14 +13,14 @@ Group::Group() {
 
 }
 
-void Group::addSurface(s_ptr<Surface> s) {
+void Group::addSurface(u_ptr<Surface>& s) {
 	_b = _b.combine(s->_b);
-	_s.push_back(s);
+	_s.push_back(std::move(s));
 }
 
-bool Group::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+bool Group::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	bool hit = false;
-	for (int i = 0; i < (int)_s.size(); i++) {
+	for (size_t i = 0; i < _s.size(); i++) {
 		hitRecord temp;
 		if (_s[i]->_hit(ray, t0, t1, temp)) {
 			hit = true;

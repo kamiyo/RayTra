@@ -16,9 +16,9 @@ Cylinder::~Cylinder()
 {
 }
 
-bool Cylinder::hit(RayBase& r, double t0, double t1, hitRecord& rec) {
-	Vector3d eye = r.m_eye;
-	Vector3d dir = r.m_dir;
+bool Cylinder::hit(RayBase& r, double t0, double t1, hitRecord& rec) const {
+	const Vector3d& eye = r.m_eye;
+	const Vector3d& dir = r.m_dir;
 	double a = dir(0) * dir(0) + dir(1) * dir(1);
 	if (a == 0) return false;
 	double b = 2 * (eye(0) * dir(0) + eye(1) * dir(1));
@@ -42,7 +42,7 @@ bool Cylinder::hit(RayBase& r, double t0, double t1, hitRecord& rec) {
 			rec.n = n.normalized();
 		}
 		else if (r.m_type == RayBase::SHADOW) {
-			rec.s = shared_from_this();
+			;
 		}
 		rec.m = _m;
 		return true;
@@ -54,7 +54,7 @@ bool Cylinder::hit(RayBase& r, double t0, double t1, hitRecord& rec) {
 			rec.n = n.normalized();
 		}
 		else if (r.m_type == RayBase::SHADOW) {
-			rec.s = shared_from_this();
+			;
 		}
 		rec.m = _m;
 		return true;

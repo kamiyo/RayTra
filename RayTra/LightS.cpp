@@ -12,20 +12,19 @@ LightS::~LightS()
 {
 }
 
-Vector3d LightS::getVector(Vector3d p) {
+Vector3d LightS::getVector(Vector3d p) const {
 	return _pos - p;
 }
 
-Photon LightS::emitPhoton(int color) {
+Photon LightS::emitPhoton(int color) const {
 	return Photon();
 }
 
-double LightS::getFalloff(Vector3d p) {
+double LightS::getFalloff(Vector3d p) const {
 	Vector3d l = _dir.normalized();
 	
 	Vector3d d = (p - _pos).normalized();
 	double ld = l.dot(d);
-	//std::cout << _theta << " " << _phi << " " << l << " " << d << " " << ld << std::endl;
 	double cosPhiHalf = cos(_phi / 2);
 	double num = ld - cosPhiHalf;
 	if (num <= 0) {
@@ -39,11 +38,10 @@ double LightS::getFalloff(Vector3d p) {
 	double den = cos(_theta / 2) - cosPhiHalf;
 	
 	double res = atten * pow(num / den, _p);
-	//std::cout << _p << " " << res << std::endl;
 	return res;
 }
 
-Vector3d LightS::getRanPoint() {
+Vector3d LightS::getRanPoint() const {
 	return Vector3d::Zero();
 }
 void LightS::projectScene(BBox b) {

@@ -14,8 +14,6 @@ Triangle::Triangle(Vector3d p1, Vector3d p2, Vector3d p3, s_ptr<Material> m) {
 	_m = m;
 	boundingBox();
 	_type = TRIANGLE;
-	abc = _p1 - _p2;
-	def = _p1 - _p3;
 	_n = ((_p2 - _p1).cross(_p3 - _p1)).normalized();
 
 	//Plucker
@@ -33,11 +31,11 @@ Triangle::~Triangle() {
 
 
 // TO-DO: PLUCKER COORDS?
-bool Triangle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
+bool Triangle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	//plucker
 
-	Vector3d e = ray.m_eye;
-	Vector3d u = ray.m_dir;
+	const Vector3d& e = ray.m_eye;
+	const Vector3d& u = ray.m_dir;
 	Vector3d v = u.cross(e);
 	double alpha = _u1.dot(v) + u.dot(_v1);
 	double beta = _u2.dot(v) + u.dot(_v2);
@@ -49,6 +47,7 @@ bool Triangle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	if ((alpha < 0) != (gamma < 0)) return false;
 
 	if ((alpha == beta) && (alpha == gamma) && alpha == 0) return false;
+	
 	double sum = alpha + beta + gamma;
 	
 	alpha /= sum; beta /= sum; gamma /= sum;
@@ -62,7 +61,7 @@ bool Triangle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 		//if (_n.dot(u) > 0) rec.n = -_n;
 	}
 	else {
-		rec.s = shared_from_this();
+		;
 	}
 	rec.m = _m;
 	return true;

@@ -13,11 +13,11 @@
 class Group : public Surface {
 public:
 	Group();
-	void addSurface(s_ptr<Surface> s);
-	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec);
+	void addSurface(u_ptr<Surface> &s);
+	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
 	void boundingBox();
 	~Group();
-	std::vector<s_ptr<Surface> > _s;
+	std::vector<u_ptr<Surface> > _s;
 };
 
 #endif /* GROUP_H_ */

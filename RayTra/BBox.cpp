@@ -36,7 +36,7 @@ BBox::~BBox() {
 http://people.csail.mit.edu/amy/papers/box-jgt.pdf
 gains of 25% in paper
 */
-bool BBox::hitbox(RayBase& ray, const double t0, const double t1) {
+bool BBox::hitbox(RayBase& ray, const double t0, const double t1) const {
 	double tmin, tmax, tymin, tymax, tzmin, tzmax;
 	Vector3d e = ray.m_eye;
 	Vector3d i = ray.m_inv;

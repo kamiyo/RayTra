@@ -8,9 +8,8 @@
 #include "Face.h"
 
 HEdge::HEdge(){
-	_vert = NULL;
-	_next = NULL;
-	_face = NULL;
+	_vert = nullptr;
+	_next = w_ptr<HEdge>();
 }
 
 void HEdge::setVertex(s_ptr<Vertex> v){
@@ -21,20 +20,17 @@ void HEdge::setNext(s_ptr<HEdge> n) {
 	_next = n;
 }
 
-void HEdge::setFace(s_ptr<Face> f) {
-	_face = f;
+s_ptr<HEdge> HEdge::getNext() const {
+	if (auto sharedptr = _next.lock()) {
+		return sharedptr;
+	}
+	else {
+		return nullptr;
+	}
 }
 
-s_ptr<HEdge> HEdge::getNext() {
-	return _next;
-}
-
-s_ptr<Vertex> HEdge::getVertex() {
+s_ptr<Vertex> HEdge::getVertex() const {
 	return _vert;
-}
-
-s_ptr<Face> HEdge::getFace() {
-	return _face;
 }
 
 HEdge::~HEdge() {

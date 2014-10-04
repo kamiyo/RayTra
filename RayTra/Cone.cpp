@@ -17,10 +17,10 @@ Cone::Cone(double lower, double upper, s_ptr<Material> m) : _l(lower), _u(upper)
 	_trans = false;
 }
 
-bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec)
+bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const
 {
-	Vector3d eye = ray.m_eye;
-	Vector3d dir = ray.m_dir;
+	const Vector3d& eye = ray.m_eye;
+	const Vector3d& dir = ray.m_dir;
 	double a = dir(0) * dir(0) + dir(1) * dir(1) - dir(2) * dir(2);
 	if (a == 0) return false;
 	double b = 2 * (eye(0) * dir(0) + eye(1) * dir(1) - eye(2) * dir(2));
@@ -44,7 +44,7 @@ bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec)
 			rec.n = n.normalized();
 		}
 		else if (ray.m_type == RayBase::SHADOW) {
-			rec.s = shared_from_this();
+			;
 		}
 		rec.m = _m;
 		return true;
@@ -58,7 +58,7 @@ bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec)
 			rec.n = n.normalized();
 		}
 		else if (ray.m_type == RayBase::SHADOW) {
-			rec.s = shared_from_this();
+			;
 		}
 		rec.m = _m;
 		return true;
