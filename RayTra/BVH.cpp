@@ -17,9 +17,9 @@ surface*	_l	pointer to left node
 surface*	_r	pointer to right node
 */
 
-BVH::BVH(s_ptr<Group> &g) {
+BVH::BVH(s_ptr<Group> g) {
 	_type = BOVOH;
-	std::vector<s_ptr<Surface> > &s = g->_s;
+	std::vector<s_ptr<Surface> > s = g->_s;
 	size_t N = s.size();
 	if (N == 0) {
 		return;
@@ -97,8 +97,8 @@ bool BVH::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) {
 	if (_b.hitbox(ray, t0, t1)) {
 		hitRecord lrec, rrec;
-		bool leftHit = (_l != nullptr) && (_l->_hit(ray, t0, t1, lrec));
-		bool rightHit = (_r != nullptr) && (_r->_hit(ray, t0, t1, rrec));
+		bool leftHit = (_l) && (_l->_hit(ray, t0, t1, lrec));
+		bool rightHit = (_r) && (_r->_hit(ray, t0, t1, rrec));
 		if (leftHit && rightHit) {
 			if (lrec.t < rrec.t) {
 				rec = lrec;

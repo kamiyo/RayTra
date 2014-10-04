@@ -23,8 +23,8 @@ public:
 	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) = 0;
 	virtual void boundingBox() = 0;
 	virtual int type();
-	Matrix4d _mInv;
-	Matrix4d _mTrans;
+	Matrix4d _mInv = Matrix4d::Identity();
+	Matrix4d _mTrans = Matrix4d::Identity();
 	s_ptr<Material> _m;
 	bool _trans;
 	BBox _b;

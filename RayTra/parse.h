@@ -29,7 +29,7 @@ protected:
 	virtual void setOption(int option, int setting, int setting2 = 0) {}
 	virtual void getObj(const char *file, int smooth) {}
 	virtual void invertNormal() {}
-	Transform T;
+	Transform T = Transform();
 public:
 	virtual void parse(const char *file);
 	const static int SHADOWS = 0, SAMPLES = 1, REFRACT = 2, STRUCT = 3, RECURSE = 4, DOF = 5, INDIRECT = 6, ACTUALLIGHTS = 7, ORDER = 8, RUSSIAN = 9;

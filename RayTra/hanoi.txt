@@ -16,7 +16,7 @@ gi 1
 rc 2
 rf 0
 dof 2
-accel 0
+accel 1
 hilbert 0
 o
 

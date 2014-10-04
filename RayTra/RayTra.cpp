@@ -257,7 +257,8 @@ void RayTra::material(string s, Vector3d amb, Vector3d diff, Vector3d spec, doub
 		cerr << "material string exists, overwriting old entry" << endl;
 	}
 }
-void RayTra::applyTransform(s_ptr<Surface> &s) {
+void RayTra::applyTransform(s_ptr<Surface> s) {
+	cout << "transforming" << endl << T._current << endl;
 	if ((T._current != Matrix4d::Identity())) {
 		s->trans(T._current, T._currentInv);
 	}
