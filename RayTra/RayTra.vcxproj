@@ -26,6 +26,7 @@
     <ClInclude Include="Cone.h" />
     <ClInclude Include="Cylinder.h" />
     <ClInclude Include="Face.h" />
+    <ClInclude Include="glfunc.h" />
     <ClInclude Include="Group.h" />
     <ClInclude Include="Hilbert.h" />
     <ClInclude Include="Instance.h" />
@@ -34,6 +35,7 @@
     <ClInclude Include="LightD.h" />
     <ClInclude Include="LightP.h" />
     <ClInclude Include="LightS.h" />
+    <ClInclude Include="log.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="parse.h" />
     <ClInclude Include="Photon.h" />
@@ -97,6 +99,10 @@
     <Text Include="hanoi.txt" />
     <Text Include="pyr.txt" />
     <Text Include="spheres.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="frag.glsl" />
+    <None Include="vert.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3970B404-5622-4318-84F4-4418F3273300}</ProjectGuid>
@@ -218,7 +224,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <OptimizeReferences>false</OptimizeReferences>
-      <AdditionalOptions>IlmImf.lib Imath.lib Iex.lib Half.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>IlmImf.lib Imath.lib Iex.lib Half.lib zlib.lib glfw3dll.lib glew32.lib opengl32.lib %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>kernel32.lib;user32.lib;zlib.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>

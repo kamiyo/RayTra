@@ -18,7 +18,7 @@ _width	image width
 _height	image height
 _size	lens size
 int		_nx		width (pixels)
-_ny		height (pixels)
+		_ny		height (pixels)
 
 */
 

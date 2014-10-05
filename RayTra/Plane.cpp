@@ -19,6 +19,11 @@ Plane::~Plane() {
 	// TODO Auto-generated destructor stub
 }
 
+void Plane::renderBoundingBox(std::vector<std::vector<float> >& verts, std::vector<int> level) const {
+	
+}
+
+
 bool Plane::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	const Vector3d& d = ray.m_dir;
 	double den = _n.dot(d);

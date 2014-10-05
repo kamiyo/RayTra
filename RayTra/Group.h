@@ -15,6 +15,7 @@ public:
 	Group();
 	void addSurface(u_ptr<Surface> &s);
 	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
+	void renderBoundingBox(std::vector<std::vector<float> >& verts, std::vector<int> level) const;
 	void boundingBox();
 	~Group();
 	std::vector<u_ptr<Surface> > _s;

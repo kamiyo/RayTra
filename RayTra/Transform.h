@@ -25,9 +25,14 @@ public:
 	std::stack<Matrix4d> _mN;
 };
 
+Matrix4d perspective(double right, double top, double near, double far);
+
+Matrix4d lookat(const Vector3d& eye, const Vector3d& dir, const Vector3d& up);
+
 inline Vector4d operator* (const Transform& t, const Vector4d& v) {
 	return t._currentInv * v;
 }
+
 
 inline Vector3d apply(const Matrix4d& m, const Vector3d& v, const int& i) {
 	double h = i;

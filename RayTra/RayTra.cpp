@@ -138,6 +138,10 @@ RayTra::RayTra() {
 
 RayTra::~RayTra() {}
 
+void RayTra::renderBoundingBoxes(std::vector<std::vector<float> >& verts, std::vector<int> level) const {
+	allSurfaces->renderBoundingBox(verts, level);
+}
+
 void RayTra::populateLights() {
 	size_t size = shading->_l.size();
 	for (size_t i = 0; i < size; i++) {
@@ -258,7 +262,6 @@ void RayTra::material(string s, Vector3d amb, Vector3d diff, Vector3d spec, doub
 	}
 }
 void RayTra::applyTransform(u_ptr<Surface>& s) {
-	cout << "transforming" << endl << T._current << endl;
 	if ((T._current != Matrix4d::Identity())) {
 		s->trans(T._current, T._currentInv);
 	}

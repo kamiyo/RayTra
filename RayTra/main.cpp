@@ -4,38 +4,35 @@
  *  Created on: Dec 2, 2011
  *      Author: kamiyo
  */
-/*
-#ifdef APPLE || _APPLE || APPLE || _APPLE_
-#include <GLUT/glut.h>
 
-#else
-#include <GL/glut.h>
-
-#endif
-*/
+#include <GL/glew.h>
+#define GLFW_DLL
+#include <GLFW/glfw3.h>
 
 #include <fstream>
 #include <iostream>
 #include <cstring>
 #include <memory>
 #include "RayTra.h"
+#include "log.h"
+#include "glfunc.h"
+
 
 using namespace std;
 
 
 //OpenGL stuff
-/*
-int glWindow;
-bool rendered = false;
-*/
+
+GLFWwindow* glWindow;
+
 
 
 // global vars
 		  unsigned int*	pixels;
-					int	width, height;
+		  double ratio;
 				 RayTra	tracer;
 Imf::Array2D<Imf::Rgba> o;
-				 string	name;
+Eigen::Matrix4f camera;
 
 //define to convert floating point intensity to 0-255 with adjustment
 //#define toInt(x) ((int)(pow(clamp(x, 0.f, 1.f), 1.f / 2.2f) * 255.f + .5f))
@@ -65,90 +62,145 @@ void writeRgba (const char fileName[], const Imf::Rgba *pixels, int width, int h
 //
 //}
 
+void updateCamera() {
+
+	float zNear = 100, zFar = 300;
+	float d = (float) tracer.camera->_d;
+	float imageRight = (float) tracer.camera->_width / (2. * d);
+	float imageTop = (float) tracer.camera->_height / (2. * d);
+	//camera = perspective(imageRight * zNear, zNear * imageTop, zNear, zFar).cast<float>();
+	//camera *= lookat(tracer.camera->_e, tracer.camera->_dir, Vector3d(0, 1, 0)).cast<float>();
+	cout << tracer.camera->_e << " " << tracer.camera->_dir << endl;
+	camera = perspective(imageTop * zNear, imageRight * zNear, zNear, zFar).cast<float>();
+	camera *= lookat(tracer.camera->_e, -tracer.camera->_dir, Vector3d(0, 1, 0)).cast<float>();
+}
+
+
+void bufferSize_cb(GLFWwindow* glWindow, int width, int height) {
+	glViewport(0, 0, width, height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glLoadIdentity();
+	updateCamera();
+}
+
+void error_cb(int error, const char* description) {
+	cout << "error " << error << ": " << description << endl;
+}
+
+static void key_cb(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+float demoTri [] = {
+	0.f, 2.f, -2.f,
+	-1.f, -2.f, -2.f,
+	1.f, -2.f, -2.f
+};
+
+float colours[] = {
+	1.0f, 0.0f, 0.0f,
+	0.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 1.0f
+};
+
 int main(int argc, char** argv) {
-	//clock_t start = clock();
-	//glutInit(&argc, argv);
-	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	//std::cout << argc << endl;
+	string inFile, outFile;
+	bool useOGL = false;
 	if (argc == 3) {
-		name = argv[2];
+		if (argv[1][0] == '/') {
+			inFile = argv[2];
+			useOGL = true;
+		}
+		else {
+			inFile = argv[1];
+			outFile = argv[2];
+		}
 	} else if (argc == 2) {
-		name = argv[1];
-		name = name.substr(0, name.find_last_of('.')) + ".exr";
+		inFile = argv[1];
+		outFile = inFile.substr(0, inFile.find_last_of('.')) + ".exr";
 	} else {
-		seedRand();
-		Vector3d accu = Vector3d::Zero();
-		for (int i = 0; i < 1000; i++) {
-			Vector3d v = cosVec(Vector3d(0, 1, 0), 1);
-			cout << v[0] << " " << v[1] << " "<< v[2] << endl;
-			accu += v;
-		}
-		accu.normalize();
-		cout << accu << endl;
+
+
+
 		return 0;
-		/*clock_t start = clock();
-		srand(time(NULL));
-#define __R rand() / (double)RAND_MAX
-#define __VR Vector3d(__R, __R, __R)
-		Sphere* ss = new Sphere(Vector3d(__R, __R, __R), __R, new Material(Vector3d::Ones, Vector3d::Ones, Vector3d::Ones, 0, Vector3d::Ones, 0, Vector3d::Ones));
-		bool result = false;
-		hitRecord r;
-		for (int i = 0; i < 1e6; i++) {
-			result = ss->hit(Ray(__VR, __VR, std::vector<double>(), std::vector<Vector3d>(), Ray::VIEW), nINF, INF, r);
-		}
-		clock_t ends = clock();
-		double runtime = (double) (ends - start) / CLOCKS_PER_SEC;
-		cout << runtime << " seconds" << endl;
-		return result;*/
-		/*
-		Interval i(0, 1);
-		cout << i << endl;
-		cout << "should be true: " << Interval::intersects(i, Interval(-1, 0.5)) << endl;
-		cout << "============= binary Intersects ============" << endl;
-		cout << "should be (0, 0.5): " << i.intersect(Interval(-1, 0.5)) << endl;
-		cout << "should be (0.2, 0.8): " << i.intersect(Interval(0.2, 0.8)) << endl;
-		cout << "should be (0.5, 1): " << i.intersect(Interval(0.5, 4)) << endl;
-		cout << "should be (): " << i.intersect(Interval(9, 10)) << endl;
-		cout << "should be (): " << i.intersect(Interval()) << endl;
-		cout << "============= binary Unions ================" << endl;
-		cout << "should be (0, 4) and (0, 4): " << i.unionize(Interval(1, 4)) << " " << i.unionize(Interval(0.5, 4)) << endl;
-		cout << "should be {(0, 1), (5, 6)}: " << i.unionize(Interval(5, 6)) << endl;
-		cout << "should be {(-5, -3), (0, 1)}: " << i.unionize(Interval(-5, -3)) << endl;
-		cout << "should be (-5, 5): " << i.unionize(Interval(-5, 5)) << endl;
-		cout << "should be (0, 1): " << i.unionize(Interval()) << endl;
-		cout << "============= binary Differences ===========" << endl;
-		Interval k(-5, 5);
-		cout << "should be {(-5, -2), (2, 5)}: " << k.difference(Interval(-2, 2)) << endl;
-		cout << "should be (0, 5): " << k.difference(Interval(-5, 0)) << endl;
-		cout << "should be (-5, 0): " << k.difference(Interval(0, 5)) << endl;
-		cout << "should be (): " << k.difference(k) << endl;
-		cout << "should be (): " << k.difference(Interval(-10, 10)) << endl;
-		cout << "should be (-5, 5): " << k.difference(Interval(10, 20)) << endl;
-		cout << "should be (-5, 5): " << k.difference(Interval(-20, -10)) << endl;
-		cout << "should be (-5, 5): " << k.difference(Interval()) << endl;
-		cout << "should be (): " << Interval().difference(k) << endl;
-		cout << "============= Multiple Unions ==============" << endl;
-		Intervals j;
-		j.push_back(Interval(-1, 1));
-		j.push_back(Interval(1.5, 2));
-		j.push_back(Interval(2.5, 3));
-		//j = Interval::unionize(j);
-		cout << "{(-1, 1), (1.5, 2), (2.5, 3)}: " << j << endl;
-		Intervals x = j;
-		x.push_back(Interval(2, 4));
-		//x = Interval::unionize(x);
-		cout << "{(-1, 1), (1.5, 4)}: " << x << endl;
-		x = j;
-		x.push_back(Interval(-5, 5));
-		//cout << "{(-5, 5)}: " << Interval::unionize(x) << endl;
-		Intervals y; y.push_back(Interval(0, 2)); y.push_back(Interval(3, 4)); y.push_back(Interval(-3, -2));
-		x.pop_back(); x.insert(x.end(), y.begin(), y.end());
-		//cout << x << endl << Interval::unionize(x) << endl;
-		exit(0);*/
 	}
-	tracer.parse(argv[1]);
+	int	width, height;
+	tracer.parse(inFile.c_str());
 	width = tracer.width;
 	height = tracer.height;
+	ratio = width / (float) height;
+	if (useOGL) {
+
+		glfwSetErrorCallback(error_cb);
+		if (!glfwInit()) {
+			return 1;
+		}
+		string windowName = "RayTra Viz - " + inFile;
+		glfwWindowHint(GLFW_SAMPLES, 4);
+		glWindow = glfwCreateWindow(width, height, windowName.c_str(), NULL, NULL);
+		if (!glWindow) {
+			glfwTerminate();
+			return 1;
+		}
+		glfwMakeContextCurrent(glWindow);
+		glfwSetWindowSizeCallback(glWindow, bufferSize_cb);
+		glfwSetKeyCallback(glWindow, key_cb);
+
+		glewExperimental = GL_TRUE;
+		glewInit();
+
+		const GLubyte* renderer = glGetString(GL_RENDERER);
+		const GLubyte* version = glGetString(GL_VERSION);
+		cout << "renderer: " << renderer << endl;
+		cout << "OpenGL version: " << version << endl;
+
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+		GLuint vbo[2];
+		glGenBuffers(2, vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), demoTri, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), colours, GL_STATIC_DRAW);
+
+
+		GLuint vao = 0;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		
+
+		GLuint shaderProgram = createProgram("../../RayTra/vert.glsl", "../../RayTra/frag.glsl");
+		GLuint vp_loc = glGetAttribLocation(shaderProgram, "vp");
+		GLuint color_loc = glGetAttribLocation(shaderProgram, "input_color");
+		GLuint camera_loc = glGetUniformLocation(shaderProgram, "camera");
+		glEnableVertexAttribArray(vp_loc);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glVertexAttribPointer(vp_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+		glEnableVertexAttribArray(color_loc);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glVertexAttribPointer(color_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+		glClearColor(0.f, 0.f, 0.f, 1.0);
+		
+		bufferSize_cb(glWindow, width, height);
+
+		while (!glfwWindowShouldClose(glWindow)) {
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glUseProgram(shaderProgram);
+			glUniformMatrix4fv(camera_loc, 1, GL_FALSE, camera.data());
+			glBindVertexArray(vao);
+			//glPolygonMode(GL_FRONT, GL_LINE);
+			glDrawArrays(GL_LINE_LOOP, 0, 3);
+			glfwSwapBuffers(glWindow);
+			glfwWaitEvents();
+		}
+
+		glfwDestroyWindow(glWindow);
+		glfwTerminate();
+		return 0;
+	}
 	pixels = new unsigned int[width * height];
 	for (int i = 0; i < width * height; i++) {
 		pixels[i] = 0;
@@ -160,24 +212,6 @@ int main(int argc, char** argv) {
 	clock_t ends = clock();
 	double runtime = (double) (ends - start) / CLOCKS_PER_SEC;
 	cout << runtime << " seconds" << endl;
-	writeRgba(name.c_str(), &o[0][0], width, height);
+	writeRgba(outFile.c_str(), &o[0][0], width, height);
 	return 0;
-	//glutInitWindowPosition(0,0);
-	//glutInitWindowSize(width,height);
-	//glWindow = glutCreateWindow("RayTra");
-	//glViewport(0, 0, width, height);
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
-	//gluOrtho2D(0, width, 0, height);
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
-	//glClearColor(0.0, 0.0, 0.0, 0.0);
-	//glutDisplayFunc(display);
-	//glutIdleFunc(idle);
-	//glutKeyboardFunc(keylistener);
-	//glDisable(GL_DEPTH_TEST);
-	//glutMainLoop();
-	//clock_t ends = clock();
-	//double runtime = (double) (ends - start) / CLOCKS_PER_SEC;
-	//std::cout << "Elapsed: " << runtime << std::endl;
 }

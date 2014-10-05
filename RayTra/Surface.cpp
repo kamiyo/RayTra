@@ -38,6 +38,11 @@ void Surface::trans(Matrix4d& m, Matrix4d& inv) {
 	_b = _b.transform(m);
 }
 
+void Surface::renderBoundingBox(std::vector<std::vector<float> >& verts, std::vector<int> level) const {
+	_b.render(verts);
+}
+
+
 int Surface::type() {
 	return _type;
 }

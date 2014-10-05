@@ -65,6 +65,7 @@ class RayTra : public Parser {
 public:
 	RayTra();
 	~RayTra();
+	void renderBoundingBoxes(std::vector<std::vector<float> >& verts, std::vector<int> level) const;
 	void render(Imf::Array2D<Imf::Rgba>& o);
 	virtual void parse(const char* name);
 	u_ptr<Group> surfaces;		// does not include planes

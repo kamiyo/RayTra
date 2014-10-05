@@ -125,5 +125,11 @@ bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	}
 }
 
+void BVH::renderBoundingBox(std::vector<std::vector<float> >& verts, std::vector<int> level) const {
+	if (_l) _l->renderBoundingBox(verts, level);
+	if (_r) _r->renderBoundingBox(verts, level);
+}
+
+
 void BVH::boundingBox() {
 }

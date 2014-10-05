@@ -65,3 +65,23 @@ void Transform::rotate(Vector3d axis, double rot) {
 	_current = t * _current;
 	_currentInv *= tInv;
 }
+
+Matrix4d perspective(double right, double top, double near, double far) {
+	Matrix4d m; m << near / right, 0, 0, 0,
+		0, near / top, 0, 0,
+		0, 0, -(far + near) / (far - near), -2 * far * near / (far - near),
+		0, 0, -1, 0;
+	return m;
+}
+
+Matrix4d lookat(const Vector3d& eye, const Vector3d& dir, const Vector3d& up) {
+	Vector3d u = dir.normalized().cross(up.normalized()).normalized();
+	Vector3d v = u.cross(dir.normalized());
+	Vector3d w = -dir.normalized();
+	Matrix4d m = Matrix4d::Identity();
+	m << u(0), u(1), u(2), -u.dot(eye),
+		v(0), v(1), v(2), -v.dot(eye),
+		w(0), w(1), w(2), -w.dot(eye),
+		    0,    0,    0,       1;
+	return m;
+}

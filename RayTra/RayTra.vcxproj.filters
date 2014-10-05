@@ -120,6 +120,12 @@
     <ClInclude Include="PhotonMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glfunc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BVH.cpp">
@@ -241,5 +247,13 @@
     <Text Include="pyr.txt">
       <Filter>Resource Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="frag.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="vert.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
