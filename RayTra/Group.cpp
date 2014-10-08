@@ -18,7 +18,7 @@ void Group::addSurface(u_ptr<Surface>& s) {
 	_s.push_back(std::move(s));
 }
 
-void Group::renderBoundingBox(std::vector<std::vector<float> >& verts, std::vector<int> level) const {
+void Group::renderBoundingBox(std::vector<std::vector<float> >& verts, int level) const {
 	for (size_t i = 0; i < _s.size(); i++) {
 		_s[i]->renderBoundingBox(verts, level);
 	}

@@ -22,7 +22,7 @@ public:
 	void trans(Matrix4d& m, Matrix4d& inv);
 	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const = 0;
 	virtual void boundingBox() = 0;
-	virtual void renderBoundingBox(std::vector<std::vector<float> >& verts, std::vector<int> level) const;
+	virtual void renderBoundingBox(std::vector<std::vector<float> >& verts, int level) const;
 	virtual int type();
 	Matrix4d _mInv = Matrix4d::Identity();
 	Matrix4d _mTrans = Matrix4d::Identity();

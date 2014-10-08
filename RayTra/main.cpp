@@ -33,6 +33,9 @@ GLFWwindow* glWindow;
 				 RayTra	tracer;
 Imf::Array2D<Imf::Rgba> o;
 Eigen::Matrix4f camera;
+vector<vector<float> > vertices;
+int level;
+vector<GLuint> vbo;
 
 //define to convert floating point intensity to 0-255 with adjustment
 //#define toInt(x) ((int)(pow(clamp(x, 0.f, 1.f), 1.f / 2.2f) * 255.f + .5f))
@@ -64,14 +67,14 @@ void writeRgba (const char fileName[], const Imf::Rgba *pixels, int width, int h
 
 void updateCamera() {
 
-	float zNear = 100, zFar = 300;
+	float zNear = 100, zFar = 400;
 	float d = (float) tracer.camera->_d;
 	float imageRight = (float) tracer.camera->_width / (2. * d);
 	float imageTop = (float) tracer.camera->_height / (2. * d);
 	//camera = perspective(imageRight * zNear, zNear * imageTop, zNear, zFar).cast<float>();
 	//camera *= lookat(tracer.camera->_e, tracer.camera->_dir, Vector3d(0, 1, 0)).cast<float>();
 	cout << tracer.camera->_e << " " << tracer.camera->_dir << endl;
-	camera = perspective(imageTop * zNear, imageRight * zNear, zNear, zFar).cast<float>();
+	camera = perspective(imageRight * zNear, imageTop * zNear, zNear, zFar).cast<float>();
 	camera *= lookat(tracer.camera->_e, -tracer.camera->_dir, Vector3d(0, 1, 0)).cast<float>();
 }
 
@@ -90,19 +93,33 @@ void error_cb(int error, const char* description) {
 static void key_cb(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9) {
+		level = key - 48;
+		vertices.clear();
+		tracer.renderBoundingBoxes(vertices, level);
+		vbo.resize(vertices.size());
+		glGenBuffers(vertices.size(), &vbo[0]);
+		for (size_t i = 0; i < vertices.size(); i++) {
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
+			glBufferData(GL_ARRAY_BUFFER, vertices[i].size() * sizeof(float), &vertices[i][0], GL_STATIC_DRAW);
+		}
+	}
 }
 
-float demoTri [] = {
-	0.f, 2.f, -2.f,
-	-1.f, -2.f, -2.f,
-	1.f, -2.f, -2.f
+vector<float> demoTri = {
+	2.f, 2.f, -2.f,
+	-2.f, 2.f, -2.f,
+	-2.f, -2.f, -2.f,
+	2.f, -2.f, -2.f
 };
 
-float colours[] = {
-	1.0f, 0.0f, 0.0f,
-	0.0f, 1.0f, 0.0f,
-	0.0f, 0.0f, 1.0f
+vector<float> demoTri2 = {
+	4.f, 4.f, -2.f,
+	-4.f, 4.f, -2.f,
+	-4.f, -4.f, -2.f,
+	4.f, -4.f, -2.f
 };
+
 
 int main(int argc, char** argv) {
 	string inFile, outFile;
@@ -131,7 +148,7 @@ int main(int argc, char** argv) {
 	height = tracer.height;
 	ratio = width / (float) height;
 	if (useOGL) {
-
+		level = 0;
 		glfwSetErrorCallback(error_cb);
 		if (!glfwInit()) {
 			return 1;
@@ -157,13 +174,13 @@ int main(int argc, char** argv) {
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-		GLuint vbo[2];
-		glGenBuffers(2, vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), demoTri, GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), colours, GL_STATIC_DRAW);
-
+		tracer.renderBoundingBoxes(vertices, level);
+		vbo.resize(vertices.size());
+		glGenBuffers(vertices.size(), &vbo[0]);
+		for (size_t i = 0; i < vertices.size(); i++) {
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
+			glBufferData(GL_ARRAY_BUFFER, vertices[i].size() * sizeof(float), &vertices[i][0], GL_STATIC_DRAW);
+		}
 
 		GLuint vao = 0;
 		glGenVertexArrays(1, &vao);
@@ -172,27 +189,28 @@ int main(int argc, char** argv) {
 
 		GLuint shaderProgram = createProgram("../../RayTra/vert.glsl", "../../RayTra/frag.glsl");
 		GLuint vp_loc = glGetAttribLocation(shaderProgram, "vp");
-		GLuint color_loc = glGetAttribLocation(shaderProgram, "input_color");
+		GLuint color_loc = glGetUniformLocation(shaderProgram, "input_color");
 		GLuint camera_loc = glGetUniformLocation(shaderProgram, "camera");
-		glEnableVertexAttribArray(vp_loc);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glVertexAttribPointer(vp_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(color_loc);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glVertexAttribPointer(color_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-		glClearColor(0.f, 0.f, 0.f, 1.0);
 		
+		glClearColor(0.f, 0.f, 0.f, 1.0);
+
 		bufferSize_cb(glWindow, width, height);
 
 		while (!glfwWindowShouldClose(glWindow)) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			glEnableVertexAttribArray(vp_loc);
 			glUseProgram(shaderProgram);
+			glUniform3f(color_loc, 1.f, 0.f, 0.f);
 			glUniformMatrix4fv(camera_loc, 1, GL_FALSE, camera.data());
-			glBindVertexArray(vao);
-			//glPolygonMode(GL_FRONT, GL_LINE);
-			glDrawArrays(GL_LINE_LOOP, 0, 3);
+
+			for (size_t i = 0; i < vertices.size(); i++) {
+				glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
+				glVertexAttribPointer(vp_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+				glBindVertexArray(vao);
+				glDrawArrays(GL_LINE_LOOP, 0, vertices[i].size()/3);
+			}
+
 			glfwSwapBuffers(glWindow);
 			glfwWaitEvents();
 		}

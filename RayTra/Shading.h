@@ -27,7 +27,7 @@ public:
 	void addAmbient(Vector3d a);
 	void initPhotonTracing();
 	Photon emitPhoton() const;
-	Photons* tracePhotons(Group *s) const;
+	u_ptr<Photons> tracePhotons(const u_ptr<Group>& s) const;
 	Vector3d computeShading(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area, int recurs, int refrac) const;
 	Vector3d computeShading(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const;
 	double fresnel(double index1, double index2, double c1, double c2) const;

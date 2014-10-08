@@ -6,9 +6,9 @@
 class PhotonMap
 {
 public:
-	PhotonMap(Photons* photons);
+	PhotonMap(const u_ptr<Photons>& photons);
 	~PhotonMap();
 	Photon m_photon;
-	PhotonMap* m_left, *m_right;
+	u_ptr<PhotonMap> m_left, m_right;
 };
 

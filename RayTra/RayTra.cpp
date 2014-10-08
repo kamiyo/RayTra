@@ -9,20 +9,21 @@
 
 void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 	seedRand();					// seed rand
-	/*
-	_shading->initPhotonTracing();
-	int numPhotons = _shading->_numPhotons;
-	Photons* allPhotons = new Photons();
-	vector<Photon> photons = allPhotons->photons;
-	#pragma omp parallel
-	{
-	Photons *photons = _shading->tracePhotons(_all);
-	vector<Photon> threadPhotons = photons->photons;
-	#pragma omp critical
-	photons.insert(photons.end(), threadPhotons.begin(), threadPhotons.end());
+	
+	if (usePhotonMap) {
+		shading->initPhotonTracing();
+		int numPhotons = shading->_numPhotons;
+		u_ptr<Photons> allPhotons = make_unique<Photons>();
+		vector<Photon>& photons = allPhotons->m_photons;
+#pragma omp parallel
+		{
+			u_ptr<Photons> tracedPhotons = shading->tracePhotons(allSurfaces);
+			vector<Photon>& threadPhotons = tracedPhotons->m_photons;
+#pragma omp critical
+			photons.insert(photons.end(), threadPhotons.begin(), threadPhotons.end());
+		}
+		u_ptr<PhotonMap> photonMap = std::make_unique<PhotonMap>(allPhotons);
 	}
-	PhotonMap* photonMap = new PhotonMap(allPhotons);
-	*/
 
 	Sampler master(width, height,
 					Sampler::INTEGRAL,
@@ -138,7 +139,7 @@ RayTra::RayTra() {
 
 RayTra::~RayTra() {}
 
-void RayTra::renderBoundingBoxes(std::vector<std::vector<float> >& verts, std::vector<int> level) const {
+void RayTra::renderBoundingBoxes(std::vector<std::vector<float> >& verts, int level) const {
 	allSurfaces->renderBoundingBox(verts, level);
 }
 
@@ -303,6 +304,9 @@ void RayTra::setOption(int option, int setting, int setting2) {
 	case ORDER:
 		renderOrder = setting;
 		break;
+	case PHOTONMAPPING:
+		shading->_numPhotons = setting / omp_get_max_threads();
+		(setting > 0) ? (usePhotonMap = true) : (usePhotonMap = false);
 	default:
 		break;
 	}

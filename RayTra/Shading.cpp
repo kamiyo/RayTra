@@ -16,6 +16,7 @@ Shading::Shading() {
 	_refraction = 0;
 	_indirect = 0;
 	_russian = false;
+	_numPhotons = 0;
 }
 
 Shading::~Shading() {
@@ -114,8 +115,8 @@ result += krefract.cwiseProduct((1 - R) * computeShading(v1, epsilon, INF, s, ar
 }
 }*/
 
-Photons* Shading::tracePhotons(Group* s) const {
-	Photons* result = new Photons();
+u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
+	u_ptr<Photons> result = std::make_unique<Photons>();
 	for (int i = 0; i < _numPhotons; i++) {
 		Photon p = emitPhoton();
 		p.m_intensity /= _numPhotons;

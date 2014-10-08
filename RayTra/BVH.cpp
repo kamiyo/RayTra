@@ -22,16 +22,20 @@ BVH::BVH(u_ptr<Group>& g) {
 	std::vector<u_ptr<Surface> >& s = g->_s;
 	size_t N = s.size();
 	if (N == 0) {
-		return;
 		_b = BBox();
+		return;
 	}
 	if (N == 1) {
+		_b = g->_b;
 		_l = std::move(s[0]);
 		_r = nullptr;
+		return;
 	}
 	else if (N == 2) {
+		_b = g->_b;
 		_l = std::move(s[0]);
 		_r = std::move(s[1]);
+		return;
 	}
 	else {
 		double m = 0;
@@ -39,10 +43,8 @@ BVH::BVH(u_ptr<Group>& g) {
 		Vector3d diff = b.max() - b.min();
 		int axis;
 		double range = diff.maxCoeff(&axis);
-		//std::cout << "----" << axis << "------" << std::endl;
-		//std::cout << b << " " << b._m << std::endl;
 		bool allSame = true;
-		for (int i = 0; i < (int) N; i++) {
+		for (size_t i = 0; i < N; i++) {
 			//std::cout << s[i]->_b << " " << s[i]->_b._m << std::endl;
 			m += s[i]->_b._m[axis];
 			if (allSame && (s[i]->_b != b && s[i]->_b._m[axis] != b._m[axis])) {
@@ -53,8 +55,8 @@ BVH::BVH(u_ptr<Group>& g) {
 		//std::cout << m << " " << allSame << std::endl;
 		u_ptr<Group> left = std::make_unique<Group>();
 		u_ptr<Group> right = std::make_unique<Group>();
-		for (int i = 0; i < (int) N; i++) {
-			if ((s[i]->_b._m[axis] < m && !allSame) || (allSame && i < (int) N / 2)) {
+		for (size_t i = 0; i < N; i++) {
+			if ((s[i]->_b._m[axis] < m && !allSame) || (allSame && i < N / 2)) {
 				left->addSurface(s[i]);
 			}
 			else {
@@ -63,8 +65,8 @@ BVH::BVH(u_ptr<Group>& g) {
 		}
 		_l = std::make_unique<BVH>(left);
 		_r = std::make_unique<BVH>(right);
+		_b = g->_b;
 	}
-	_b = g->_b;
 }
 BVH::~BVH() {
 }
@@ -125,9 +127,14 @@ bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	}
 }
 
-void BVH::renderBoundingBox(std::vector<std::vector<float> >& verts, std::vector<int> level) const {
-	if (_l) _l->renderBoundingBox(verts, level);
-	if (_r) _r->renderBoundingBox(verts, level);
+void BVH::renderBoundingBox(std::vector<std::vector<float> >& verts, int level) const {
+	if (level == 0) {
+		_b.render(verts);
+	}
+	else {
+		if (_l) _l->renderBoundingBox(verts, level - 1);
+		if (_r) _r->renderBoundingBox(verts, level - 1);
+	}
 }
 
 

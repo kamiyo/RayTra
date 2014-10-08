@@ -16,7 +16,7 @@ public:
 	BVH(u_ptr<Group>& g);
 	bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
 	bool _hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
-	void renderBoundingBox(std::vector<std::vector<float> >& verts, std::vector<int> level) const;
+	void renderBoundingBox(std::vector<std::vector<float> >& verts, int level) const;
 	void boundingBox();
 	u_ptr<Surface> _l;
 	u_ptr<Surface> _r;
