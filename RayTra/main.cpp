@@ -34,8 +34,12 @@ GLFWwindow* glWindow;
 Imf::Array2D<Imf::Rgba> o;
 Eigen::Matrix4f camera;
 vector<vector<float> > vertices;
+vector<float> photons;
+vector<float> photonColors;
 int level;
 vector<GLuint> vbo;
+GLuint photonVbo;
+GLuint colorVbo;
 
 //define to convert floating point intensity to 0-255 with adjustment
 //#define toInt(x) ((int)(pow(clamp(x, 0.f, 1.f), 1.f / 2.2f) * 255.f + .5f))
@@ -73,7 +77,7 @@ void updateCamera() {
 	float imageTop = (float) tracer.camera->_height / (2. * d);
 	//camera = perspective(imageRight * zNear, zNear * imageTop, zNear, zFar).cast<float>();
 	//camera *= lookat(tracer.camera->_e, tracer.camera->_dir, Vector3d(0, 1, 0)).cast<float>();
-	cout << tracer.camera->_e << " " << tracer.camera->_dir << endl;
+	//cout << tracer.camera->_e << " " << tracer.camera->_dir << endl;
 	camera = perspective(imageRight * zNear, imageTop * zNear, zNear, zFar).cast<float>();
 	camera *= lookat(tracer.camera->_e, -tracer.camera->_dir, Vector3d(0, 1, 0)).cast<float>();
 }
@@ -106,18 +110,23 @@ static void key_cb(GLFWwindow* window, int key, int scancode, int action, int mo
 	}
 }
 
-vector<float> demoTri = {
-	2.f, 2.f, -2.f,
-	-2.f, 2.f, -2.f,
-	-2.f, -2.f, -2.f,
-	2.f, -2.f, -2.f
-};
-
-vector<float> demoTri2 = {
-	4.f, 4.f, -2.f,
-	-4.f, 4.f, -2.f,
-	-4.f, -4.f, -2.f,
-	4.f, -4.f, -2.f
+vector<float> boxColors = {
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f,
+	1.f, 0.f, 0.f
 };
 
 
@@ -176,20 +185,36 @@ int main(int argc, char** argv) {
 		glDepthFunc(GL_LESS);
 		tracer.renderBoundingBoxes(vertices, level);
 		vbo.resize(vertices.size());
+		GLuint boxColorVbo = 0;
 		glGenBuffers(vertices.size(), &vbo[0]);
 		for (size_t i = 0; i < vertices.size(); i++) {
 			glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
 			glBufferData(GL_ARRAY_BUFFER, vertices[i].size() * sizeof(float), &vertices[i][0], GL_STATIC_DRAW);
 		}
+		glGenBuffers(1, &boxColorVbo);
+		glBindBuffer(GL_ARRAY_BUFFER, boxColorVbo);
+		glBufferData(GL_ARRAY_BUFFER, boxColors.size() * sizeof(float), &boxColors[0], GL_STATIC_DRAW);
 
 		GLuint vao = 0;
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		
+		tracer.renderPhotonMapOGL(photons, photonColors);
+
+		glGenBuffers(1, &photonVbo);
+		glGenBuffers(1, &colorVbo);
+		glBindBuffer(GL_ARRAY_BUFFER, photonVbo);
+		glBufferData(GL_ARRAY_BUFFER, photons.size() * sizeof(float), &photons[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+		glBufferData(GL_ARRAY_BUFFER, photonColors.size() * sizeof(float), &photonColors[0], GL_STATIC_DRAW);
+
+
+		GLuint photonVao;
+		glGenVertexArrays(1, &photonVao);
 
 		GLuint shaderProgram = createProgram("../../RayTra/vert.glsl", "../../RayTra/frag.glsl");
 		GLuint vp_loc = glGetAttribLocation(shaderProgram, "vp");
-		GLuint color_loc = glGetUniformLocation(shaderProgram, "input_color");
+		GLuint color_loc = glGetAttribLocation(shaderProgram, "input_color");
 		GLuint camera_loc = glGetUniformLocation(shaderProgram, "camera");
 		
 		glClearColor(0.f, 0.f, 0.f, 1.0);
@@ -200,16 +225,25 @@ int main(int argc, char** argv) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			glEnableVertexAttribArray(vp_loc);
+			glEnableVertexAttribArray(color_loc);
 			glUseProgram(shaderProgram);
-			glUniform3f(color_loc, 1.f, 0.f, 0.f);
 			glUniformMatrix4fv(camera_loc, 1, GL_FALSE, camera.data());
 
 			for (size_t i = 0; i < vertices.size(); i++) {
+				glBindVertexArray(vao);
 				glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
 				glVertexAttribPointer(vp_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-				glBindVertexArray(vao);
+				glBindBuffer(GL_ARRAY_BUFFER, boxColorVbo);
+				glVertexAttribPointer(color_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 				glDrawArrays(GL_LINE_LOOP, 0, vertices[i].size()/3);
 			}
+
+			glBindVertexArray(photonVao);
+			glBindBuffer(GL_ARRAY_BUFFER, photonVbo);
+			glVertexAttribPointer(vp_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+			glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+			glVertexAttribPointer(color_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+			glDrawArrays(GL_LINES, 0, photons.size() / 3);
 
 			glfwSwapBuffers(glWindow);
 			glfwWaitEvents();

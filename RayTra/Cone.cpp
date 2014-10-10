@@ -36,31 +36,25 @@ bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const
 		if (rec.t < t0 || rec.t > t1) return false;
 		double z = eye(2) + rec.t * dir(2);
 		if (z > _u || z < _l) return false;
-		if (ray.m_type == RayBase::VIEW) {
+		if (ray.m_type != RayBase::SHADOW) {
 			Vector3d n = eye + rec.t * dir;
 			double nz; nz = (n(2) > 0) ? -1.0 : 1.0;
 			n(2) = 0; n.normalize();
 			n(2) = nz;
 			rec.n = n.normalized();
-		}
-		else if (ray.m_type == RayBase::SHADOW) {
-			;
 		}
 		rec.m = _m;
 		return true;
 	}
 	else {
-		if (ray.m_type == RayBase::VIEW) {
+		if (ray.m_type != RayBase::SHADOW) {
 			Vector3d n = eye + rec.t * dir;
 			double nz; nz = (n(2) > 0) ? -1.0 : 1.0;
 			n(2) = 0; n.normalize();
 			n(2) = nz;
 			rec.n = n.normalized();
+			rec.m = _m;
 		}
-		else if (ray.m_type == RayBase::SHADOW) {
-			;
-		}
-		rec.m = _m;
 		return true;
 	}
 }

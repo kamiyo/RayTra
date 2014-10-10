@@ -57,7 +57,7 @@ bool Face::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	if (beta < 0 || beta >(1 - gamma)) {
 		return false;
 	}
-	if (ray.m_type == RayBase::VIEW) {
+	if (ray.m_type != RayBase::SHADOW) {
 		rec.t = t;
 		if (smooth) {
 			rec.n = ((1 - gamma - beta) * _n1 + beta * _n2 + gamma * _n3).normalized();
@@ -65,9 +65,6 @@ bool Face::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 		else {
 			rec.n = _normal;
 		}
-	}
-	else if (ray.m_type == RayBase::SHADOW) {
-		;
 	}
 	rec.m = _m;
 	return true;

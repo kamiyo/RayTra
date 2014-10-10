@@ -56,12 +56,8 @@ bool Triangle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	double t = (p - e).norm() / u.norm();
 	if (t > t1 || t < t0) return false;
 	rec.t = t;
-	if (ray.m_type == RayBase::VIEW) {
+	if (ray.m_type != RayBase::SHADOW) {
 		rec.n = _n;
-		//if (_n.dot(u) > 0) rec.n = -_n;
-	}
-	else {
-		;
 	}
 	rec.m = _m;
 	return true;

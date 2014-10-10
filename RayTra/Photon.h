@@ -26,21 +26,10 @@ public:
 
 class Photons {
 public:
-	Photons() {
-		m_bb = BBox();
-	}
-	void push_back(Photon &p) {
-		m_photons.push_back(p);
-		m_bb.combine(BBox(p.m_eye, p.m_eye));
-	}
-	Photon pop_back() {
-		Photon temp = m_photons.back();
-		m_photons.pop_back();
-		return temp;
-	}
-	size_t size() {
-		return m_photons.size();
-	}
+	Photons();
+	void push_back(Photon p);
+	Photon pop_back();
+	size_t size();
 	std::vector<Photon> m_photons;
 	BBox m_bb;
 };

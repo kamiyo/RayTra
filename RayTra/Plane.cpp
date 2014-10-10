@@ -38,12 +38,9 @@ bool Plane::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 			return false;
 		}
 		else {
-			if (ray.m_type == Ray::VIEW) {
+			if (ray.m_type != Ray::SHADOW) {
 				rec.n = _n.normalized();
 				rec.m = _m;
-			}
-			else {
-				;
 			}
 			return true;
 		}

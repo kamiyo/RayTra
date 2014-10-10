@@ -16,7 +16,7 @@ public:
 	void reSign() {
 		m_sign = (m_inv.array() < 0).cast<int>();
 	}
-	Vector3d getPoint(double &t) {
+	Vector3d getPoint(double t) {
 		return m_eye + t * m_dir;
 	}
 	Vector3d m_eye;

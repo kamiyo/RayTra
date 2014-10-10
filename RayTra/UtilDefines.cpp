@@ -32,7 +32,7 @@ Vector3d cosVec(Vector3d a) {
 }
 
 Vector3d _cosVec(Vector3d a) {
-	Vector3d w = -1.0 * a;
+	Vector3d w = -1.0 * a.normalized();
 	Vector3d up(0, 1, 0);
 	if (a.dot(up) == 1) {
 		up << 1, 0, 0;

@@ -7,22 +7,38 @@
 
 #include "RayTra.h"
 
+void RayTra::renderPhotonMapOGL(std::vector<float>& vertices, std::vector<float>& colors) {
+	seedRand();					// seed rand
+
+	if (usePhotonMap) {
+		shading->initPhotonTracing(numPhotons / omp_get_max_threads());
+		u_ptr<Photons> allPhotons = make_unique<Photons>();
+#pragma omp parallel
+		{
+			u_ptr<Photons> tracedPhotons = shading->tracePhotons(allSurfaces);
+#pragma omp critical
+			allPhotons->m_photons.insert(allPhotons->m_photons.end(), tracedPhotons->m_photons.begin(), tracedPhotons->m_photons.end());
+		}
+		std::cout << allPhotons->size() << std::endl;
+		photonMap = std::make_unique<PhotonMap>(allPhotons);
+		photonMap->drawPhotons(vertices, colors);
+	}
+
+}
+
 void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 	seedRand();					// seed rand
 	
 	if (usePhotonMap) {
-		shading->initPhotonTracing();
-		int numPhotons = shading->_numPhotons;
+		shading->initPhotonTracing(numPhotons / omp_get_max_threads());
 		u_ptr<Photons> allPhotons = make_unique<Photons>();
-		vector<Photon>& photons = allPhotons->m_photons;
 #pragma omp parallel
 		{
 			u_ptr<Photons> tracedPhotons = shading->tracePhotons(allSurfaces);
-			vector<Photon>& threadPhotons = tracedPhotons->m_photons;
 #pragma omp critical
-			photons.insert(photons.end(), threadPhotons.begin(), threadPhotons.end());
+			allPhotons->m_photons.insert(allPhotons->m_photons.end(), tracedPhotons->m_photons.begin(), tracedPhotons->m_photons.end());
 		}
-		u_ptr<PhotonMap> photonMap = std::make_unique<PhotonMap>(allPhotons);
+		photonMap = std::make_unique<PhotonMap>(allPhotons);
 	}
 
 	Sampler master(width, height,
@@ -135,6 +151,8 @@ RayTra::RayTra() {
 	dofSetting = OFF;
 	circleLight = false;
 	actualLights = false;
+	usePhotonMap = false;
+	numPhotons = 0;
 }
 
 RayTra::~RayTra() {}
@@ -305,7 +323,7 @@ void RayTra::setOption(int option, int setting, int setting2) {
 		renderOrder = setting;
 		break;
 	case PHOTONMAPPING:
-		shading->_numPhotons = setting / omp_get_max_threads();
+		numPhotons = setting;
 		(setting > 0) ? (usePhotonMap = true) : (usePhotonMap = false);
 	default:
 		break;

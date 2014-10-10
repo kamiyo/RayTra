@@ -36,7 +36,8 @@ void Shading::addAmbient(Vector3d a) {
 	_amb = a;
 }
 
-void Shading::initPhotonTracing() {
+void Shading::initPhotonTracing(double numPhotons) {
+	_numPhotons = numPhotons;
 	Eigen::MatrixXd ints(3, _l.size());
 	for (int i = 0; i < (int) _l.size(); i++) {
 		ints.col(i) << _l[i]->_rgb;
@@ -56,9 +57,10 @@ Photon Shading::emitPhoton() const {
 		if (roll < _lProbs[i]) {
 			color = i % 3;
 			light = i / 3;
+			break;
 		}
 		else {
-			break;
+			continue;
 		}
 	}
 	return _l[light]->emitPhoton(color);
@@ -124,7 +126,9 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 		while (1) {
 			if (s->hit(p, p.m_epsilon, INF, rec)) {
 				Vector3d p1 = p.getPoint(rec.t);
-				if (rec.m->kd.all() != 0) result->push_back(Photon(p1, -p.m_dir, p.m_intensity, p.m_color));
+				if ((rec.m->kd.array() != 0).all()) {
+					result->push_back(Photon(p1, -p.m_dir, p.m_intensity, p.m_color));
+				}
 				s_ptr<Material> m = rec.m;
 				double diff = m->kd(p.m_color);
 				double spec = m->ki(p.m_color);
@@ -152,6 +156,7 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 				}
 				else if (roll < (diff + spec)) { // spec
 					Vector3d reflectVec = (m->p == -1) ? (d - 2 * (d.dot(n)) * n) : (COSVEC((d - 2 * (d.dot(n)) * n).normalized(), m->p));
+					reflectVec.normalize();
 					p.set(p1, reflectVec);
 				}
 				else {

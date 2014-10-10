@@ -25,7 +25,7 @@ public:
 	virtual ~Shading();
 	void addLight(s_ptr<Light> l);
 	void addAmbient(Vector3d a);
-	void initPhotonTracing();
+	void initPhotonTracing(double numPhotons);
 	Photon emitPhoton() const;
 	u_ptr<Photons> tracePhotons(const u_ptr<Group>& s) const;
 	Vector3d computeShading(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area, int recurs, int refrac) const;

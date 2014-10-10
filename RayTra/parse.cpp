@@ -124,6 +124,11 @@ void Parser::parse(const char *file) {
 			}
 		}
 		else if (isOpt) {
+			if (cmd == "p" || cmd == "photonmap") {
+				int setting;
+				_iss >> setting;
+				setOption(PHOTONMAPPING, setting);
+			}
 			if (cmd == "s" || cmd == "shadows") {
 				int setting;
 				_iss >> setting;

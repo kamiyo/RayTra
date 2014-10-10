@@ -52,23 +52,17 @@ bool Sphere::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 			if (rec.t < t0 || rec.t > t1) {
 				return false;
 			}
-			if (ray.m_type == RayBase::VIEW) {
+			if (ray.m_type != RayBase::SHADOW) {
 				Vector3d n = e + rec.t * d;
 				rec.n = (n - _p).normalized();
-			}
-			else if (ray.m_type == RayBase::SHADOW) {
-				;
 			}
 			rec.m = _m;
 			return true;
 		}
 		else {
-			if (ray.m_type == RayBase::VIEW) {
+			if (ray.m_type != RayBase::SHADOW) {
 				Vector3d n = e + rec.t * d;
 				rec.n = (n - _p).normalized();
-			}
-			else if (ray.m_type == RayBase::SHADOW) {
-				;
 			}
 			rec.m = _m;
 			return true;

@@ -63,15 +63,12 @@ bool Torus::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	if ((size_t) reals.size() == 0) return false;
 	std::sort(reals.begin(), reals.end());
 	rec.t = reals[0];
-	if (ray.m_type == RayBase::VIEW) {
+	if (ray.m_type != RayBase::SHADOW) {
 		Vector3d p = e + rec.t * d;
 		Vector3d pp; pp << p(0), p(1), 0.;
 		Vector3d c = pp.normalized() * _R; // center of tube
 		Vector3d n = (p - c).normalized();
 		rec.n = n;
-	}
-	else {
-		;
 	}
 	rec.m = _m;
 	return true;

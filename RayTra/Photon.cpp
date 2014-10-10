@@ -26,3 +26,20 @@ Photon::Photon() {}
 Photon::~Photon()
 {
 }
+
+Photons::Photons() {
+	m_bb = BBox();
+}
+void Photons::push_back(Photon p) {
+	m_photons.push_back(p);
+	m_bb = m_bb.combine(BBox(p.m_eye, p.m_eye));
+
+}
+Photon Photons::pop_back() {
+	Photon temp = m_photons.back();
+	m_photons.pop_back();
+	return temp;
+}
+size_t Photons::size() {
+	return m_photons.size();
+}

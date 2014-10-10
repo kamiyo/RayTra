@@ -36,25 +36,19 @@ bool Cylinder::hit(RayBase& r, double t0, double t1, hitRecord& rec) const {
 		if (z > _h / 2. || z < _h / -2.) {
 			return false;
 		}
-		if (r.m_type == RayBase::VIEW) {
+		if (r.m_type != RayBase::SHADOW) {
 			Vector3d n = eye + rec.t * dir;
 			n[2] = 0;
 			rec.n = n.normalized();
-		}
-		else if (r.m_type == RayBase::SHADOW) {
-			;
 		}
 		rec.m = _m;
 		return true;
 	}
 	else {
-		if (r.m_type == RayBase::VIEW) {
+		if (r.m_type != RayBase::SHADOW) {
 			Vector3d n = eye + rec.t * dir;
 			n(2) = 0;
 			rec.n = n.normalized();
-		}
-		else if (r.m_type == RayBase::SHADOW) {
-			;
 		}
 		rec.m = _m;
 		return true;

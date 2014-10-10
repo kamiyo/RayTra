@@ -47,13 +47,10 @@ bool Circle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 		if (((e + d * rec.t) - _p).norm() > _r) {
 			return false;
 		}
-		if (ray.m_type == RayBase::VIEW) {
+		if (ray.m_type != RayBase::SHADOW) {
 			rec.n = _n.normalized();
+			rec.m = _m;
 		}
-		else {
-			;
-		}
-		rec.m = _m;
 
 		return true;
 	}

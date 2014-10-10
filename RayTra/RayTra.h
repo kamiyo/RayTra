@@ -65,6 +65,7 @@ class RayTra : public Parser {
 public:
 	RayTra();
 	~RayTra();
+	void RayTra::renderPhotonMapOGL(std::vector<float>& vertices, std::vector<float>& colors);
 	void renderBoundingBoxes(std::vector<std::vector<float> >& verts, int level) const;
 	void render(Imf::Array2D<Imf::Rgba>& o);
 	virtual void parse(const char* name);
@@ -74,6 +75,7 @@ public:
 	u_ptr<Shading> shading;
 	vector<Material> materials;
 	s_ptr<Material> prevMaterial;
+	u_ptr<PhotonMap> photonMap;
 	vector<s_ptr<HEdge> > m_h;
 	vector<s_ptr<Vertex> > m_v;
 	vector<s_ptr<Face> > m_f;
@@ -89,6 +91,7 @@ public:
 	int numSamples;				// number of samples for each pixel, will be squared.
 	int shadowSetting;			// Off, hard, soft square, soft circle
 	int dofSetting;				// DoF: Off, Square, or Circle
+	int numPhotons;				// number of photons to use
 	static const int OFF = 0, HARD = 1, SOFTSQUARE = 2, SOFTCIRCLE = 3;
 	static const int SQUARE = 1, CIRCLE = 2;
 	static const int LINEAR = 0, HILBERT = 1;
