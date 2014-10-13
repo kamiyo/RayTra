@@ -126,6 +126,9 @@
     <ClInclude Include="glfunc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PhotonStore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BVH.cpp">
@@ -231,6 +234,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PhotonMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotonStore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

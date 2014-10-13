@@ -79,7 +79,8 @@ Vector3d LightP::getRanPoint() const {
 }
 
 Photon LightP::emitPhoton(int color) const {
-	/*Vector3d point = getRanPoint();
-	Vector3d dir = COSVEC(-getVector(point));*/
-	return Photon(_pos, randSphere(), _rgb[color], color);
+	//Vector3d point = getRanPoint();
+	Vector3d point = _pos + randSphere();
+	Vector3d dir = COSVEC(-getVector(point));
+	return Photon(point, dir, _rgb[color], color);
 }

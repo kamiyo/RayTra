@@ -5,19 +5,21 @@ PhotonMap::PhotonMap(u_ptr<Photons>& photons)
 {
 	size_t N = photons->m_photons.size();
 	if (N == 1) {
+		m_axis = 0;
 		m_photon = photons->pop_back();
 		m_left = nullptr;
 		m_right = nullptr;
 		return;
 	}
 	if (N == 2) {
+		m_axis = 0;
 		m_photon = photons->pop_back();
 		m_left = std::make_unique<PhotonMap>(photons);
 		m_right = nullptr;
 		return;
 	}
 	//std::cout << N << std::endl;
-	std::vector<Photon>& s = photons->m_photons;
+	std::vector<PhotonStore>& s = photons->m_photons;
 	BBox b = photons->m_bb;
 	//std::cout << "box: " << b << std::endl;
 	Vector3d diff = b.max() - b.min();
@@ -46,49 +48,70 @@ PhotonMap::PhotonMap(u_ptr<Photons>& photons)
 	m_right = std::make_unique<PhotonMap>(right);
 }
 
-void PhotonMap::locatePhotons(PhotonQueue& photonQueue, const Vector3d& point, double& maxSqDistance, int numPhotons) const {
-	if (photonQueue.size() == numPhotons) {
-		return;
-	}
-	double delta = point[m_axis] - m_photon.m_eye[m_axis];
-	if (delta < 0) {
-		m_left->locatePhotons(photonQueue, point, maxSqDistance, numPhotons);
-		if (delta * delta < maxSqDistance) {
-			m_right->locatePhotons(photonQueue, point, maxSqDistance, numPhotons);
+void PhotonMap::locatePhotons(PhotonQueue& photonQueue, const Vector3d& point, double& maxSqDistance, int numPhotons, int flag) const {
+	if (m_left || m_right) {
+		double delta = point[m_axis] - m_photon.m_eye[m_axis];
+		if (delta < 0) {
+			if (m_left)
+				m_left->locatePhotons(photonQueue, point, maxSqDistance, numPhotons, flag);
+			if (delta * delta < maxSqDistance) {
+				if (m_right)
+					m_right->locatePhotons(photonQueue, point, maxSqDistance, numPhotons, flag);
+			}
+		}
+		else {
+			if (m_right)
+				m_right->locatePhotons(photonQueue, point, maxSqDistance, numPhotons, flag);
+			if (delta * delta < maxSqDistance) {
+				if (m_left)
+					m_left->locatePhotons(photonQueue, point, maxSqDistance, numPhotons, flag);
+			}
 		}
 	}
-	else {
-		m_right->locatePhotons(photonQueue, point, maxSqDistance, numPhotons);
-		if (abs(delta) < maxSqDistance) {
-			m_left->locatePhotons(photonQueue, point, maxSqDistance, numPhotons);
-		}
-	}
-
-	double normSq = (m_photon.m_eye - point).squaredNorm();
-	if (normSq < maxSqDistance) {
+	// change
+	if (m_photon.m_flag != PhotonStore::SHADOW) {
+		double normSq = (m_photon.m_eye - point).squaredNorm();
 		photonQueue.push(std::make_pair(m_photon, normSq));
+		if (photonQueue.size() > numPhotons) {
+			photonQueue.pop();
+		}
 		maxSqDistance = photonQueue.top().second;
 	}
 
 }
 
-void PhotonMap::drawPhotons(std::vector<float>& vertices, std::vector<float>& colors) const {
+void PhotonMap::drawPhotons(std::vector<float>& vertices, std::vector<float>& colors, int flag) const {
 	if (m_left != nullptr) {
-		m_left->drawPhotons(vertices, colors);
+		m_left->drawPhotons(vertices, colors, flag);
 	}
 	if (m_right != nullptr) {
-		m_right->drawPhotons(vertices, colors);
+		m_right->drawPhotons(vertices, colors, flag);
 	}
-	colors.push_back((m_photon.m_color == Photon::RED) ? 1 : 0);
-	colors.push_back((m_photon.m_color == Photon::GREEN) ? 1 : 0);
-	colors.push_back((m_photon.m_color == Photon::BLUE) ? 1 : 0);
-	colors.push_back((m_photon.m_color == Photon::RED) ? 1 : 0);
-	colors.push_back((m_photon.m_color == Photon::GREEN) ? 1 : 0);
-	colors.push_back((m_photon.m_color == Photon::BLUE) ? 1 : 0);
-
-	Vector3d to = m_photon.m_eye + m_photon.m_dir;
-	vertices.push_back(m_photon.m_eye[0]); vertices.push_back(m_photon.m_eye[1]); vertices.push_back(m_photon.m_eye[2]);
-	vertices.push_back(to[0]); vertices.push_back(to[1]); vertices.push_back(to[2]);
+	// 0 = direct
+	// 1 = indirect
+	// 2 = shadow
+	// 3 = d + i
+	if ((flag < 2 && m_photon.m_flag == flag) || (flag == 3 && m_photon.m_flag < 2)) {
+		colors.push_back((m_photon.m_color == PhotonStore::RED) ? 1 : 0);
+		colors.push_back((m_photon.m_color == PhotonStore::GREEN) ? 1 : 0);
+		colors.push_back((m_photon.m_color == PhotonStore::BLUE) ? 1 : 0);
+		colors.push_back((m_photon.m_color == PhotonStore::RED) ? 1 : 0);
+		colors.push_back((m_photon.m_color == PhotonStore::GREEN) ? 1 : 0);
+		colors.push_back((m_photon.m_color == PhotonStore::BLUE) ? 1 : 0);
+		Vector3d to = m_photon.m_eye + m_photon.m_dir;
+		vertices.push_back(m_photon.m_eye[0]); vertices.push_back(m_photon.m_eye[1]); vertices.push_back(m_photon.m_eye[2]);
+		vertices.push_back(to[0]); vertices.push_back(to[1]); vertices.push_back(to[2]);
+	} else if (flag == 2 && m_photon.m_flag == flag) {
+		colors.push_back(1);
+		colors.push_back(1);
+		colors.push_back(1);
+		colors.push_back(1);
+		colors.push_back(1);
+		colors.push_back(1);
+		Vector3d to = m_photon.m_eye + m_photon.m_dir;
+		vertices.push_back(m_photon.m_eye[0]); vertices.push_back(m_photon.m_eye[1]); vertices.push_back(m_photon.m_eye[2]);
+		vertices.push_back(to[0]); vertices.push_back(to[1]); vertices.push_back(to[2]);
+	}
 }
 
 

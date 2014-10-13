@@ -7,7 +7,7 @@
 
 #include "RayTra.h"
 
-void RayTra::renderPhotonMapOGL(std::vector<float>& vertices, std::vector<float>& colors) {
+void RayTra::populatePhotonMapOGL() {
 	seedRand();					// seed rand
 
 	if (usePhotonMap) {
@@ -20,10 +20,14 @@ void RayTra::renderPhotonMapOGL(std::vector<float>& vertices, std::vector<float>
 			allPhotons->m_photons.insert(allPhotons->m_photons.end(), tracedPhotons->m_photons.begin(), tracedPhotons->m_photons.end());
 		}
 		std::cout << allPhotons->size() << std::endl;
-		photonMap = std::make_unique<PhotonMap>(allPhotons);
-		photonMap->drawPhotons(vertices, colors);
+		shading->photonMap = std::make_unique<PhotonMap>(allPhotons);
 	}
+}
 
+void RayTra::renderPhotonMapOGL(std::vector<float>& vertices, std::vector<float>& colors, int flag) {
+	if (usePhotonMap) {
+		shading->photonMap->drawPhotons(vertices, colors, flag);
+	}
 }
 
 void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
@@ -38,8 +42,17 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 #pragma omp critical
 			allPhotons->m_photons.insert(allPhotons->m_photons.end(), tracedPhotons->m_photons.begin(), tracedPhotons->m_photons.end());
 		}
-		photonMap = std::make_unique<PhotonMap>(allPhotons);
+		std::cout << allPhotons->size() << std::endl;
+		shading->photonMap = std::make_unique<PhotonMap>(allPhotons);
 	}
+	PhotonQueue p; double md = 4;
+	shading->photonMap->locatePhotons(p, Vector3d(0, 0, 2), md, 100, 0);
+	std::cout << p.size() << std::endl;
+	while (p.size() != 0) {
+		std::cout << p.top().first.m_eye << std::endl;
+		p.pop();
+	}
+	return;
 
 	Sampler master(width, height,
 					Sampler::INTEGRAL,
@@ -94,11 +107,11 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 			// multisampling raytracing
 			for (int q = 0; q < numSamples; q++) {
 				for (int p = 0; p < numSamples; p++) {
-
 					int currentSample = q * numSamples + p;
 					Ray r;
 					camera->generateRay(lensSample(currentSample), x + multiSample(currentSample)[0], y + multiSample(currentSample)[1], r);
-					c += shading->computeShading(r, 0, INF, allSurfaces, lightSample(currentSample));				// SHADE
+					//c += shading->computeShading(r, 0, INF, allSurfaces, lightSample(currentSample));				// SHADE
+					c += shading->computeRadianceEstimate(r, 0, INF, allSurfaces);				// SHADE
 				}
 			}
 			c /= (numSamples * numSamples);		// normalize result

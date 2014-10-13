@@ -13,6 +13,8 @@
 #include "LightS.h"
 #include "Group.h"
 #include "Photon.h"
+#include "PhotonStore.h"
+#include "PhotonMap.h"
 #include <limits>
 #include <ctime>
 #include "Circle.h"
@@ -30,13 +32,15 @@ public:
 	u_ptr<Photons> tracePhotons(const u_ptr<Group>& s) const;
 	Vector3d computeShading(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area, int recurs, int refrac) const;
 	Vector3d computeShading(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const;
+	Vector3d computeRadianceEstimate(Ray vray, double t0, double t1, const u_ptr<Group>& s) const;
 	double fresnel(double index1, double index2, double c1, double c2) const;
 	double schlicks(double index, double c) const;
 	bool refract(const Vector3d& d, const Vector3d& n, double index, double indext, Vector3d& t) const;
 	void setRecursDepth(int d);
 	Vector3d _amb;
 	std::vector<s_ptr<Light> > _l;
-	Eigen::ArrayXd _lProbs;
+	Eigen::MatrixXd _lProbs;
+	u_ptr<PhotonMap> photonMap;
 	int _indirect;
 	int _recurs;
 	int _refraction;

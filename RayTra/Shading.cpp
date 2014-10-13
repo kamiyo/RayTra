@@ -9,7 +9,6 @@
 
 //constructor sets up default values in case of no parameters
 Shading::Shading() {
-	init_genrand(time(NULL));
 	_recurs = 0;
 	_amb = Vector3d::Zero();
 	_shadows = false;
@@ -54,7 +53,7 @@ Photon Shading::emitPhoton() const {
 	double roll = RAN;
 	int color, light;
 	for (int i = 0; i < _lProbs.size(); i++) {
-		if (roll < _lProbs[i]) {
+		if (roll < _lProbs(i)) {
 			color = i % 3;
 			light = i / 3;
 			break;
@@ -63,7 +62,9 @@ Photon Shading::emitPhoton() const {
 			continue;
 		}
 	}
-	return _l[light]->emitPhoton(color);
+	Photon temp = _l[light]->emitPhoton(color);
+	temp.m_light = _l[light];
+	return temp;
 }
 
 
@@ -123,11 +124,26 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 		Photon p = emitPhoton();
 		p.m_intensity /= _numPhotons;
 		hitRecord rec;
+		bool first = true;
 		while (1) {
 			if (s->hit(p, p.m_epsilon, INF, rec)) {
 				Vector3d p1 = p.getPoint(rec.t);
 				if ((rec.m->kd.array() != 0).all()) {
-					result->push_back(Photon(p1, -p.m_dir, p.m_intensity, p.m_color));
+					if (first) {
+						result->push_back(PhotonStore(p1, -p.m_dir, p.m_intensity, p.m_color, p.m_light, PhotonStore::DIRECT));
+					} else
+						result->push_back(PhotonStore(p1, -p.m_dir, p.m_intensity, p.m_color, p.m_light, PhotonStore::INDIRECT));
+				}
+				if (first) {
+					hitRecord shadowRec;
+					Photon shadow(p);
+					shadow.set(p1, p.m_dir, p.m_light);
+					while (s->hit(shadow, shadow.m_epsilon, INF, shadowRec)) {
+						Vector3d pShadow = shadow.getPoint(shadowRec.t);
+						result->push_back(PhotonStore(pShadow, shadow.m_dir, shadow.m_light, PhotonStore::SHADOW));
+						shadow.set(pShadow, shadow.m_dir);
+					}
+					first = false;
 				}
 				s_ptr<Material> m = rec.m;
 				double diff = m->kd(p.m_color);
@@ -164,6 +180,9 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 				} // absorbed
 			}
 			else {
+				if (first) {
+					i--;
+				}
 				break;
 			}
 		}
@@ -171,6 +190,27 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 	return result;
 }
 
+Vector3d Shading::computeRadianceEstimate(Ray vray, double t0, double t1, const u_ptr<Group>& s) const {
+	hitRecord rec;													// rec = light record, srec = shadow record
+	Vector3d result = Vector3d::Zero();								// rgb result zero'd
+	Vector3d d = (-1.0 * vray.m_dir).normalized();					// d = viewing ray direction (out of surface)
+	s_ptr<Material> m;
+	if (s->_hit(vray, t0, t1, rec)) {
+		Vector3d x = vray.getPoint(rec.t);
+		PhotonQueue photons;
+		double sqDistance = 1;
+		photonMap->locatePhotons(photons, x, sqDistance, 100, 3);
+		while (photons.size() != 0) {
+			int color = photons.top().first.m_color;
+			double intensity = photons.top().first.m_intensity;
+			Vector3d irrad(((color == 0)?intensity:0), ((color == 1)?intensity:0), ((color == 2)?intensity:0));
+			result += irrad;
+		}
+		result = result.cwiseProduct(rec.m->kd);
+		result /= (M_PI * sqDistance);
+	}
+	return result;
+}
 
 // form of function where recursion and refraction are not specified. 
 Vector3d Shading::computeShading(Ray vray, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const {

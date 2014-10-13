@@ -40,6 +40,7 @@
     <ClInclude Include="parse.h" />
     <ClInclude Include="Photon.h" />
     <ClInclude Include="PhotonMap.h" />
+    <ClInclude Include="PhotonStore.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="rand.h" />
     <ClInclude Include="Ray.h" />
@@ -78,6 +79,7 @@
     <ClCompile Include="parse.cpp" />
     <ClCompile Include="Photon.cpp" />
     <ClCompile Include="PhotonMap.cpp" />
+    <ClCompile Include="PhotonStore.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="rand.cpp" />
     <ClCompile Include="Ray.cpp" />
