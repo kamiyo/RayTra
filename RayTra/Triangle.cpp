@@ -58,6 +58,7 @@ bool Triangle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 	rec.t = t;
 	if (ray.m_type != RayBase::SHADOW) {
 		rec.n = _n;
+		rec.s = _type;
 	}
 	rec.m = _m;
 	return true;

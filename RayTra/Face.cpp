@@ -65,6 +65,7 @@ bool Face::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 		else {
 			rec.n = _normal;
 		}
+		rec.s = _type;
 	}
 	rec.m = _m;
 	return true;

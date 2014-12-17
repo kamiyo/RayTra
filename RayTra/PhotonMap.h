@@ -9,8 +9,8 @@ typedef std::pair<PhotonStore, double> PhotonPair;
 
 struct cmpAxis {
 	cmpAxis(int axis) { this->m_axis = axis; }
-	bool operator()(const PhotonStore& a, const PhotonStore& b) {
-		return a.m_eye[m_axis] < b.m_eye[m_axis];
+	bool operator()(const u_ptr<PhotonStore>& a, const u_ptr<PhotonStore>& b) {
+		return a->m_eye[m_axis] < b->m_eye[m_axis];
 	}
 	int m_axis;
 };
@@ -27,12 +27,13 @@ class PhotonMap
 {
 public:
 	PhotonMap(u_ptr<Photons>& photons);
+	void makeHeap(u_ptr<Photons>& photons, const int index);
 	~PhotonMap();
-	void locatePhotons(PhotonQueue& photonQueue, const Vector3d& point, double& maxSqDistance, int numPhotons, int flag) const;
-	void drawPhotons(std::vector<float>& vertices, std::vector<float>& colors, int flag) const;
-	PhotonStore m_photon;
-	u_ptr<PhotonMap> m_left, m_right;
-	int m_axis;
+	void locatePhotons(int index, PhotonQueue& photonQueue, const Vector3d& point, const Vector3d& normal, double& maxSqDistance, int numPhotons, int flag) const;
+	void drawPhotons(int index, std::vector<float>& vertices, std::vector<float>& colors, int flag) const;
+	void precomputeIrradiance(int index, double distance, double numPhotons);
+	u_ptr<Photons> m_storage;
+	std::vector<int> m_axes;
 };
 
 #endif

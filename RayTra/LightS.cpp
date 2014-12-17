@@ -16,7 +16,7 @@ Vector3d LightS::getVector(Vector3d p) const {
 	return _pos - p;
 }
 
-Photon LightS::emitPhoton(int color) const {
+Photon LightS::emitPhoton() const {
 	return Photon();
 }
 

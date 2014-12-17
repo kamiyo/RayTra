@@ -50,6 +50,7 @@ bool Circle::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 		if (ray.m_type != RayBase::SHADOW) {
 			rec.n = _n.normalized();
 			rec.m = _m;
+			rec.s = _type;
 		}
 
 		return true;

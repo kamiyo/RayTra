@@ -19,7 +19,7 @@ LightD::~LightD() {
 	// TODO Auto-generated destructor stub
 }
 
-Photon LightD::emitPhoton(int color) const {
+Photon LightD::emitPhoton() const {
 	return Photon();
 }
 

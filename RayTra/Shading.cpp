@@ -7,6 +7,16 @@
 
 #include "Shading.h"
 
+template <class T, class S, class C>
+S& Container(std::priority_queue<T, S, C>& q) {
+	struct HackedQueue : private std::priority_queue<T, S, C> {
+		static S& Container(priority_queue<T, S, C>& q) {
+			return q.*&HackedQueue::c;
+		}
+	};
+	return HackedQueue::Container(q);
+}
+
 //constructor sets up default values in case of no parameters
 Shading::Shading() {
 	_recurs = 0;
@@ -37,9 +47,9 @@ void Shading::addAmbient(Vector3d a) {
 
 void Shading::initPhotonTracing(double numPhotons) {
 	_numPhotons = numPhotons;
-	Eigen::MatrixXd ints(3, _l.size());
+	Eigen::VectorXd ints(_l.size());
 	for (int i = 0; i < (int) _l.size(); i++) {
-		ints.col(i) << _l[i]->_rgb;
+		ints[i] = _l[i]->_rgb.maxCoeff();
 	}
 	double sum = ints.sum();
 	ints /= sum;
@@ -51,18 +61,17 @@ void Shading::initPhotonTracing(double numPhotons) {
 
 Photon Shading::emitPhoton() const {
 	double roll = RAN;
-	int color, light;
+	int light;
 	for (int i = 0; i < _lProbs.size(); i++) {
 		if (roll < _lProbs(i)) {
-			color = i % 3;
-			light = i / 3;
+			light = i;
 			break;
 		}
 		else {
 			continue;
 		}
 	}
-	Photon temp = _l[light]->emitPhoton(color);
+	Photon temp = _l[light]->emitPhoton();
 	temp.m_light = _l[light];
 	return temp;
 }
@@ -122,7 +131,7 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 	u_ptr<Photons> result = std::make_unique<Photons>();
 	for (int i = 0; i < _numPhotons; i++) {
 		Photon p = emitPhoton();
-		p.m_intensity /= _numPhotons;
+		p.m_intensities /= _numPhotons;
 		hitRecord rec;
 		bool first = true;
 		while (1) {
@@ -130,24 +139,30 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 				Vector3d p1 = p.getPoint(rec.t);
 				if ((rec.m->kd.array() != 0).all()) {
 					if (first) {
-						result->push_back(PhotonStore(p1, -p.m_dir, p.m_intensity, p.m_color, p.m_light, PhotonStore::DIRECT));
-					} else
-						result->push_back(PhotonStore(p1, -p.m_dir, p.m_intensity, p.m_color, p.m_light, PhotonStore::INDIRECT));
+						result->push_back(std::make_unique<PhotonStore>(p1, -p.m_dir.normalized(), rec.n, p.m_intensities, p.m_light, PhotonStore::DIRECT));
+					}
+					else {
+						result->push_back(std::make_unique<PhotonStore>(p1, -p.m_dir.normalized(), rec.n, p.m_intensities, p.m_light, PhotonStore::INDIRECT));
+						if (p.onlySpecular);
+					
+					}
 				}
 				if (first) {
-					hitRecord shadowRec;
-					Photon shadow(p);
-					shadow.set(p1, p.m_dir, p.m_light);
-					while (s->hit(shadow, shadow.m_epsilon, INF, shadowRec)) {
-						Vector3d pShadow = shadow.getPoint(shadowRec.t);
-						result->push_back(PhotonStore(pShadow, shadow.m_dir, shadow.m_light, PhotonStore::SHADOW));
-						shadow.set(pShadow, shadow.m_dir);
+					if (rec.s != Surface::PLANE) {
+						hitRecord shadowRec;
+						Photon shadow(p);
+						shadow.set(p1, p.m_dir, p.m_light);
+						while (s->hit(shadow, shadow.m_epsilon, INF, shadowRec)) {
+							Vector3d pShadow = shadow.getPoint(shadowRec.t);
+							result->push_back(std::make_unique<PhotonStore>(pShadow, shadow.m_dir, rec.n, shadow.m_light, PhotonStore::SHADOW));
+							shadow.set(pShadow, shadow.m_dir);
+						}
 					}
 					first = false;
 				}
 				s_ptr<Material> m = rec.m;
-				double diff = m->kd(p.m_color);
-				double spec = m->ki(p.m_color);
+				Vector3d diff = m->kd / 2;
+				Vector3d spec = m->ks / 2;
 				double krefract = 1., R;
 				double index = m->n;
 				Vector3d d = p.m_dir;
@@ -161,19 +176,24 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 					} //absorbed in deBeer's effect
 				}
 				int max = 0;
-				if (diff > 0) max++;
-				if (spec > 0) max++;
-				roll = (double) max * RAN;
+				if ((diff.array() > 0).any()) max++;
+				if ((spec.array() > 0).any()) max++;
+				roll = RAN;
+
+				double probDiffuse = p.m_intensities.cwiseProduct(diff).maxCoeff() / p.m_intensities.maxCoeff();
+				double probSpecular = p.m_intensities.cwiseProduct(spec).maxCoeff() / p.m_intensities.maxCoeff();
 
 				// russian roulette
-				if (roll < diff) { // diffuse
+				if (roll < probDiffuse) { // diffuse
 					Vector3d diffuseVec = COSVEC(n);
-					p.set(p1, diffuseVec);
+					Vector3d power = p.m_intensities.cwiseProduct(diff) / probDiffuse;
+					p.set(p1, diffuseVec, power);
 				}
-				else if (roll < (diff + spec)) { // spec
+				else if (roll < (probDiffuse + probSpecular)) { // spec
 					Vector3d reflectVec = (m->p == -1) ? (d - 2 * (d.dot(n)) * n) : (COSVEC((d - 2 * (d.dot(n)) * n).normalized(), m->p));
 					reflectVec.normalize();
-					p.set(p1, reflectVec);
+					Vector3d power = p.m_intensities.cwiseProduct(spec) / probSpecular;
+					p.set(p1, reflectVec, power);
 				}
 				else {
 					break;
@@ -190,27 +210,201 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 	return result;
 }
 
+bool cmp2d(const Vector2d& a, const Vector2d& b) {
+	return (a.x() < b.x() || (a.x() == b.x() && a.y() < b.y()));
+}
+
+double cross2d(const Vector2d& a, const Vector2d& b) {
+	return (a.x() * b.y() - a.y() * b.x());
+}
+
+std::vector<Vector2d> monotoneChain(std::vector<Vector2d>& p) {
+	std::sort(p.begin(), p.end(), cmp2d);
+
+	int n = (int)p.size();
+	std::vector<Vector2d> hull(n * 2);
+
+	int k = 0;
+	for (int i = 0; i < n; i++) {
+
+		while (k >= 2 && cross2d(hull[k - 1] - hull[k - 2], p[i] - hull[k - 2]) < 0) {
+			k--;
+		}
+		hull[k++] = p[i];
+	}
+	for (int i = n - 2, t = k + 1; i >= 0; i--) {
+		while (k >= t && cross2d(hull[k - 1] - hull[k - 2], p[i] - hull[k - 2]) < 0) {
+			k--;
+		}
+		hull[k++] = p[i];
+	}
+	hull.resize(k);
+
+	return hull;
+}
+
+double areaHull(std::vector<Vector2d>& p) {
+	std::vector<Vector2d> hull = monotoneChain(p);
+	double result = 0;
+	for (int i = 0; i < (int)hull.size(); i++) {
+		result += cross2d(hull[i], hull[(i + 1) % hull.size()]);
+	}
+	result *= 0.5;
+	return result;
+}
+
 Vector3d Shading::computeRadianceEstimate(Ray vray, double t0, double t1, const u_ptr<Group>& s) const {
 	hitRecord rec;													// rec = light record, srec = shadow record
 	Vector3d result = Vector3d::Zero();								// rgb result zero'd
 	Vector3d d = (-1.0 * vray.m_dir).normalized();					// d = viewing ray direction (out of surface)
 	s_ptr<Material> m;
 	if (s->_hit(vray, t0, t1, rec)) {
-		Vector3d x = vray.getPoint(rec.t);
+		Vector3d w = rec.n.normalized();
+		// get uvw
+		Vector3d up = (abs(w.dot(Vector3d(0, 1, 0))) == 1) ? Vector3d(1, 0, 0) : Vector3d(0, 1, 0);
+		Vector3d u = up.cross(w).normalized();
+		Vector3d v = w.cross(u).normalized();
+		Eigen::MatrixXd T(3, 2); T << u, v;
+		T.transposeInPlace();
+		const Vector3d x = vray.getPoint(rec.t);
 		PhotonQueue photons;
-		double sqDistance = 1;
-		photonMap->locatePhotons(photons, x, sqDistance, 100, 3);
+		double sqDistance = pmRadius;
+		photonMap->locatePhotons(0, photons, x, rec.n, sqDistance, pmNumber, 1);
+		std::vector<Vector2d> projectedPoints;
 		while (photons.size() != 0) {
-			int color = photons.top().first.m_color;
-			double intensity = photons.top().first.m_intensity;
-			Vector3d irrad(((color == 0)?intensity:0), ((color == 1)?intensity:0), ((color == 2)?intensity:0));
-			result += irrad;
+			const PhotonStore& p = photons.top().first;
+			double cos = w.dot(p.m_dir.normalized());
+			if (cos > 0) {
+				Vector3d irradiance = p.m_intensities;
+				result += irradiance;
+				Vector2d temp = T * (p.m_eye);
+				projectedPoints.push_back(temp);
+			}
+			photons.pop();
 		}
-		result = result.cwiseProduct(rec.m->kd);
+		result = result.cwiseProduct(rec.m->kd / M_PI);
+		double area = areaHull(projectedPoints);
+
+		if (area != 0) {
+			result /= area; 
+		}
+		/*
+		if (sqDistance != 0)
 		result /= (M_PI * sqDistance);
+		*/
 	}
 	return result;
 }
+
+Vector3d Shading::computeRadiance(Ray vray, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const {
+	hitRecord rec;													// rec = light record, srec = shadow record
+	Vector3d result = Vector3d::Zero();								// rgb result zero'd
+	Vector3d d = (-1.0 * vray.m_dir).normalized();					// d = viewing ray direction (out of surface)
+	Vector3d diffuse = Vector3d::Zero();
+	if (s->_hit(vray, t0, t1, rec)) {
+		s_ptr<Material> m = rec.m;
+		Vector3d x = vray.getPoint(rec.t);
+		PhotonQueue photons;
+		double sqDistance = pmRadius;
+		photonMap->locatePhotons(0, photons, x, rec.n, sqDistance, pmNumber, 4);
+		std::vector<PhotonPair> &pPair = Container(photons);
+
+		const double &epsilon = vray.m_epsilon;
+		const Vector3d &n = rec.n;											// n = normal vector of intersection
+		double nd = n.dot(d);
+		for (int j = 0; j < (int) _l.size(); j++) {
+			bool hasShadows = false, hasDirect = false;
+			for (auto it = pPair.begin(); it != pPair.end(); it++) {
+				const PhotonStore& temp = (*it).first;
+				if (temp.m_light.lock() == _l[j]) {
+					if (temp.m_flag == PhotonStore::DIRECT) {
+						hasDirect = true;
+					}
+					else if (temp.m_flag == PhotonStore::SHADOW) {
+						hasShadows = true;
+					}
+				}
+				if (hasDirect && hasShadows) break;
+			}
+			if (hasShadows && !hasDirect) {
+				continue;
+			}
+			else {
+				Vector3d l = _l[j]->getVector(x);						//		l = light position
+				double fall = _l[j]->getFalloff(x);
+				Vector3d I = _l[j]->_rgb;
+
+				if (_l[j]->_type == Light::POINT || _l[j]->_type == Light::SPOT){		//		if light is a point
+					Vector3d w = l.normalized();						//		find the point on the "area" light
+					Vector3d up(0.0, 1.0, 0.0);
+					if (w.dot(up) == 1) up << 1.0, 0.0, 0.0;
+					Vector3d u = (up.cross(w)).normalized();
+					Vector3d v = (w.cross(u)).normalized();
+					Vector2d _area = area.array() * (std::static_pointer_cast<LightP>(_l[j]))->_r;
+					l = l + u * _area[0] + v * _area[1];
+				}
+				
+				if (hasDirect && !hasShadows) {
+					Vector3d nn = n;
+					if (nd < 0) {
+						nd = -nd;
+						nn = -nn;
+					}
+					l.normalize();
+					Vector3d h = (l + d).normalized();
+					double nl = nn.dot(l);
+					if (nl > 0) {
+						result += fall * ((m->kd).cwiseProduct(I) * nl);
+					}
+					double nh = nn.dot(h);
+					if (nh > 0) {
+						result += fall * (m->ks).cwiseProduct(I) * std::pow(nh, m->p);
+					}
+				}
+				else {
+					Ray sRay(x, l, vray.ref, vray.alpha, RayBase::SHADOW);
+					hitRecord srec;
+					if ((fall != 0 && !s->_hit(sRay, sRay.m_epsilon, 1, srec)) || srec.m == NULL || _shadows == false) {
+						Vector3d nn = n;
+						if (nd < 0) {
+							nd = -nd;
+							nn = -nn;
+						}
+						l.normalize();
+						Vector3d h = (l + d).normalized();
+						double nl = nn.dot(l);
+						if (nl > 0) {
+							result += fall * ((m->kd).cwiseProduct(I) * nl);
+						}
+						double nh = nn.dot(h);
+						if (nh > 0) {
+							result += fall * (m->ks).cwiseProduct(I) * std::pow(nh, m->p);
+						}
+					}
+				}
+			}
+		}
+		diffuse = Vector3d::Zero();
+		for (auto it = pPair.begin(); it != pPair.end(); it++) {
+			const PhotonStore& temp = (*it).first;
+			if (temp.m_flag == PhotonStore::INDIRECT) {
+				double cos = rec.n.normalized().dot(temp.m_dir.normalized());
+				if (cos <= 0) continue;
+				diffuse += temp.m_intensities * cos;
+			}
+		}
+		diffuse = diffuse.cwiseProduct(rec.m->kd);
+		if (sqDistance != 0)
+			diffuse /= (M_PI * sqDistance);
+	}
+	return diffuse + result;
+}
+
+void Shading::precomputeIrradiance() {
+	double distance = pmRadius;
+	photonMap->precomputeIrradiance(0, distance, pmNumber);
+}
+
 
 // form of function where recursion and refraction are not specified. 
 Vector3d Shading::computeShading(Ray vray, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const {
@@ -247,12 +441,33 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, const u_ptr<Gro
 		for (int gi = 0; gi < _indirect; gi++) {
 			Vector3d newDir = COSVEC(n);
 			Ray diffR(p, vray.m_dir.norm() * newDir, vray.ref, vray.alpha, Ray::VIEW);
-			global += computeShading(diffR, epsilon, INF, s, area, recurs - 1, refrac);
+			hitRecord gatherRec;
+			if (s->hit(diffR, diffR.m_epsilon, INF, gatherRec)) {
+				Vector3d gatherP = diffR.getPoint(gatherRec.t);
+				PhotonQueue gatherQueue;
+				double rad = pmRadius;
+				photonMap->locatePhotons(0, gatherQueue, gatherP, gatherRec.n, rad, pmNumber, 1);
+				std::vector<PhotonPair> &pPair = Container(gatherQueue);
+				Vector3d diffuse = Vector3d::Zero();
+				for (auto it = pPair.begin(); it != pPair.end(); it++) {
+					const PhotonStore& temp = (*it).first;
+					if (temp.m_flag == PhotonStore::INDIRECT) {
+						double cos = rec.n.normalized().dot(temp.m_dir.normalized());
+						if (cos <= 0) continue;
+						diffuse += temp.m_intensities * cos;
+					}
+				}
+				diffuse = diffuse.cwiseProduct(rec.m->kd);
+				if (rad != 0)
+					diffuse /= (M_PI * M_PI * rad);
+				global += diffuse;
+			}
+			//global += computeShading(diffR, epsilon, INF, s, area, recurs - 1, refrac);
 		}
-
-		if (_indirect != 0) {
+		result += global;
+		/*if (_indirect != 0) {
 			result += m->kd.cwiseProduct(global / (2. * (double)_indirect));
-		}
+		}*/
 		for (int j = 0; j < (int)_l.size(); j++) {					// for each light
 			Vector3d l = _l[j]->getVector(p);						//		l = light position
 			double fall = _l[j]->getFalloff(p);
@@ -287,12 +502,12 @@ Vector3d Shading::computeShading(Ray vray, double t0, double t1, const u_ptr<Gro
 				Vector3d h = (l + d).normalized();
 				double nl = nn.dot(l);
 				double nh = nn.dot(h);
-				if (_indirect != 0) {
+				/*if (_indirect != 0) {
 					result += fall * ((m->kd).cwiseProduct(I) * std::max((double) 0, nl) / 2.0 + (m->ks).cwiseProduct(I) * std::pow(std::max((double) 0, nh), m->p));
 				}
-				else {
-					result += fall * ((m->kd).cwiseProduct(I) * std::max((double) 0, nl) + (m->ks).cwiseProduct(I) * std::pow(std::max((double) 0, nh), m->p));
-				}
+				else {*/
+					result += fall * ((m->kd).cwiseProduct(I) * std::max((double) 0, nl) / (4 * M_PI) + (m->ks).cwiseProduct(I) * std::pow(std::max((double) 0, nh), m->p));
+				//}
 			}
 		}
 

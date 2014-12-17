@@ -17,16 +17,28 @@ void RayTra::populatePhotonMapOGL() {
 		{
 			u_ptr<Photons> tracedPhotons = shading->tracePhotons(allSurfaces);
 #pragma omp critical
-			allPhotons->m_photons.insert(allPhotons->m_photons.end(), tracedPhotons->m_photons.begin(), tracedPhotons->m_photons.end());
+			allPhotons->insert(tracedPhotons);
 		}
 		std::cout << allPhotons->size() << std::endl;
-		shading->photonMap = std::make_unique<PhotonMap>(allPhotons);
+		shading->photonMap = make_unique<PhotonMap>(allPhotons);
 	}
 }
 
 void RayTra::renderPhotonMapOGL(std::vector<float>& vertices, std::vector<float>& colors, int flag) {
 	if (usePhotonMap) {
-		shading->photonMap->drawPhotons(vertices, colors, flag);
+		shading->photonMap->drawPhotons(0, vertices, colors, flag);
+	}
+}
+
+void RayTra::renderClosestPhotonsOGL(std::vector<float>& vertices, std::vector<float>& colors, const Vector3d& point, int numPhotons, int flag) {
+	if (usePhotonMap) {
+		PhotonQueue q;
+		double distance = 5;
+		shading->photonMap->locatePhotons(0, q, point, Vector3d::Zero(), distance, numPhotons, flag);
+		while (q.size() != 0) {
+			q.top().first.drawPhoton(vertices, colors, flag);
+			q.pop();
+		}
 	}
 }
 
@@ -40,19 +52,12 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 		{
 			u_ptr<Photons> tracedPhotons = shading->tracePhotons(allSurfaces);
 #pragma omp critical
-			allPhotons->m_photons.insert(allPhotons->m_photons.end(), tracedPhotons->m_photons.begin(), tracedPhotons->m_photons.end());
+			allPhotons->insert(tracedPhotons);
 		}
 		std::cout << allPhotons->size() << std::endl;
 		shading->photonMap = std::make_unique<PhotonMap>(allPhotons);
-	}
-	PhotonQueue p; double md = 4;
-	shading->photonMap->locatePhotons(p, Vector3d(0, 0, 2), md, 100, 0);
-	std::cout << p.size() << std::endl;
-	while (p.size() != 0) {
-		std::cout << p.top().first.m_eye << std::endl;
-		p.pop();
-	}
-	return;
+		//shading->precomputeIrradiance();
+	}	
 
 	Sampler master(width, height,
 					Sampler::INTEGRAL,
@@ -111,6 +116,7 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 					Ray r;
 					camera->generateRay(lensSample(currentSample), x + multiSample(currentSample)[0], y + multiSample(currentSample)[1], r);
 					//c += shading->computeShading(r, 0, INF, allSurfaces, lightSample(currentSample));				// SHADE
+					//c += shading->computeRadiance(r, 0, INF, allSurfaces, lightSample(currentSample));				// SHADE
 					c += shading->computeRadianceEstimate(r, 0, INF, allSurfaces);				// SHADE
 				}
 			}
@@ -298,46 +304,51 @@ void RayTra::applyTransform(u_ptr<Surface>& s) {
 		s->trans(T._current, T._currentInv);
 	}
 }
-void RayTra::setOption(int option, int setting, int setting2) {
+void RayTra::setOption(int option, double setting, double setting2) {
 	switch (option) {
 	case SHADOWS:
-		shadowSetting = setting;
+		shadowSetting = (int) setting;
 		if (shadowSetting >= 1)
 			shading->_shadows = true;
 		break;
 	case DOF:
-		dofSetting = setting;
+		dofSetting = (int) setting;
 		break;
 	case SAMPLES:
 		if (setting != 0) {
-			numSamples = setting;
-			sampleType = setting2;
+			numSamples = (int) setting;
+			sampleType = (int) setting2;
 		}
 		break;
 	case RUSSIAN:
 		(setting == 1) ? shading->_russian = true : shading->_russian = false;
 		break;
 	case REFRACT:
-		shading->_refraction = setting;
+		shading->_refraction = (int) setting;
 		break;
 	case RECURSE:
-		shading->_recurs = setting;
+		shading->_recurs = (int) setting;
 		break;
 	case STRUCT:
-		accelerationStructure = setting;
+		accelerationStructure = (int) setting;
 		break;
 	case INDIRECT:
-		shading->_indirect = setting;
+		shading->_indirect = (int) setting;
 		break;
 	case ACTUALLIGHTS:
 		(setting == 0) ? actualLights = false :	actualLights = true;
 		break;
 	case ORDER:
-		renderOrder = setting;
+		renderOrder = (int) setting;
 		break;
 	case PHOTONMAPPING:
-		numPhotons = setting;
+		numPhotons = (int) setting;
 		(setting > 0) ? (usePhotonMap = true) : (usePhotonMap = false);
+		break;
+	case RADIUSNUMBER:
+		shading->pmRadius = setting;
+		shading->pmNumber = (int) setting2;
+		break;
 	default:
 		break;
 	}

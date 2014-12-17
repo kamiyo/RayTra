@@ -42,6 +42,7 @@ bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const
 			n(2) = 0; n.normalize();
 			n(2) = nz;
 			rec.n = n.normalized();
+			rec.s = _type;
 		}
 		rec.m = _m;
 		return true;
@@ -54,6 +55,7 @@ bool Cone::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const
 			n(2) = nz;
 			rec.n = n.normalized();
 			rec.m = _m;
+			rec.s = _type;
 		}
 		return true;
 	}

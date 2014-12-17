@@ -55,6 +55,7 @@ bool Sphere::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 			if (ray.m_type != RayBase::SHADOW) {
 				Vector3d n = e + rec.t * d;
 				rec.n = (n - _p).normalized();
+				rec.s = _type;
 			}
 			rec.m = _m;
 			return true;
@@ -63,6 +64,7 @@ bool Sphere::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 			if (ray.m_type != RayBase::SHADOW) {
 				Vector3d n = e + rec.t * d;
 				rec.n = (n - _p).normalized();
+				rec.s = _type;
 			}
 			rec.m = _m;
 			return true;

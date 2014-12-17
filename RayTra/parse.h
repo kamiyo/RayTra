@@ -26,13 +26,13 @@ protected:
 	virtual void material(Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten) {}
 	virtual void material(string s) {}
 	virtual void material(string s, Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten) {}
-	virtual void setOption(int option, int setting, int setting2 = 0) {}
+	virtual void setOption(int option, double setting, double setting2 = 0) {}
 	virtual void getObj(const char *file, int smooth) {}
 	virtual void invertNormal() {}
 	Transform T = Transform();
 public:
 	virtual void parse(const char *file);
-	const static int SHADOWS = 0, SAMPLES = 1, REFRACT = 2, STRUCT = 3, RECURSE = 4, DOF = 5, INDIRECT = 6, ACTUALLIGHTS = 7, ORDER = 8, RUSSIAN = 9, PHOTONMAPPING = 10;
+	const static int SHADOWS = 0, SAMPLES = 1, REFRACT = 2, STRUCT = 3, RECURSE = 4, DOF = 5, INDIRECT = 6, ACTUALLIGHTS = 7, ORDER = 8, RUSSIAN = 9, PHOTONMAPPING = 10, RADIUSNUMBER = 11;
 };
 
 #endif

@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\x64\Release\scene.txt" />
+    <Text Include="cornell.txt" />
     <Text Include="hanoi.txt" />
     <Text Include="pyr.txt" />
     <Text Include="spheres.txt" />

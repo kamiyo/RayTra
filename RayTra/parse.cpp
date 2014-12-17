@@ -125,57 +125,62 @@ void Parser::parse(const char *file) {
 		}
 		else if (isOpt) {
 			if (cmd == "p" || cmd == "photonmap") {
-				int setting;
+				double setting;
 				_iss >> setting;
 				setOption(PHOTONMAPPING, setting);
 			}
-			if (cmd == "s" || cmd == "shadows") {
-				int setting;
+			else if (cmd == "rn" || cmd == "radius" || cmd == "number"){
+				double setting, setting2;
+				_iss >> setting >> setting2;
+				setOption(RADIUSNUMBER, setting, setting2);
+			}
+			else if (cmd == "s" || cmd == "shadows") {
+				double setting;
 				_iss >> setting;
 				setOption(SHADOWS, setting);
 			}
 			else if (cmd == "ms" || cmd == "samples") {
-				int setting, setting2 = 0;
+				double setting, setting2 = 0;
 				_iss >> setting >> setting2;
 				setOption(SAMPLES, setting, setting2);
 			}
 			else if (cmd == "refract" || cmd == "rf") {
-				int setting;
+				double setting;
 				_iss >> setting;
 				setOption(REFRACT, setting);
 			}
 			else if (cmd == "accel" || cmd == "structure") {
-				int setting;
+				double setting;
 				_iss >> setting;
 				setOption(STRUCT, setting);
 			}
 			else if (cmd == "DOF" || cmd == "depth of field" || cmd == "dof") {
-				int setting;
+				double setting;
 				_iss >> setting;
 				setOption(DOF, setting);
 			}
 			else if (cmd == "recurse" || cmd == "rc") {
-				int setting;
+				double setting;
 				_iss >> setting;
 				setOption(RECURSE, setting);
 			}
 			else if (cmd == "indirect" || cmd == "GI" || cmd == "gi") {
-				int setting;
+				double setting;
 				_iss >> setting;
 				setOption(INDIRECT, setting);
 			}
 			else if (cmd == "actualLights" || cmd == "aL") {
-				int setting;
+				double setting;
 				_iss >> setting;
 				setOption(ACTUALLIGHTS, setting);
 			}
 			else if (cmd == "hilbert" || cmd == "h") {
-				int setting;
+				double setting;
 				_iss >> setting;
 				setOption(ORDER, setting);
 			}
 			else if (cmd == "russian" || cmd == "rr") {
-				int setting;
+				double setting;
 				_iss >> setting;
 				setOption(RUSSIAN, setting);
 			}

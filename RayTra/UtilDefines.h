@@ -73,7 +73,7 @@ typedef struct hitRecord {
 	Vector3d n;
 	s_ptr<Material> m;
 	s_ptr<LightP> l;
-	s_ptr<Surface> s;
+	int s;
 } hitRecord;
 
 Vector3d randSphere();

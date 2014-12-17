@@ -253,6 +253,9 @@
     <Text Include="pyr.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="cornell.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.glsl">

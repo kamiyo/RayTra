@@ -40,6 +40,7 @@ bool Cylinder::hit(RayBase& r, double t0, double t1, hitRecord& rec) const {
 			Vector3d n = eye + rec.t * dir;
 			n[2] = 0;
 			rec.n = n.normalized();
+			rec.s = _type;
 		}
 		rec.m = _m;
 		return true;
@@ -49,6 +50,7 @@ bool Cylinder::hit(RayBase& r, double t0, double t1, hitRecord& rec) const {
 			Vector3d n = eye + rec.t * dir;
 			n(2) = 0;
 			rec.n = n.normalized();
+			rec.s = _type;
 		}
 		rec.m = _m;
 		return true;

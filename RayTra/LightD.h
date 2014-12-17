@@ -17,7 +17,7 @@ public:
 	virtual Vector3d getVector(Vector3d p) const;
 	virtual double getFalloff(Vector3d p) const;
 	virtual Vector3d getRanPoint() const;
-	virtual Photon emitPhoton(int color) const;
+	virtual Photon emitPhoton() const;
 	virtual void projectScene(BBox b);
 	Vector3d _dir;
 

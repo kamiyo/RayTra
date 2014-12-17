@@ -54,7 +54,7 @@ class RayTra : public Parser {
 	virtual void material(string s, Vector3d amb, Vector3d diff, Vector3d spec, double r, Vector3d refl, double n, Vector3d atten);
 	virtual void material(string s);
 	virtual void getObj(const char *file, int smooth);
-	virtual void setOption(int option, int setting, int setting2 = 0);
+	virtual void setOption(int option, double setting, double setting2 = 0);
 	virtual void invertNormal();
 	void createFace(int v1, int v2, int v3, int n1, int n2, int n3, int smooth);
 	void parseMtl(const char* s);
@@ -64,6 +64,7 @@ class RayTra : public Parser {
 public:
 	RayTra();
 	~RayTra();
+	void renderClosestPhotonsOGL(std::vector<float>& vertices, std::vector<float>& colors, const Vector3d& point, int numPhotons, int flag);
 	void populatePhotonMapOGL();
 	void renderPhotonMapOGL(std::vector<float>& vertices, std::vector<float>& colors, int flag);
 	void renderBoundingBoxes(std::vector<std::vector<float> >& verts, int level) const;

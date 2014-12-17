@@ -69,6 +69,7 @@ bool Torus::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
 		Vector3d c = pp.normalized() * _R; // center of tube
 		Vector3d n = (p - c).normalized();
 		rec.n = n;
+		rec.s = _type;
 	}
 	rec.m = _m;
 	return true;

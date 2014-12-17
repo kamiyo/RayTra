@@ -43,6 +43,8 @@ GLuint colorVbo;
 string input;
 Vector3d point;
 int current;
+int numPhotons;
+int flag;
 
 //define to convert floating point intensity to 0-255 with adjustment
 //#define toInt(x) ((int)(pow(clamp(x, 0.f, 1.f), 1.f / 2.2f) * 255.f + .5f))
@@ -74,7 +76,7 @@ void writeRgba (const char fileName[], const Imf::Rgba *pixels, int width, int h
 
 void updateCamera() {
 
-	float zNear = 100, zFar = 400;
+	float zNear = 0.01, zFar = 500;
 	float d = (float) tracer.camera->_d;
 	float imageRight = (float) tracer.camera->_width / (2. * d);
 	float imageTop = (float) tracer.camera->_height / (2. * d);
@@ -97,6 +99,10 @@ void error_cb(int error, const char* description) {
 	cout << "error " << error << ": " << description << endl;
 }
 
+void printOGL() {
+	cout << "\r" << point << " numPhotons: " << numPhotons << "            ";
+}
+
 static void key_cb(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
@@ -115,9 +121,12 @@ static void key_cb(GLFWwindow* window, int key, int scancode, int action, int mo
 		}
 		return;
 	}
-	if ((key == GLFW_KEY_Q || key == GLFW_KEY_W || key == GLFW_KEY_E || key == GLFW_KEY_R) && action == GLFW_PRESS) {
+	if ((key == GLFW_KEY_Q || key == GLFW_KEY_W || key == GLFW_KEY_E || key == GLFW_KEY_R) && action == GLFW_PRESS && mods != GLFW_MOD_SHIFT) {
+		flag = (key == GLFW_KEY_Q) ? 0 : ((key == GLFW_KEY_W) ? 1 : ((key == GLFW_KEY_E) ? 2 : 3));
+	}
+	if ((key == GLFW_KEY_Q || key == GLFW_KEY_W || key == GLFW_KEY_E || key == GLFW_KEY_R) && action == GLFW_PRESS && mods == GLFW_MOD_SHIFT) {
 		photons.clear(); photonColors.clear();
-		int flag = (key == GLFW_KEY_Q) ? 0 : ((key == GLFW_KEY_W) ? 1 : ((key == GLFW_KEY_E) ? 2 : 3));
+		flag = (key == GLFW_KEY_Q) ? 0 : ((key == GLFW_KEY_W) ? 1 : ((key == GLFW_KEY_E) ? 2 : 3));
 		tracer.renderPhotonMapOGL(photons, photonColors, flag);
 		glBindBuffer(GL_ARRAY_BUFFER, photonVbo);
 		glBufferData(GL_ARRAY_BUFFER, photons.size() * sizeof(float), &photons[0], GL_STATIC_DRAW);
@@ -125,26 +134,52 @@ static void key_cb(GLFWwindow* window, int key, int scancode, int action, int mo
 		glBufferData(GL_ARRAY_BUFFER, photonColors.size() * sizeof(float), &photonColors[0], GL_STATIC_DRAW);
 		return;
 	}
-	if (((key >= GLFW_KEY_0 && key <= GLFW_KEY_9) || key == GLFW_KEY_PERIOD ) && action == GLFW_PRESS && mods != GLFW_MOD_SHIFT) {
+	if (((key >= GLFW_KEY_0 && key <= GLFW_KEY_9) || key == GLFW_KEY_PERIOD || key == GLFW_KEY_MINUS ) && action == GLFW_PRESS && mods != GLFW_MOD_SHIFT) {
 		char inChar = key;
 		input += inChar;
-		cout << input << endl;
+		stringstream ss(input);
+		ss >> point[current];
+		printOGL();
 		return;
 	}
-	if (key == GLFW_KEY_TAB) {
+	if (key == GLFW_KEY_TAB && action == GLFW_PRESS) {
 		stringstream ss(input);
 		ss >> point[current];
 		current++;
 		current = current % 3;
-		cout << point << endl;
+		input = "";
+		printOGL();
 		return;
 	}
-	if (key == GLFW_KEY_BACKSPACE) {
+	if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
 		input = input.substr(0, input.size() - 1);
+		stringstream ss(input);
+		ss >> point[current];
+		printOGL();
 		return;
 	}
-	if (key == GLFW_KEY_ENTER) {
-
+	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS) {
+		photons.clear(); photonColors.clear();
+		tracer.renderClosestPhotonsOGL(photons, photonColors, point, numPhotons, flag);
+		glBindBuffer(GL_ARRAY_BUFFER, photonVbo);
+		glBufferData(GL_ARRAY_BUFFER, photons.size() * sizeof(float), &photons[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+		glBufferData(GL_ARRAY_BUFFER, photonColors.size() * sizeof(float), &photonColors[0], GL_STATIC_DRAW);
+	}
+	if (key == GLFW_KEY_LEFT_BRACKET && action == GLFW_PRESS) {
+		if (mods == GLFW_MOD_SHIFT)
+			numPhotons -= 10;
+		else
+			numPhotons--;
+		numPhotons = (numPhotons < 0) ? 0 : numPhotons;
+		printOGL();
+	}
+	if (key == GLFW_KEY_RIGHT_BRACKET && action == GLFW_PRESS) {
+		if (mods == GLFW_MOD_SHIFT)
+			numPhotons += 10;
+		else
+			numPhotons++;
+		printOGL();
 	}
 }
 
@@ -170,6 +205,7 @@ vector<float> boxColors = {
 
 int main(int argc, char** argv) {
 	current = 0;
+	numPhotons = 0;
 	point = Vector3d::Zero();
 	string inFile, outFile;
 	bool useOGL = false;
@@ -283,7 +319,7 @@ int main(int argc, char** argv) {
 			glVertexAttribPointer(vp_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 			glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
 			glVertexAttribPointer(color_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-			glDrawArrays(GL_LINES, 0, photons.size() / 3);
+			glDrawArrays(GL_POINTS, 0, photons.size() / 3);
 
 			glfwSwapBuffers(glWindow);
 			glfwWaitEvents();
