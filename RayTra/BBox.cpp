@@ -59,69 +59,69 @@ bool BBox::hitbox(RayBase& ray, const double t0, const double t1) const {
 
 void BBox::render(std::vector<std::vector<float> >& verts) const {
 	std::vector<float> temp;
-	temp.push_back(MIN(0));
-	temp.push_back(MIN(1));
-	temp.push_back(MIN(2));
+	temp.push_back((float) MIN(0));
+	temp.push_back((float) MIN(1));
+	temp.push_back((float) MIN(2));
 
-	temp.push_back(MIN(0));
-	temp.push_back(MIN(1));
-	temp.push_back(MAX(2));
+	temp.push_back((float) MIN(0));
+	temp.push_back((float) MIN(1));
+	temp.push_back((float) MAX(2));
 
-	temp.push_back(MIN(0));
-	temp.push_back(MAX(1));
-	temp.push_back(MAX(2));
+	temp.push_back((float) MIN(0));
+	temp.push_back((float) MAX(1));
+	temp.push_back((float) MAX(2));
 
-	temp.push_back(MIN(0));
-	temp.push_back(MAX(1));
-	temp.push_back(MIN(2));
+	temp.push_back((float) MIN(0));
+	temp.push_back((float) MAX(1));
+	temp.push_back((float) MIN(2));
 
-	temp.push_back(MIN(0));
-	temp.push_back(MIN(1));
-	temp.push_back(MIN(2));
+	temp.push_back((float) MIN(0));
+	temp.push_back((float) MIN(1));
+	temp.push_back((float) MIN(2));
 
-	temp.push_back(MAX(0));
-	temp.push_back(MIN(1));
-	temp.push_back(MIN(2));
+	temp.push_back((float) MAX(0));
+	temp.push_back((float) MIN(1));
+	temp.push_back((float) MIN(2));
 
-	temp.push_back(MAX(0));
-	temp.push_back(MAX(1));
-	temp.push_back(MIN(2));
+	temp.push_back((float) MAX(0));
+	temp.push_back((float) MAX(1));
+	temp.push_back((float) MIN(2));
 
-	temp.push_back(MIN(0));
-	temp.push_back(MAX(1));
-	temp.push_back(MIN(2));
+	temp.push_back((float) MIN(0));
+	temp.push_back((float) MAX(1));
+	temp.push_back((float) MIN(2));
 
-	temp.push_back(MIN(0));
-	temp.push_back(MAX(1));
-	temp.push_back(MAX(2));
+	temp.push_back((float) MIN(0));
+	temp.push_back((float) MAX(1));
+	temp.push_back((float) MAX(2));
 
-	temp.push_back(MAX(0));
-	temp.push_back(MAX(1));
-	temp.push_back(MAX(2));
+	temp.push_back((float) MAX(0));
+	temp.push_back((float) MAX(1));
+	temp.push_back((float) MAX(2));
 
-	temp.push_back(MAX(0));
-	temp.push_back(MAX(1));
-	temp.push_back(MIN(2));
+	temp.push_back((float) MAX(0));
+	temp.push_back((float) MAX(1));
+	temp.push_back((float) MIN(2));
 
-	temp.push_back(MAX(0));
-	temp.push_back(MAX(1));
-	temp.push_back(MAX(2));
+	temp.push_back((float) MAX(0));
+	temp.push_back((float) MAX(1));
+	temp.push_back((float) MAX(2));
 
-	temp.push_back(MAX(0));
-	temp.push_back(MIN(1));
-	temp.push_back(MAX(2));
+	temp.push_back((float) MAX(0));
+	temp.push_back((float) MIN(1));
+	temp.push_back((float) MAX(2));
 
-	temp.push_back(MIN(0));
-	temp.push_back(MIN(1));
-	temp.push_back(MAX(2));
+	temp.push_back((float) MIN(0));
+	temp.push_back((float) MIN(1));
+	temp.push_back((float) MAX(2));
 
-	temp.push_back(MAX(0));
-	temp.push_back(MIN(1));
-	temp.push_back(MAX(2));
+	temp.push_back((float) MAX(0));
+	temp.push_back((float) MIN(1));
+	temp.push_back((float) MAX(2));
 
-	temp.push_back(MAX(0));
-	temp.push_back(MIN(1));
-	temp.push_back(MIN(2));
+	temp.push_back((float) MAX(0));
+	temp.push_back((float) MIN(1));
+	temp.push_back((float) MIN(2));
 
 	verts.push_back(temp);
 }

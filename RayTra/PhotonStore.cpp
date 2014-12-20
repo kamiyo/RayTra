@@ -20,14 +20,14 @@ void PhotonStore::set(Vector3d pos, Vector3d dir, Vector3d normal, w_ptr<Light> 
 }
 
 void PhotonStore::drawPhoton(std::vector<float>& vertices, std::vector<float>& colors, int flag) const {
-	if ((flag < 2 && m_flag == flag) || (flag == 3 && m_flag < 2)) {
+	if ((flag < 3 && m_flag == flag) || (flag == 4 && m_flag < 3)) {
 		for (int i = 0; i < 3; i++) {
 			Vector3d temp = m_intensities.normalized();
 			colors.push_back(temp[i]);
 		}
 		vertices.push_back(m_eye[0]); vertices.push_back(m_eye[1]); vertices.push_back(m_eye[2]);
 	}
-	else if (flag == 2 && m_flag == flag) {
+	else if (flag == 3 && m_flag == flag) {
 		for (int i = 0; i < 3; i++) {
 			colors.push_back(1);
 		}

@@ -11,22 +11,29 @@ void RayTra::populatePhotonMapOGL() {
 	seedRand();					// seed rand
 
 	if (usePhotonMap) {
-		shading->initPhotonTracing(numPhotons / omp_get_max_threads());
+		shading->initPhotonTracing(numPhotons / omp_get_max_threads(), numCaustic / omp_get_max_threads());
 		u_ptr<Photons> allPhotons = make_unique<Photons>();
+		u_ptr<Photons> allCaustic = make_unique<Photons>();
 #pragma omp parallel
 		{
-			u_ptr<Photons> tracedPhotons = shading->tracePhotons(allSurfaces);
+			u_ptr<Photons> tempPhotons = std::make_unique<Photons>();
+			u_ptr<Photons> tempCaustic = std::make_unique<Photons>();
+			shading->tracePhotons(allSurfaces, tempPhotons, tempCaustic);
 #pragma omp critical
-			allPhotons->insert(tracedPhotons);
+			{
+				allPhotons->insert(tempPhotons);
+				allCaustic->insert(tempCaustic);
+			}
 		}
-		std::cout << allPhotons->size() << std::endl;
-		shading->photonMap = make_unique<PhotonMap>(allPhotons);
+		shading->photonMap = std::make_unique<PhotonMap>(allPhotons);
+		shading->causticMap = std::make_unique<PhotonMap>(allCaustic);
 	}
 }
 
 void RayTra::renderPhotonMapOGL(std::vector<float>& vertices, std::vector<float>& colors, int flag) {
 	if (usePhotonMap) {
 		shading->photonMap->drawPhotons(0, vertices, colors, flag);
+		shading->causticMap->drawPhotons(0, vertices, colors, flag);
 	}
 }
 
@@ -46,17 +53,22 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 	seedRand();					// seed rand
 	
 	if (usePhotonMap) {
-		shading->initPhotonTracing(numPhotons / omp_get_max_threads());
+		shading->initPhotonTracing(numPhotons / omp_get_max_threads(), numCaustic / omp_get_max_threads());
 		u_ptr<Photons> allPhotons = make_unique<Photons>();
+		u_ptr<Photons> allCaustic = make_unique<Photons>();
 #pragma omp parallel
 		{
-			u_ptr<Photons> tracedPhotons = shading->tracePhotons(allSurfaces);
+			u_ptr<Photons> tempPhotons = std::make_unique<Photons>();
+			u_ptr<Photons> tempCaustic = std::make_unique<Photons>();
+			shading->tracePhotons(allSurfaces, tempPhotons, tempCaustic);
 #pragma omp critical
-			allPhotons->insert(tracedPhotons);
+			{
+				allPhotons->insert(tempPhotons);
+				allCaustic->insert(tempCaustic);
+			}
 		}
-		std::cout << allPhotons->size() << std::endl;
 		shading->photonMap = std::make_unique<PhotonMap>(allPhotons);
-		//shading->precomputeIrradiance();
+		shading->causticMap = std::make_unique<PhotonMap>(allCaustic);
 	}	
 
 	Sampler master(width, height,
@@ -343,6 +355,7 @@ void RayTra::setOption(int option, double setting, double setting2) {
 		break;
 	case PHOTONMAPPING:
 		numPhotons = (int) setting;
+		numCaustic = (int) setting2;
 		(setting > 0) ? (usePhotonMap = true) : (usePhotonMap = false);
 		break;
 	case RADIUSNUMBER:

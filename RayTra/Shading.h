@@ -27,9 +27,9 @@ public:
 	virtual ~Shading();
 	void addLight(s_ptr<Light> l);
 	void addAmbient(Vector3d a);
-	void initPhotonTracing(double numPhotons);
+	void initPhotonTracing(double numPhotons, double numCaustic);
 	Photon emitPhoton() const;
-	u_ptr<Photons> tracePhotons(const u_ptr<Group>& s) const;
+	void tracePhotons(const u_ptr<Group>& s, u_ptr<Photons>& global, u_ptr<Photons>& caustic) const;
 	Vector3d computeShading(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area, int recurs, int refrac) const;
 	Vector3d computeShading(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const;
 	Vector3d computeRadianceEstimate(Ray vray, double t0, double t1, const u_ptr<Group>& s) const;
@@ -48,6 +48,7 @@ public:
 	int _recurs;
 	int _refraction;
 	int _numPhotons;
+	int _numCaustic;
 	int pmNumber;
 	double pmRadius;
 	bool _russian;

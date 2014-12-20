@@ -45,8 +45,9 @@ void Shading::addAmbient(Vector3d a) {
 	_amb = a;
 }
 
-void Shading::initPhotonTracing(double numPhotons) {
+void Shading::initPhotonTracing(double numPhotons, double numCaustic) {
 	_numPhotons = numPhotons;
+	_numCaustic = numCaustic;
 	Eigen::VectorXd ints(_l.size());
 	for (int i = 0; i < (int) _l.size(); i++) {
 		ints[i] = _l[i]->_rgb.maxCoeff();
@@ -73,6 +74,7 @@ Photon Shading::emitPhoton() const {
 	}
 	Photon temp = _l[light]->emitPhoton();
 	temp.m_light = _l[light];
+	temp.onlySpecular = true;
 	return temp;
 }
 
@@ -127,11 +129,12 @@ result += krefract.cwiseProduct((1 - R) * computeShading(v1, epsilon, INF, s, ar
 }
 }*/
 
-u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
-	u_ptr<Photons> result = std::make_unique<Photons>();
-	for (int i = 0; i < _numPhotons; i++) {
+void Shading::tracePhotons(const u_ptr<Group>& s, u_ptr<Photons>& global, u_ptr<Photons>& caustic) const {
+	int count = 0; int count_caustic = 0;
+	int last_caustic = 0;
+	while (count < _numPhotons || count_caustic < _numCaustic) {
 		Photon p = emitPhoton();
-		p.m_intensities /= _numPhotons;
+		p.m_intensities /= (_numPhotons + _numCaustic);
 		hitRecord rec;
 		bool first = true;
 		while (1) {
@@ -139,22 +142,30 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 				Vector3d p1 = p.getPoint(rec.t);
 				if ((rec.m->kd.array() != 0).all()) {
 					if (first) {
-						result->push_back(std::make_unique<PhotonStore>(p1, -p.m_dir.normalized(), rec.n, p.m_intensities, p.m_light, PhotonStore::DIRECT));
+						if (count < _numPhotons) {
+							global->push_back(std::make_unique<PhotonStore>(p1, -p.m_dir.normalized(), rec.n, p.m_intensities, p.m_light, PhotonStore::DIRECT));
+							count++;
+						}
 					}
 					else {
-						result->push_back(std::make_unique<PhotonStore>(p1, -p.m_dir.normalized(), rec.n, p.m_intensities, p.m_light, PhotonStore::INDIRECT));
-						if (p.onlySpecular);
-					
+						if (count < _numPhotons) {
+							global->push_back(std::make_unique<PhotonStore>(p1, -p.m_dir.normalized(), rec.n, p.m_intensities, p.m_light, PhotonStore::INDIRECT));
+							count++;
+						}
+						if (count_caustic < _numCaustic && p.onlySpecular) {
+							caustic->push_back(std::make_unique<PhotonStore>(p1, -p.m_dir.normalized(), rec.n, p.m_intensities, p.m_light, PhotonStore::CAUSTIC));
+							count_caustic++;
+						}
 					}
 				}
 				if (first) {
-					if (rec.s != Surface::PLANE) {
+					if (rec.s != Surface::PLANE && count < _numPhotons) {
 						hitRecord shadowRec;
 						Photon shadow(p);
 						shadow.set(p1, p.m_dir, p.m_light);
 						while (s->hit(shadow, shadow.m_epsilon, INF, shadowRec)) {
 							Vector3d pShadow = shadow.getPoint(shadowRec.t);
-							result->push_back(std::make_unique<PhotonStore>(pShadow, shadow.m_dir, rec.n, shadow.m_light, PhotonStore::SHADOW));
+							global->push_back(std::make_unique<PhotonStore>(pShadow, shadow.m_dir, rec.n, shadow.m_light, PhotonStore::SHADOW));
 							shadow.set(pShadow, shadow.m_dir);
 						}
 					}
@@ -188,6 +199,10 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 					Vector3d diffuseVec = COSVEC(n);
 					Vector3d power = p.m_intensities.cwiseProduct(diff) / probDiffuse;
 					p.set(p1, diffuseVec, power);
+					p.onlySpecular = false;
+					if (count >= _numPhotons) {
+						break;
+					}
 				}
 				else if (roll < (probDiffuse + probSpecular)) { // spec
 					Vector3d reflectVec = (m->p == -1) ? (d - 2 * (d.dot(n)) * n) : (COSVEC((d - 2 * (d.dot(n)) * n).normalized(), m->p));
@@ -200,14 +215,10 @@ u_ptr<Photons> Shading::tracePhotons(const u_ptr<Group>& s) const {
 				} // absorbed
 			}
 			else {
-				if (first) {
-					i--;
-				}
 				break;
 			}
 		}
 	}
-	return result;
 }
 
 bool cmp2d(const Vector2d& a, const Vector2d& b) {
@@ -288,10 +299,30 @@ Vector3d Shading::computeRadianceEstimate(Ray vray, double t0, double t1, const 
 		if (area != 0) {
 			result /= area; 
 		}
-		/*
-		if (sqDistance != 0)
-		result /= (M_PI * sqDistance);
-		*/
+
+		Vector3d caustic = Vector3d::Zero();
+		PhotonQueue causticPhotons;
+		photonMap->locatePhotons(0, causticPhotons, x, rec.n, sqDistance, pmNumber, 1);
+		std::vector<Vector2d> projectedCaustic;
+		while (causticPhotons.size() != 0) {
+			const PhotonStore& p = causticPhotons.top().first;
+			double cos = w.dot(p.m_dir.normalized());
+			if (cos > 0) {
+				Vector3d irradiance = p.m_intensities;
+				result += irradiance;
+				Vector2d temp = T * (p.m_eye);
+				projectedCaustic.push_back(temp);
+			}
+			causticPhotons.pop();
+		}
+		caustic = caustic.cwiseProduct(rec.m->kd / M_PI);
+		area = areaHull(projectedCaustic);
+
+		if (area != 0) {
+			caustic /= area;
+		}
+
+		result += caustic;
 	}
 	return result;
 }

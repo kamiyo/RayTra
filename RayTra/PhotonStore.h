@@ -15,7 +15,7 @@ public:
 	Vector3d m_intensities, m_irradiance;
 	int m_flag;
 	w_ptr<Light> m_light;
-	static const int DIRECT = 0, INDIRECT = 1, SHADOW = 2;
+	static const int DIRECT = 0, INDIRECT = 1, CAUSTIC = 2, SHADOW = 3, ALL = 4;
 };
 
 class Photons {

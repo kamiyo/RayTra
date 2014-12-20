@@ -121,12 +121,12 @@ static void key_cb(GLFWwindow* window, int key, int scancode, int action, int mo
 		}
 		return;
 	}
-	if ((key == GLFW_KEY_Q || key == GLFW_KEY_W || key == GLFW_KEY_E || key == GLFW_KEY_R) && action == GLFW_PRESS && mods != GLFW_MOD_SHIFT) {
-		flag = (key == GLFW_KEY_Q) ? 0 : ((key == GLFW_KEY_W) ? 1 : ((key == GLFW_KEY_E) ? 2 : 3));
+	if ((key == GLFW_KEY_Q || key == GLFW_KEY_W || key == GLFW_KEY_E || key == GLFW_KEY_R || key == GLFW_KEY_T) && action == GLFW_PRESS && mods != GLFW_MOD_SHIFT) {
+		flag = (key == GLFW_KEY_Q) ? 0 : ((key == GLFW_KEY_W) ? 1 : ((key == GLFW_KEY_E) ? 2 : ((key == GLFW_KEY_R) ? 3 : 4)));
 	}
-	if ((key == GLFW_KEY_Q || key == GLFW_KEY_W || key == GLFW_KEY_E || key == GLFW_KEY_R) && action == GLFW_PRESS && mods == GLFW_MOD_SHIFT) {
+	if ((key == GLFW_KEY_Q || key == GLFW_KEY_W || key == GLFW_KEY_E || key == GLFW_KEY_R || key == GLFW_KEY_T) && action == GLFW_PRESS && mods == GLFW_MOD_SHIFT) {
 		photons.clear(); photonColors.clear();
-		flag = (key == GLFW_KEY_Q) ? 0 : ((key == GLFW_KEY_W) ? 1 : ((key == GLFW_KEY_E) ? 2 : 3));
+		flag = (key == GLFW_KEY_Q) ? 0 : ((key == GLFW_KEY_W) ? 1 : ((key == GLFW_KEY_E) ? 2 : ((key == GLFW_KEY_R) ? 3 : 4)));
 		tracer.renderPhotonMapOGL(photons, photonColors, flag);
 		glBindBuffer(GL_ARRAY_BUFFER, photonVbo);
 		glBufferData(GL_ARRAY_BUFFER, photons.size() * sizeof(float), &photons[0], GL_STATIC_DRAW);
@@ -275,7 +275,7 @@ int main(int argc, char** argv) {
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		tracer.populatePhotonMapOGL();
-		tracer.renderPhotonMapOGL(photons, photonColors, 3);
+		tracer.renderPhotonMapOGL(photons, photonColors, 4);
 
 		glGenBuffers(1, &photonVbo);
 		glGenBuffers(1, &colorVbo);

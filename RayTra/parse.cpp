@@ -125,9 +125,9 @@ void Parser::parse(const char *file) {
 		}
 		else if (isOpt) {
 			if (cmd == "p" || cmd == "photonmap") {
-				double setting;
-				_iss >> setting;
-				setOption(PHOTONMAPPING, setting);
+				double setting, setting2 = 0.;
+				_iss >> setting >> setting2;
+				setOption(PHOTONMAPPING, setting, setting2);
 			}
 			else if (cmd == "rn" || cmd == "radius" || cmd == "number"){
 				double setting, setting2;

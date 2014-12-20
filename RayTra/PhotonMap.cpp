@@ -177,7 +177,7 @@ void PhotonMap::locatePhotons(const int index, PhotonQueue& photonQueue, const V
 		}
 	}
 	// change
-	if (photon->m_flag == flag || (flag == 3 && photon->m_flag < 2 ) || (flag == 4)) {
+	if (photon->m_flag == flag || (flag == 4 && photon->m_flag < 3 )) {
 		Vector3d to = photon->m_eye - point;
 		if (to.normalized().dot(normal) > 0.25) return;
 		if (photon->m_normal.normalized().dot(normal) < 0.75) return;
@@ -202,8 +202,9 @@ void PhotonMap::precomputeIrradiance(int index, double distance, double numPhoto
 	}
 	// 0 = direct
 	// 1 = indirect
-	// 2 = shadow
-	// 3 = d + i
+	// 2 = caustic
+	// 3 = shadow
+	// 4 = d + i + c
 	if (((*m_storage)[index]) != nullptr) {
 		PhotonQueue photons;
 		Vector3d result = Vector3d::Zero();
@@ -229,8 +230,9 @@ void PhotonMap::drawPhotons(const int index, std::vector<float>& vertices, std::
 	}
 	// 0 = direct
 	// 1 = indirect
-	// 2 = shadow
-	// 3 = d + i
+	// 2 = caustic
+	// 3 = shadow
+	// 4 = d + i + c
 	if (((*m_storage)[index]) != nullptr)
 		(*m_storage)[index]->drawPhoton(vertices, colors, flag);
 }

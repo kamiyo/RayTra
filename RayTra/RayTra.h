@@ -92,6 +92,7 @@ public:
 	int shadowSetting;			// Off, hard, soft square, soft circle
 	int dofSetting;				// DoF: Off, Square, or Circle
 	int numPhotons;				// number of photons to use
+	int numCaustic;				// number of caustic photons to use
 	static const int OFF = 0, HARD = 1, SOFTSQUARE = 2, SOFTCIRCLE = 3;
 	static const int SQUARE = 1, CIRCLE = 2;
 	static const int LINEAR = 0, HILBERT = 1;
