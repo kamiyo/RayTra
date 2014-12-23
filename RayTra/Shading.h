@@ -33,10 +33,12 @@ public:
 	Vector3d computeShading(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area, int recurs, int refrac) const;
 	Vector3d computeShading(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const;
 	Vector3d computeRadianceEstimate(Ray vray, double t0, double t1, const u_ptr<Group>& s) const;
-	Vector3d computeRadiance(Ray vray, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const;
+	Vector3d computeRadiance(Ray v, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area) const;
+	Vector3d computeRadiance(Ray vray, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area, int recurs, int ) const;
 	void precomputeIrradiance();
-	double fresnel(double index1, double index2, double c1, double c2) const;
-	double schlicks(double index, double c) const;
+	static double fresnel(double index1, double index2, double c1, double c2);
+	static double schlicks(double index, double c);
+	static Vector3d reflect(const Vector3d& d, const Vector3d& n);
 	bool refract(const Vector3d& d, const Vector3d& n, double index, double indext, Vector3d& t) const;
 	void setRecursDepth(int d);
 	Vector3d _amb;
@@ -51,6 +53,8 @@ public:
 	int _numCaustic;
 	int pmNumber;
 	double pmRadius;
+	int cmNumber;
+	double cmRadius;
 	bool _russian;
 	bool _shadows;
 	bool toBreak;

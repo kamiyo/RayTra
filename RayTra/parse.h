@@ -32,7 +32,7 @@ protected:
 	Transform T = Transform();
 public:
 	virtual void parse(const char *file);
-	const static int SHADOWS = 0, SAMPLES = 1, REFRACT = 2, STRUCT = 3, RECURSE = 4, DOF = 5, INDIRECT = 6, ACTUALLIGHTS = 7, ORDER = 8, RUSSIAN = 9, PHOTONMAPPING = 10, RADIUSNUMBER = 11;
+	const static int SHADOWS = 0, SAMPLES = 1, REFRACT = 2, STRUCT = 3, RECURSE = 4, DOF = 5, INDIRECT = 6, ACTUALLIGHTS = 7, ORDER = 8, RUSSIAN = 9, PHOTONMAPPING = 10, RADIUSNUMBER = 11, CAUSTICNUMBER = 12;
 };
 
 #endif

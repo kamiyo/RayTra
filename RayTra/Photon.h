@@ -13,7 +13,7 @@ class Photon : public RayBase
 {
 public:
 	Photon(Vector3d pos, Vector3d dir, Vector3d intensities, w_ptr<Light> light = w_ptr<Light>());
-	Photon(Vector3d pos, Vector3d dir, Vector3d intensities, w_ptr<Light> light, std::vector<double> ref, std::vector<double> alpha);
+	Photon(Vector3d pos, Vector3d dir, Vector3d intensities, w_ptr<Light> light, std::vector<double> ref, std::vector<Vector3d> alpha);
 	Photon();
 	~Photon();
 	void set(Vector3d pos, Vector3d dir, w_ptr<Light> light);
@@ -23,7 +23,7 @@ public:
 	w_ptr<Light> m_light;
 	bool onlySpecular;
 	std::vector<double> m_refIndices;
-	std::vector<double> m_atten;
+	std::vector<Vector3d> m_atten;
 	static unsigned long count;
 };
 

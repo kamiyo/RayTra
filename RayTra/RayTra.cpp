@@ -51,7 +51,7 @@ void RayTra::renderClosestPhotonsOGL(std::vector<float>& vertices, std::vector<f
 
 void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 	seedRand();					// seed rand
-	
+	clock_t master_start = clock();
 	if (usePhotonMap) {
 		shading->initPhotonTracing(numPhotons / omp_get_max_threads(), numCaustic / omp_get_max_threads());
 		u_ptr<Photons> allPhotons = make_unique<Photons>();
@@ -102,7 +102,6 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 	Sampler2d masterPixels = master.genPoints();
 
 	int counter = 0;
-	clock_t master_start = clock();
 #pragma omp parallel for schedule(dynamic)
 	for (int j = 0; j < height; j++) {
 
@@ -128,8 +127,8 @@ void RayTra::render(Imf::Array2D<Imf::Rgba>& o) {
 					Ray r;
 					camera->generateRay(lensSample(currentSample), x + multiSample(currentSample)[0], y + multiSample(currentSample)[1], r);
 					//c += shading->computeShading(r, 0, INF, allSurfaces, lightSample(currentSample));				// SHADE
-					//c += shading->computeRadiance(r, 0, INF, allSurfaces, lightSample(currentSample));				// SHADE
-					c += shading->computeRadianceEstimate(r, 0, INF, allSurfaces);				// SHADE
+					c += shading->computeRadiance(r, 0, INF, allSurfaces, lightSample(currentSample));				// SHADE
+					//c += shading->computeRadianceEstimate(r, 0, INF, allSurfaces);				// SHADE
 				}
 			}
 			c /= (numSamples * numSamples);		// normalize result
@@ -361,6 +360,10 @@ void RayTra::setOption(int option, double setting, double setting2) {
 	case RADIUSNUMBER:
 		shading->pmRadius = setting;
 		shading->pmNumber = (int) setting2;
+		break;
+	case CAUSTICNUMBER:
+		shading->cmRadius = setting;
+		shading->cmNumber = (int) setting2;
 		break;
 	default:
 		break;

@@ -134,6 +134,11 @@ void Parser::parse(const char *file) {
 				_iss >> setting >> setting2;
 				setOption(RADIUSNUMBER, setting, setting2);
 			}
+			else if (cmd == "cn" || cmd == "caustic") {
+				double setting, setting2;
+				_iss >> setting >> setting2;
+				setOption(CAUSTICNUMBER, setting, setting2);
+			}
 			else if (cmd == "s" || cmd == "shadows") {
 				double setting;
 				_iss >> setting;
