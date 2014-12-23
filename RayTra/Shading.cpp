@@ -268,17 +268,21 @@ double areaHull(std::vector<Vector2d>& p) {
 Vector3d Shading::computeRadianceEstimate(Ray vray, double t0, double t1, const u_ptr<Group>& s) const {
 	hitRecord rec;													// rec = light record, srec = shadow record
 	Vector3d result = Vector3d::Zero();								// rgb result zero'd
-	Vector3d d = (-1.0 * vray.m_dir).normalized();					// d = viewing ray direction (out of surface)
-	s_ptr<Material> m;
 	if (s->_hit(vray, t0, t1, rec)) {
-		Vector3d w = rec.n.normalized();
+
+		const Vector3d x = vray.getPoint(rec.t);
+
+		const Vector3d d_plus = vray.m_dir;
+		const Vector3d d_minus = -1.0 * vray.m_dir;					// d = viewing ray direction (out of surface)
+		s_ptr<Material> m;
+		const Vector3d w = rec.n.normalized();
 		// get uvw
 		Vector3d up = (abs(w.dot(Vector3d(0, 1, 0))) > 0.9) ? Vector3d(1, 0, 0) : Vector3d(0, 1, 0);
-		Vector3d u = up.cross(w).normalized();
-		Vector3d v = w.cross(u).normalized();
+		const Vector3d u = up.cross(w).normalized();
+		const Vector3d v = w.cross(u).normalized();
+
 		Eigen::MatrixXd T(3, 2); T << u, v;
 		T.transposeInPlace();
-		const Vector3d x = vray.getPoint(rec.t);
 		PhotonQueue photons;
 		double sqDistance = pmRadius;
 		photonMap->locatePhotons(0, photons, x, rec.n, sqDistance, pmNumber, PhotonStore::INDIRECT);
@@ -337,16 +341,20 @@ Vector3d Shading::computeRadiance(Ray v, double t0, double t1, const u_ptr<Group
 Vector3d Shading::computeRadiance(Ray vray, double t0, double t1, const u_ptr<Group>& s, const Vector2d& area, int recurs, int refrac) const {
 	hitRecord rec;													// rec = light record, srec = shadow record
 	Vector3d result = Vector3d::Zero();								// rgb result zero'd
-	Vector3d d = (-1.0 * vray.m_dir).normalized();					// d = viewing ray direction (out of surface)
 	Vector3d diffuse = Vector3d::Zero();
 	Vector3d caustic = Vector3d::Zero();
 	if (s->_hit(vray, t0, t1, rec)) {
+
+		const Vector3d d_minus = -vray.m_dir;								// d = viewing ray direction (out of surface)
+		const Vector3d d_plus = vray.m_dir;
+		const Vector3d d_normed = d_plus.normalized();
+
 		s_ptr<Material> m = rec.m;
 		const Vector3d x = vray.getPoint(rec.t);
 
 		const double &epsilon = vray.m_epsilon;
 		const Vector3d n = rec.n;											// n = normal vector of intersection
-		double nd = n.dot(d);
+		const double nd = n.dot(d_plus.normalized());
 
 		if ((m->n != 0) && _refraction && (recurs || refrac)) {
 			double c1, c2;
@@ -354,20 +362,19 @@ Vector3d Shading::computeRadiance(Ray vray, double t0, double t1, const u_ptr<Gr
 			double current, to;
 			auto temp_ref = vray.ref;
 			auto temp_alpha = vray.alpha;
-			double dnorm = d.norm();
-			Vector3d reflect = d - 2 * (d.dot(n)) * n;	// reflect = reflected vector
-			d.normalize();								// d = viewing ray direction
+			const double d_norm = d_plus.norm();
+			Vector3d reflect = d_plus - 2 * (d_plus.dot(n)) * n;	// reflect = reflected vector
 			Vector3d t = Vector3d::Zero();
-			c1 = abs(d.dot(n));
+			c1 = abs(nd);
 			current = vray.ref.back();
 			refrac--;
 			krefract = (-1.0 * temp_alpha.back() * rec.t).array().exp();
 			bool alreadyTransmitted = false;
-			if (d.dot(n) < 0) {							// if viewing vector is in front of normal, i.e. entering a refracting object
+			if (nd < 0) {							// if viewing vector is in front of normal, i.e. entering a refracting object
 				to = m->n;
 				temp_ref.push_back(to);
 				temp_alpha.push_back(m->a);
-				if (refract(d, n, current, to, t)) {
+				if (refract(d_normed, n, current, to, t)) {
 					c2 = abs((t.normalized()).dot(n));
 				}
 				else {
@@ -381,7 +388,7 @@ Vector3d Shading::computeRadiance(Ray vray, double t0, double t1, const u_ptr<Gr
 				temp_ref.pop_back();
 				to = temp_ref.back();
 				temp_alpha.pop_back();
-				if (refract(d, -1.0 * n, current, to, t)) {
+				if (refract(d_normed, -1.0 * n, current, to, t)) {
 					c2 = abs((t.normalized()).dot(n));
 				}
 				else {								// if total internal refraction, then only add reflection
@@ -395,7 +402,7 @@ Vector3d Shading::computeRadiance(Ray vray, double t0, double t1, const u_ptr<Gr
 				double index = m->n;
 				double R = Shading::fresnel(current, to, c1, c2);
 				Ray v0(x, reflect, vray.ref, vray.alpha, Ray::VIEW);
-				Ray v1(x, t, temp_ref, temp_alpha, Ray::VIEW);
+				Ray v1(x, t * d_norm, temp_ref, temp_alpha, Ray::VIEW);
 				if (_russian) {
 					double roll = RAN;
 					if (roll < R) {
@@ -437,12 +444,13 @@ Vector3d Shading::computeRadiance(Ray vray, double t0, double t1, const u_ptr<Gr
 			hitRecord srec;
 			if ((fall != 0 && !s->_hit(sRay, sRay.m_epsilon, 1, srec)) || srec.m == NULL || _shadows == false) {
 				Vector3d nn = n;
+				double nd_abs = nd;
 				if (nd < 0) {
-					nd = -nd;
+					nd_abs = -nd;
 					nn = -nn;
 				}
 				l.normalize();
-				Vector3d h = (l + d).normalized();
+				Vector3d h = (l + d_minus).normalized();
 				double nl = nn.dot(l);
 				if (nl > 0) {
 					result += fall * ((m->kd).cwiseProduct(I) * nl);
