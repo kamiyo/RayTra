@@ -16,7 +16,7 @@
 //	// TODO Auto-generated destructor stub
 //}
 
-bool Surface::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) const  {
+bool Surface::_hit(RayBase& ray, const double t0, const double t1, hitRecord& rec) const  {
 	if (_trans) {
 		RayBase tRay(apply(_mInv, ray.m_eye, 1), apply(_mInv, ray.m_dir, 0), ray.m_type);
 		bool temp = hit(tRay, t0, t1, rec);
@@ -31,11 +31,11 @@ bool Surface::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) const  {
 	}
 }
 
-void Surface::trans(Matrix4d& m, Matrix4d& inv) {
+void Surface::trans(const Matrix4d& m, const Matrix4d& inv) {
 	_trans = true;
 	_mInv = inv;
 	_mTrans = m.inverse().transpose();
-	_b = _b.transform(m);
+	_b.transform(m);
 }
 
 void Surface::renderBoundingBox(std::vector<std::vector<float> >& verts, int level) const {

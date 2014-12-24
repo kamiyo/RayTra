@@ -18,9 +18,9 @@ class Surface{
 public:
 	enum { NeedsToAlign = (sizeof(Vector4d) % 16) == 0 };
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign);
-	virtual bool _hit(RayBase& ray, double t0, double t1, hitRecord& rec) const;
-	void trans(Matrix4d& m, Matrix4d& inv);
-	virtual bool hit(RayBase& ray, double t0, double t1, hitRecord& rec) const = 0;
+	virtual bool _hit(RayBase& ray, const double t0, const double t1, hitRecord& rec) const;
+	void trans(const Matrix4d& m, const Matrix4d& inv);
+	virtual bool hit(RayBase& ray, const double t0, const double t1, hitRecord& rec) const = 0;
 	virtual void boundingBox() = 0;
 	virtual void renderBoundingBox(std::vector<std::vector<float> >& verts, int level) const;
 	virtual int type();
