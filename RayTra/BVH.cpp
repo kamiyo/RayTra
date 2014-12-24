@@ -17,7 +17,7 @@ surface*	_l	pointer to left node
 surface*	_r	pointer to right node
 */
 
-BVH::BVH(u_ptr<Group>& g) {
+BVH::BVH(const u_ptr<Group>& g) {
 	_type = BOVOH;
 	std::vector<u_ptr<Surface> >& s = g->_s;
 	size_t N = s.size();
@@ -45,14 +45,12 @@ BVH::BVH(u_ptr<Group>& g) {
 		double range = diff.maxCoeff(&axis);
 		bool allSame = true;
 		for (size_t i = 0; i < N; i++) {
-			//std::cout << s[i]->_b << " " << s[i]->_b._m << std::endl;
 			m += s[i]->_b._m[axis];
 			if (allSame && (s[i]->_b != b && s[i]->_b._m[axis] != b._m[axis])) {
 				allSame = false;
 			}
 		}
 		m /= (double) N;
-		//std::cout << m << " " << allSame << std::endl;
 		u_ptr<Group> left = std::make_unique<Group>();
 		u_ptr<Group> right = std::make_unique<Group>();
 		for (size_t i = 0; i < N; i++) {
@@ -73,27 +71,12 @@ BVH::~BVH() {
 
 /*
 traverses BVH and finds if ray hits any object
-TODO: use this algo to render with OGL?
-TODO: write tree display algo
 POSSIBLE?: turn into Heap instead of tree
 */
 
 // boxes should already be pre-transformed. BVH shouldn't have its own transformation
 bool BVH::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
-	/*if (!_b.hitbox(ray, t0, t1)) return false;
-	if (_trans) {
-		std::cout << "this BVH has been transformed" << std::endl;
-		RayBase tRay(apply(_mInv, ray.m_eye, 1), apply(_mInv, ray.m_dir, 0), ray.m_type);
-		bool temp = hit(tRay, t0, t1, rec);
-		if (temp) {
-			rec.n = apply(_mTrans, rec.n, 0);
-			rec.n.normalize();
-		}
-		return temp;
-	}
-	else {*/
-		return hit(ray, t0, t1, rec);
-	//}
+	return hit(ray, t0, t1, rec);
 }
 
 bool BVH::hit(RayBase& ray, double t0, double t1, hitRecord& rec) const {
@@ -135,8 +118,4 @@ void BVH::renderBoundingBox(std::vector<std::vector<float> >& verts, int level) 
 		if (_l) _l->renderBoundingBox(verts, level - 1);
 		if (_r) _r->renderBoundingBox(verts, level - 1);
 	}
-}
-
-
-void BVH::boundingBox() {
 }
