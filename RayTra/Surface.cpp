@@ -16,7 +16,7 @@
 //	// TODO Auto-generated destructor stub
 //}
 
-bool Surface::_hit(RayBase& ray, const double t0, const double t1, hitRecord& rec) const  {
+bool Surface::_hit(RayBase& ray, double t0, double t1, hitRecord& rec) const  {
 	if (_trans) {
 		RayBase tRay(apply(_mInv, ray.m_eye, 1), apply(_mInv, ray.m_dir, 0), ray.m_type);
 		bool temp = hit(tRay, t0, t1, rec);

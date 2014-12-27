@@ -122,9 +122,6 @@ void Shading::tracePhotons(const u_ptr<Group>& s, u_ptr<Photons>& global, u_ptr<
 					}
 					first = false;
 				}
-				else {
-					count++;
-				}
 				s_ptr<Material> m = rec.m;
 				Vector3d diff = m->kd / 2;
 				Vector3d spec = m->ks / 2;
@@ -152,6 +149,7 @@ void Shading::tracePhotons(const u_ptr<Group>& s, u_ptr<Photons>& global, u_ptr<
 					p.set(p1, diffuseVec, power);
 					p.onlySpecular = false;
 					if (count >= _numPhotons) {
+						count++;
 						break;
 					}
 				}
@@ -179,6 +177,7 @@ void Shading::tracePhotons(const u_ptr<Group>& s, u_ptr<Photons>& global, u_ptr<
 							}
 							else {
 								p.set(p1, reflect, power);
+								continue;
 							}
 						}
 						else {
@@ -190,6 +189,7 @@ void Shading::tracePhotons(const u_ptr<Group>& s, u_ptr<Photons>& global, u_ptr<
 							}
 							else {
 								p.set(p1, reflect, power);
+								continue;
 							}
 						}
 						//double R = Shading::schlicks(to_index / from_index, cosine_out);
@@ -212,6 +212,7 @@ void Shading::tracePhotons(const u_ptr<Group>& s, u_ptr<Photons>& global, u_ptr<
 					}
 				}
 				else {
+					count++;
 					break;
 				} // absorbed
 			}

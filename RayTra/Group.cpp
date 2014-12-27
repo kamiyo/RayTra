@@ -14,7 +14,7 @@ Group::Group() {
 }
 
 void Group::addSurface(u_ptr<Surface>& s) {
-	_b = _b.combine(s->_b);
+	_b.combine(s->_b);
 	_s.push_back(std::move(s));
 }
 

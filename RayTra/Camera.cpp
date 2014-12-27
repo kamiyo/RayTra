@@ -8,7 +8,7 @@
 #include "Camera.h"
 /*
 VARS
-vec		_e		eye pos
+vec		_eye		eye pos
 _u		uvw coords (w points out from screen for right-handedness)
 _v
 _w
@@ -36,42 +36,51 @@ int		pw		width (pixels)
 ph		height (pixels)
 */
 Camera::Camera(Vector3d ep, Vector3d ip, Vector3d dir, Vector3d up, Vector3d fp, Vector3d fd, double d, double fl, double iw, double ih, int pw, int ph, double fstop) {
-	_fd = fd;
-	_fp = fp;
-	if ((_fd.array() != nINF).all()) {
-		_fd.normalize();
-	}
+
+	// eye uvw
 	if ((ip.array() == nINF).all()) {
-		_dir = -dir;
+		if ((dir.array() == nINF).all()) {
+			std::cerr << "must supply either image-plane location or view direction." << std::endl;
+			exit(1);
+		}
+		else {
+			_ew = -dir;
+		}
 	}
 	else {
-		_dir = ep - ip;
+		_ew = ep - ip;
 	}
-	if ((dir.array() == nINF).all()) {
-		_w = (ep - ip).normalized();
+
+	if ((fd.array() != nINF).all()) {
+		_fw = -fd.normalized();
+		_tilt = true;
 	}
 	else {
-		_w = -1.0 * (dir).normalized();
+		_fw = _ew.normalized();
 	}
-	if (fl != nINF && (_fp.array() != nINF).all()) {
-		_fp = ep + fl * (_fp - ep).normalized();
+
+	if ((fp.array() != nINF).all()) {
+		_fp = fp;
 	}
-	_u = (up.cross(_w)).normalized();
-	_v = (_w.cross(_u)).normalized();
+	else {
+		_fp = ep - _ew;
+	}
+
+	_focalDistance = (d == nINF) ? _ew.norm() : d;
+
+	_ew.normalize();
+	_eu = (up.cross(_ew)).normalized();
+	_ev = (_ew.cross(_eu)).normalized();
+	_ep = ep;
+
+	_e2p = _fp - _ep;
 	_width = iw;
 	_height = ih;
-	if (d == nINF) {
-		_d = _dir.norm();
-	}
-	else {
-		_d = d;
-	}
-	_dir.normalize();
-	_e = ep;
+
 	_nx = pw;
 	_ny = ph;
-	if (fstop == nINF) _size = 0;
-	else _size = _d / fstop;
+
+	_lensSize = (fstop == nINF) ? 0 : (_focalDistance / fstop);
 }
 
 /*
@@ -84,25 +93,15 @@ ray		r	reference
 void Camera::generateRay(const Vector2d& p, double i, double j, Ray& r) {
 	double u = (_width) * (i / _nx - 0.5);
 	double v = (_height) * (j / _ny - 0.5);
-	Vector2d _p = p * _size;
-	Vector3d eye = _e;
-	Vector3d dir = -1.0 * _d * _w + u * _u + v * _v;
+	Vector2d sample = p * _lensSize;
+	Vector3d eye = _ep;
+	Vector3d dir = _focalDistance * _e2p + u * _eu + v * _ev;
 	Vector3d point = eye + dir;
-	if ((_fd.array() != nINF).all() || (_fp.array() != nINF).all()) {
-		Vector3d e2p;
-		if ((_fd.array() == nINF).all()) {
-			_fd = -_w;
-			e2p = _fp - eye;
-		}
-		else if ((_fp.array() == nINF).all()) {
-			e2p = -_d * _w;
-		}
-		double den = _fd.dot(dir);
-		double num = _fd.dot(e2p);
-		double t = num / den;
+	if (_tilt) {
+		double t = _fw.dot(_e2p) / _fw.dot(dir);
 		point = eye + t * dir;
 	}
-	eye = _e + _p[0] * _u + _p[1] * _v;
+	eye = _ep + sample[0] * _eu + sample[1] * _ev;
 	dir = point - eye;
 	std::vector<double>ref; ref.push_back(1.0);
 	std::vector<Vector3d>alph; alph.push_back(Vector3d(0.0, 0.0, 0.0));
